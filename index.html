@@ -33,74 +33,72 @@
                             <p>File browser goes here</p>
                         </div>
                     </div>
-                    <div class="large-6 medium-6 cell">
-                        <div class="callout">
-                            <div class="grid-x grid-padding-1">
-                                <div class="large-6 medium-6">
-                                    <h3>Edit file or files.</h3>
-                                </div>
-                                <div class="large-3 medium-3">
-                                        <button class="button action"><i class="fa fa-users"></i> Groups</button>
-                                </div>
-                                <div class="large-3 medium-3">
-                                        <button class="button action"><i class="fa fa-question-circle"></i> Help</button>
-                                </div>
+                    <form class="large-6 medium-6 cell callout" id="actions">
+                        <div class="grid-x grid-padding-1">
+                            <div class="large-6 medium-6">
+                                <h3>Edit file or files.</h3>
                             </div>
-                            <div class="input-group grid-x grid-padding-1">
-                                <div class="large-12 medium-12">
-                                    <input class="input-group-field" type="text" name="personName" placeholder="Enter names or email addresses..." autofocus required/>
-                                </div>
+                            <div class="large-3 medium-3">
+                                    <button class="button action"><i class="fa fa-users"></i> Groups</button>
                             </div>
-                            <div class="input-group grid-x grid-padding-1">
-                                <div class="large-6 medium-6">
-                                    <button class="button secondary action" type="submit">
-                                        <i class="fa fa-plus"></i> Add Users
-                                    </button>
-                                </div>
-                                <div class="large-6 medium-6">
-                                    <button class="button secondary action" type="submit">
-                                        <i class="fa fa-minus"></i> Remove Users
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="input-group grid-x grid-padding-1">
-                                <div class="large-6 medium-6">
-                                    <button class="button secondary action" type="submit">
-                                        <i class="fa fa-plus-circle"></i> Add Owners
-                                    </button>
-                                </div>
-                                <div class="large-6 medium-6">
-                                    <button class="button secondary action" type="submit">
-                                        <i class="fa fa-minus-circle"></i> Remove Owners
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="input-group grid-x grid-padding-1">
-                                <div class="large-6 medium-6">
-                                    <button class="button secondary action" type="submit">
-                                        <i class="fa fa-pencil"></i> Change Permissions
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="input-group grid-x grid-padding-1">
-                                <div class="large-12 medium-12">                                        
-                                    <input type="radio" name="role" value="owner"> <strong>Owner</strong>: can organize, read, write and comment
-                                </div>
-                                <div class="large-12 medium-12">
-                                    <input type="radio" name="role" value="organizer"> <strong>Organizer</strong>: can organize, read, write and comment
-                                </div>
-                                <div class="large-12 medium-12">                                        
-                                    <input type="radio" name="role" value="writer"> <strong>Writer</strong>: can read, write and comment
-                                </div>
-                                <div class="large-12 medium-12">                                        
-                                    <input type="radio" name="role" value="commenter"> <strong>Commenter</strong>: can read and comment
-                                </div>
-                                <div class="large-12 medium-12">                                        
-                                    <input type="radio" name="role" value="reader"> <strong>Reader</strong>: can read
-                                </div>
+                            <div class="large-3 medium-3">
+                                    <button class="button action"><i class="fa fa-question-circle"></i> Help</button>
                             </div>
                         </div>
-                    </div>
+                        <div class="input-group grid-x grid-padding-1">
+                            <div class="large-12 medium-12">
+                                <input class="input-group-field" type="text" name="personName" placeholder="Enter names or email addresses..." autofocus required/>
+                            </div>
+                        </div>
+                        <div class="input-group grid-x grid-padding-1">
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action" type="submit">
+                                    <i class="fa fa-plus"></i> Add Users
+                                </button>
+                            </div>
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action" type="submit">
+                                    <i class="fa fa-minus"></i> Remove Users
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group grid-x grid-padding-1">
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action" type="submit">
+                                    <i class="fa fa-plus-circle"></i> Add Owners
+                                </button>
+                            </div>
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action" type="submit">
+                                    <i class="fa fa-minus-circle"></i> Remove Owners
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group grid-x grid-padding-1">
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action" type="submit">
+                                    <i class="fa fa-pencil"></i> Change Permissions
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group grid-x grid-padding-1">
+                            <div class="large-12 medium-12">                                        
+                                <input type="radio" name="role" value="owner"> <strong>Owner</strong>: can organize, read, write and comment
+                            </div>
+                            <div class="large-12 medium-12">
+                                <input type="radio" name="role" value="organizer"> <strong>Organizer</strong>: can organize, read, write and comment
+                            </div>
+                            <div class="large-12 medium-12">                                        
+                                <input type="radio" name="role" value="writer"> <strong>Writer</strong>: can read, write and comment
+                            </div>
+                            <div class="large-12 medium-12">                                        
+                                <input type="radio" name="role" value="commenter"> <strong>Commenter</strong>: can read and comment
+                            </div>
+                            <div class="large-12 medium-12">                                        
+                                <input type="radio" name="role" value="reader"> <strong>Reader</strong>: can read
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
