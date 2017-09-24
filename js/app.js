@@ -4,9 +4,18 @@ var clientID = '706092088663-1ur3mt6607aabki0lggij9ad9gt06r6d.apps.googleusercon
 var apiKey = 'AIzaSyDHRk9uzGCpQVBAK8iwP2JYouXfzN_EKcw';
 var scopes = 'https://www.googleapis.com/auth/drive';
 
+class Tree{
+  constructor(file, parent, children) {
+    this.file = file;
+    this.parent = parent;
+    this.children = children;
+  }
+}
+
 class OverDrive{
   constructor() {
     this.setUpEventListeners();
+    this.displayTree();
   }
 
   setUpEventListeners() {
