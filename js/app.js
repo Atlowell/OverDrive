@@ -6,11 +6,32 @@ var scopes = 'https://www.googleapis.com/auth/drive';
 var folderId = '0B6Q-4y1_9vfwRHBLSWMwREdoZEk';
 var count = 0;
 
-class Tree{
+class File{
+	constructor(fid, name) {
+  	this.fid = fid;
+    this.name = name;
+  }
+}
+
+class Node{
   constructor(file, parent, children) {
     this.file = file;
     this.parent = parent;
     this.children = children;
+  }
+}
+
+class TreeRoot{
+  constructor(nodes) {
+    this._root = new Node(null, null, []);
+    this.insert(nodes)
+  }
+  
+  insert(nodes) {
+  	for (var i = 0; i < nodes.length; i++) {
+    	this._root.children.push(nodes[i])
+      nodes[i].parent = this._root;
+    }
   }
 }
 
