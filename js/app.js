@@ -1,8 +1,6 @@
 //$(document).foundation();
 
-var clientID = '706092088663-1ur3mt6607aabki0lggij9ad9gt06r6d.apps.googleusercontent.com';
-var apiKey = 'AIzaSyDHRk9uzGCpQVBAK8iwP2JYouXfzN_EKcw';
-var scopes = 'https://www.googleapis.com/auth/drive';
+
 
 class Tree{
   constructor(file, parent, children) {
@@ -16,6 +14,7 @@ class OverDrive{
   constructor() {
     this.setUpEventListeners();
     this.displayTree();
+	var tree = new Tree();
   }
 
   setUpEventListeners() {
@@ -32,16 +31,45 @@ class OverDrive{
     console.log("hello");
   }
   
-  displayTree() {
-    //Clear current tree
-    //Get list of top-level files for user
-    //For each file, call displalyTreeRecurse
+  populateTree() {
+	// Get list of top-level files from user
+	gapi.client.load('drive', 'v2', function() {
+		var q = "'root' in parents and trashed=false";
+		var request = gapi.client.drive.files.list({
+			'q': query
+		});
+		request.execute(function(response) {
+			if(response.error) {
+				console.log("Error with list execution");
+			}
+			else {
+				//Do something with list of files
+				console.log(resp.items);
+			}
+		});
+	});
+	//For each file, call populateTreeRecurse
   }
   
-  displayTreeRecurse(fid) {
+  populateTreeRecurse() {
+	//Perform depth-first insertion
+  }
+  
+  displayTree() {
+    //Clear current tree UI
+    //For each toplevel file in tree, call displayTreeRecurse
+	/*for(i = 0; i < tree.root.length; i++) {
+		displayTreeRecurse(tree.root[i]);
+	}*/
+  }
+  
+  displayTreeRecurse(node) {
     //Add file to tree UI
-    //Get children
-    //Call displayTreeRecurse(fid) on each child
+    //Call displayTreeRecurse() on each child
+	/*for(int i = 0; i < node.children.length; i++) {
+		displayTreeRecurse(node.children[i]);
+	}*/
+  }
 }
-
+  
 const overDrive = new OverDrive();
