@@ -57,6 +57,7 @@ class OverDrive{
   handleAddUsers(e) {
     e.preventDefault();
     console.log(e);
+    this.parseUsers();
   }
 
   handleRemoveUsers(e) {
@@ -77,6 +78,13 @@ class OverDrive{
   handleChangePermissions(e) {
     e.preventDefault();
     console.log(e);
+  }
+
+  parseUsers() {
+    const usersInput = document.querySelector('.users');
+    const usersString = usersInput.value;
+    const users = usersString.split(/[\s,;]+/);
+    console.log(users);
   }
   
   populateTree() {
