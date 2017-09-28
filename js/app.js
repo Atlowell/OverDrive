@@ -56,35 +56,37 @@ class OverDrive{
 
   handleAddUsers(e) {
     e.preventDefault();
-    console.log(e);
-    this.parseUsers();
+    const userIDs = this.parseUsers();
   }
 
   handleRemoveUsers(e) {
     e.preventDefault();
-    console.log(e);
+    const usersID = this.parseUsers();
   }
 
   handleAddOwners(e) {
     e.preventDefault();
-    console.log(e);
+    const usersID = this.parseUsers();
   }
 
   handleRemoveOwners(e) {
     e.preventDefault();
-    console.log(e);
+    const usersID = this.parseUsers();
   }
 
   handleChangePermissions(e) {
     e.preventDefault();
-    console.log(e);
+    const usersID = this.parseUsers();
   }
 
   parseUsers() {
     const usersInput = document.querySelector('.users');
     const usersString = usersInput.value;
-    const users = usersString.split(/[\s,;]+/);
-    console.log(users);
+    const userEmails = usersString.split(/[\s,;]+/);
+    console.log(userEmails);
+
+    //Get user id's from list of emails
+    //return user id's
   }
   
   populateTree() {
