@@ -33,7 +33,7 @@ class TreeRoot{
 
 class OverDrive{
 	
-  var tree;
+  //var tree;
 	
   constructor() {
     this.setUpEventListeners();
@@ -43,15 +43,40 @@ class OverDrive{
   setUpEventListeners() {
     const actionsForm = document.querySelector('form#actions');
     const addUsersBtn = actionsForm.querySelector('.add-users');
-    //console.log(addUsersBtn);
-    addUsersBtn.addEventListener('click', (e) => this.handleAddUsers);
-    //actionForm.addEventListener('submit', (e) => this.handleSubmit(e));
+    const removeUsersBtn = actionsForm.querySelector('.remove-users');
+    const addOwnersBtn = actionsForm.querySelector('.add-owners');
+    const removeOwnersBtn = actionsForm.querySelector('.remove-owners');
+    const changePermBtn = actionsForm.querySelector('.change-permissions');
+    addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
+    removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
+    addOwnersBtn.addEventListener('click', (e) => this.handleAddOwners(e));
+    removeOwnersBtn.addEventListener('click', (e) => this.handleRemoveOwners(e));
+    changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
   }
 
   handleAddUsers(e) {
     e.preventDefault();
     console.log(e);
-    console.log("hello");
+  }
+
+  handleRemoveUsers(e) {
+    e.preventDefault();
+    console.log(e);
+  }
+
+  handleAddOwners(e) {
+    e.preventDefault();
+    console.log(e);
+  }
+
+  handleRemoveOwners(e) {
+    e.preventDefault();
+    console.log(e);
+  }
+
+  handleChangePermissions(e) {
+    e.preventDefault();
+    console.log(e);
   }
   
   populateTree() {
