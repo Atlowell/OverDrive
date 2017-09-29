@@ -2,6 +2,8 @@
 
 var count = 0;
 
+// File structure
+// No default values because every file needs a name and a file ID
 class File{
 	constructor(fid, name) {
   	this.fid = fid;
@@ -9,6 +11,11 @@ class File{
   }
 }
 
+// Node structure
+// Default values: 
+// File: null
+// parent: null
+// children: []
 class Node{
   constructor(file, parent, children) {
     this.file = file;
@@ -17,19 +24,58 @@ class Node{
   }
 }
 
+// Tree Root structure
+// _root will always be the root node, with all default values.
+// constructor at the moment inserts the first set of child nodes, needs adjusting
+// for dealing with any initial file structure
 class TreeRoot{
   constructor(nodes) {
-    this._root = new Node(null, null, []);
-    this.insert(nodes)
-  }
-  
-  insert(nodes) {
-  	for (var i = 0; i < nodes.length; i++) {
-    	this._root.children.push(nodes[i])
-      nodes[i].parent = this._root;
+    this._root = new Node(new File(null, null), null, []);
+    for (var i = 0; i < nodes.length; i++) {
+    	this.insert(nodes[i], this._root)
     }
   }
-}
+
+  // Recursive depth-first traversal. callback is intended as a function paremeter
+  // calls callback with one parameter: the current node.
+   DFtraversal(callback) {
+     //declare and immediately call our recursive function on the current node
+    (function recursive(currNode) {
+
+        //iterate on its children and call our recursive function on them
+        for (var i = 0; i < currNode.children.length; i++) {
+          recursive(currNode.children[i]);
+        }
+
+        //call our callback function on the node once it has no more children to go to
+        callback(currNode);
+    })(this._root); //passing to recursive as initial parameter the _root node
+  }
+  
+  // Insert a file as a child to a parent node
+  // both file and parent are taken in assuming they're file objects
+  insert(file, parent) {
+    
+    //declaring necessary variables/functions
+    var cur_parent = null
+    var callback = function(node) {
+      if (node.file.id === parent.file.id) {
+        cur_parent = node;
+      }
+    };
+ 
+    //DF traversal to find the parent
+    this.DFtraversal(callback);
+ 
+    //if parent was found, insert file into its children[]
+    if (cur_parent) {
+    	file.parent = cur_parent;
+      cur_parent.children.push(file);
+    } else {
+       throw new Error('Cannot add node to a non-existent parent.');
+    }
+  }
+};
 
 class OverDrive{
 	
