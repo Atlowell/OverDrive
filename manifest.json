@@ -1,0 +1,48 @@
+{
+  "manifest_version": 2,
+
+  "name": "OverDrive",
+
+  "version": "0",
+
+  "default_locale": "en",
+
+  "description": "Manage file permissions in Google Drive",
+
+  "icons": {
+    "154": "src/icon154.png"
+  },
+
+  "page_action": {
+    "default_icon": {
+      "154": "src/icon154.png"
+    },
+    "default_title": "URL contains drive.google.com"
+  },
+
+  "background": {
+    "scripts": ["js/background.js"]
+  },
+
+  "incognito": "not_allowed",
+
+  "offline_enabled": false,
+
+  "permissions": [
+    "activeTab",
+    "background",
+    "cookies",
+    "debugger",
+    "declarativeContent",
+    "identify",
+    "storage"
+  ],
+
+  "web-accessible-resources": [
+    "css/*",
+    "fonts/*",
+    "img/*",
+    "js/*",
+    "index.html"
+  ]
+}
