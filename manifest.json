@@ -10,11 +10,17 @@
   "description": "Manage file permissions in Google Drive",
 
   "icons": {
+    "32": "src/icon32.png",
+    "64": "src/icon64.png",
+    "128": "src/icon128.png",
     "154": "src/icon154.png"
   },
 
   "page_action": {
     "default_icon": {
+      "32": "src/icon32.png",
+      "64": "src/icon64.png",
+      "128": "src/icon128.png",
       "154": "src/icon154.png"
     },
     "default_title": "URL contains drive.google.com"
