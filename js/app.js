@@ -103,7 +103,7 @@ class OverDrive{
 
   handleAddUsers(e) {
     e.preventDefault();
-    const userIDs = this.parseUsers();
+    const users = this.parseUsers();
     const role = this.getRoleFromUI();
     //get file(s) from UI
     //call addToFile for given files, users, role
@@ -111,28 +111,28 @@ class OverDrive{
 
   handleRemoveUsers(e) {
     e.preventDefault();
-    const usersID = this.parseUsers();
+    const users = this.parseUsers();
     //get file(s) from UI
     //call removeFromFile for given files and users
   }
 
   handleAddOwners(e) {
     e.preventDefault();
-    const usersID = this.parseUsers();
+    const users = this.parseUsers();
     //get file(s) from UI
     //call addOwners for given files and users
   }
 
   handleRemoveOwners(e) {
     e.preventDefault();
-    const usersID = this.parseUsers();
+    const users = this.parseUsers();
     //get file(s) from UI
     //call removeOwners for given files and users
   }
 
   handleChangePermissions(e) {
     e.preventDefault();
-    const usersID = this.parseUsers();
+    const users = this.parseUsers();
     const role = this.getRoleFromUI();
     //get file(s) from UI
     //call addToFile for given files and users
@@ -142,10 +142,7 @@ class OverDrive{
     const usersInput = document.querySelector('.users');
     const usersString = usersInput.value;
     const userEmails = usersString.split(/[\s,;]+/);
-    console.log(userEmails);
-
-    //Get user id's from list of emails
-    //return user id's
+    return userEmails;
   }
 
   getRoleFromUI() {
@@ -273,5 +270,17 @@ function getChildFolders(parentName, parent, sheet) {
     getChildFolders(parentName + "/" + childFolder.getName(), childFolder, sheet, count);  
   }
 };
+
+function addToFile(users, role, file) {
+}
+
+function removeFromFile(users, role, file) {
+}
+
+function addOwners(users, file) {
+}
+
+function removeOwners(users, file) {
+}
 
 const overDrive = new OverDrive();
