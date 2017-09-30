@@ -5,23 +5,21 @@
 
   "version": "0",
 
-  "default_locale": "en",
-
   "description": "Manage file permissions in Google Drive",
 
   "icons": {
-    "32": "src/icon32.png",
-    "64": "src/icon64.png",
-    "128": "src/icon128.png",
-    "154": "src/icon154.png"
+    "32": "img/icon32.png",
+    "64": "img/icon64.png",
+    "128": "img/icon128.png",
+    "154": "img/icon154.png"
   },
 
   "page_action": {
     "default_icon": {
-      "32": "src/icon32.png",
-      "64": "src/icon64.png",
-      "128": "src/icon128.png",
-      "154": "src/icon154.png"
+      "32": "img/icon32.png",
+      "64": "img/icon64.png",
+      "128": "img/icon128.png",
+      "154": "img/icon154.png"
     },
     "default_title": "URL contains drive.google.com"
   },
@@ -40,11 +38,13 @@
     "cookies",
     "debugger",
     "declarativeContent",
-    "identify",
-    "storage"
+    "identity",
+    "storage",
+    "tabs",
+    "https://*.google.com/"
   ],
 
-  "web-accessible-resources": [
+  "web_accessible_resources": [
     "css/*",
     "fonts/*",
     "img/*",

@@ -15,5 +15,8 @@ chrome.runtime.onInstalled.addListener(function() {
         actions: [ new chrome.declarativeContent.ShowPageAction() ]
       }
     ]);
+    chrome.pageAction.onClicked.addListener(function(tab) {
+      chrome.tabs.executeScript(null, {file: "js/inject.js"});
+    })
   });
 });
