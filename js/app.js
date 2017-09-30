@@ -5,9 +5,11 @@ var count = 0;
 // File structure
 // No default values because every file needs a name and a file ID
 class File{
-	constructor(fid, name) {
+	constructor(fid, name, folder) {
   	this.fid = fid;
     this.name = name;
+	this.folder = folder;
+	this.checked = false;
   }
 }
 
@@ -30,7 +32,7 @@ class Node{
 // for dealing with any initial file structure
 class TreeRoot{
   constructor(nodes) {
-    this._root = new Node(new File(null, null), null, []);
+    this._root = new Node(new File(null, null, null), null, []);
     for (var i = 0; i < nodes.length; i++) {
     	this.insert(nodes[i], this._root)
     }
@@ -53,11 +55,11 @@ class TreeRoot{
   }
   
   // Insert a file as a child to a parent node
-  // both file and parent are taken in assuming they're file objects
+  // both file and parent are taken in assuming they're node objects
   insert(file, parent) {
     
     //declaring necessary variables/functions
-    var cur_parent = null
+    /*var cur_parent = null
     var callback = function(node) {
       if (node.file.id === parent.file.id) {
         cur_parent = node;
@@ -73,7 +75,9 @@ class TreeRoot{
       cur_parent.children.push(file);
     } else {
        throw new Error('Cannot add node to a non-existent parent.');
-    }
+    }*/
+	file.parent = parent;
+	parent.children.push(file);
   }
 };
 
@@ -81,9 +85,13 @@ class OverDrive{
 	
   //var tree;
 	
-  constructor() {
-    this.setUpEventListeners();
+  constructor(gapi) {
+	this.gapi = gapi;
+	console.log(this.gapi);
+	this.tree = new TreeRoot([]);
+	this.populateTree();
     this.displayTree();
+	this.setUpEventListeners();
   }
 
   //Add appropriate event listeners to action buttons
@@ -101,6 +109,7 @@ class OverDrive{
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
   }
 
+  
   handleAddUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
@@ -152,9 +161,10 @@ class OverDrive{
   
   populateTree() {
 	// Get list of top-level files from user
-	gapi.client.load('drive', 'v2', function() {
+	console.log(this.gapi);
+	this.gapi.client.load('drive', 'v2', function() {
 		var q = "'root' in parents and trashed=false";
-		var request = gapi.client.drive.files.list({
+		var request = this.gapi.client.drive.files.list({
 			'q': query
 		});
 		request.execute(function(response) {
@@ -162,16 +172,77 @@ class OverDrive{
 				console.log("Error with list execution");
 			}
 			else {
-				//Do something with list of files
-				console.log(resp.items);
+				var filelist = resp.items;
+				var npt = response.nextPageToken;
+				while(npt) {
+					request = this.gapi.client.drive.files.list({
+						'pageToken': npt
+					});
+					request.execute(function(response) {
+						if(response.error) {
+							console.log("Error with extended list execution");
+						}
+						else {
+							npt = resp.nextPageToken;
+							filelist.concat(response.items);
+						}
+					});
+				}
+				
+				for(i = 0; i < filelist.length; i++) {
+					populateTreeRecurse(filelist[i], this.tree._root);
+				}
+				
+				console.log(filelist);
 			}
 		});
 	});
 	//For each file, call populateTreeRecurse
   }
   
-  populateTreeRecurse() {
-	//Perform depth-first insertion
+  populateTreeRecurse(file, parent) {
+	fid = file.id;
+	name = file.title;
+	folder = false;
+	if(file.mimeType == "application/vnd.google-apps.folder") {
+		folder = true;
+	}
+	child = new File(fid, name, folder);
+	childnode = new Node(child, null, []);
+	this.tree.insert(childnode, parent);
+	if (folder) {
+		var request = this.gapi.client.drive.children.list({
+			'folderId': fid
+		});
+		request.execute(function(response){
+			if(response.error) {
+				console.log("Error with child list execution");
+			}
+			else {
+				childlist = response.items;
+				npt = response.nextPageToken;
+				while(npt) {
+					request = this.gapi.client.drive.children.list({
+						'folderId': fid,
+						'pageToken': npt
+					});
+					request.execute(function(response) {
+						if(response.error) {
+							console.log("Error with extended child list execution");
+						}
+						else {
+							childlist.concat(response.items);
+							npt = response.nextPageToken;
+						}
+					});
+				}
+				for(i = 0; i < childlist.length; i++ ) {
+					populateTreeRecurse(childlist[i], childnode);
+				}
+			}
+		});
+	}
+	
   }
   
   displayTree() {
@@ -283,4 +354,9 @@ function addOwners(users, file) {
 function removeOwners(users, file) {
 }
 
-const overDrive = new OverDrive();
+var overDrive;
+
+function setupOverdrive() {
+	console.log(gapi);
+	overDrive = new OverDrive(gapi);
+}
