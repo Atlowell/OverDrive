@@ -107,13 +107,49 @@ class OverDrive{
     removeOwnersBtn.addEventListener('click', (e) => this.handleRemoveOwners(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
   }
-
   
   handleAddUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
-    //get file(s) from UI
+	var filelist = [];
+    this.tree.DFtraversal(function(node) {
+		if(node.checked) {
+			filelist.push(node.fid);
+		}
+	});
+	
+	var newrole = role;
+	var com = false;
+	if(newrole == "commenter") {
+		com = true;
+		newrole = "reader";
+	}
+	var body = {
+		'value': undefined,
+		'type': "user",
+		'role': newrole
+	}
+	if(com) {
+		body.additonalRoles = ["commenter"];
+	}
+	console.log(body);
+	
+	for(i = 0; i < filelist.length; i++) {
+		for(j = 0; j < user.length; j++) {
+			body.value = user[j];
+			var request = this.gapi.client.drive.permissions.insert({
+				'fid': filelist[i],
+				'resource': body,
+				'sendNotificationEmails': false
+			});
+			request.execute(function(reponse) {
+				if(response.error) {
+					console.log("Error with inserting permission");
+				}
+			});
+		}
+	}
     //call addToFile for given files, users, role
   }
 
@@ -160,8 +196,22 @@ class OverDrive{
   
   // Assumes a fid for simplicity.  When implemented it might take a different argument
   getpermissions(fid) {
-	  var permuserlist = {owner:undefined, organizers:[], editors:[], commentors:[], viewers:[], anyone:undefined}; 
-	  var request = this.gapi.client.drive.permissions.list({
+	  var permuserlist = {owner:undefined, canshare:undefined, editors:[], commentors:[], viewers:[], anyone:undefined};
+	  
+	  var request = this.gapi.client.drive.files.get({
+		 'fileId': fid,
+		 'fields': "writersCanShare"
+	  });
+	  request.execute(function(response) {
+		  if(response.error) {
+			  console.log("Error with file metadata writersCanShare get execution");
+		  }
+		  else {
+			  canshare = response.writersCanShare;
+		  }
+	  });
+	  
+	  request = this.gapi.client.drive.permissions.list({
 		  'fileId': fid
 	  });
 	  request.execute(function(response) {
@@ -200,12 +250,12 @@ class OverDrive{
 					  else if(permlist[i].role == "writer") {
 						  permuserlist.editors.push(permlist[i].emailAddress);
 					  }
-					  else if(permlist[i].role == "organizer") {
-						  permuserlist.organizers.push(permlist[i].emailAddress);
-					  }
-					  else {
+					  else if(permlist[i].role == "owner") {
 						  permuserlist.owner = permlist[i].emailAddress;
 						  console.log("Owner found.  There should only be one of these");
+					  }
+					  else {
+						  console.log("invalid user role");
 					  }
 				  }
 				  else if(permlist[i].type == "group") {
@@ -225,8 +275,8 @@ class OverDrive{
 					  else if(permlist[i].role == "writer") {
 						  permuserlist.anyone = "edit";
 					  }
-					  else if(permlist[i].role == "organizer") {
-						  permuserlist.anyone = "organize";
+					  else {
+						  console.log("invalid anyone role");
 					  }
 				  }
 				  else {
