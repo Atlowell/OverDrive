@@ -87,7 +87,6 @@ class OverDrive{
 	
   constructor(gapi) {
 	this.gapi = gapi;
-	console.log(this.gapi);
 	this.tree = new TreeRoot([]);
 	this.populateTree();
     this.displayTree();
@@ -159,20 +158,100 @@ class OverDrive{
     return role;
   }
   
+  // Assumes a fid for simplicity.  When implemented it might take a different argument
+  getpermissions(fid) {
+	  var permuserlist = {owner:undefined, organizers:[], editors:[], commentors:[], viewers:[], anyone:undefined}; 
+	  var request = this.gapi.client.drive.permissions.list({
+		  'fileId': fid
+	  });
+	  request.execute(function(response) {
+		  if(response.error) {
+			  console.log("Error with permission list execution");
+		  }
+		  else {
+			  var permlist = response.items;
+			  var npt = response.nextPageToken;
+			  while(npt) {
+				  request = this.gapi.client.drive.children.list({
+					  'fileId': fid,
+					  'pageToken': npt
+				  });
+				  request.execute(function(response) {
+					  if(response.error) {
+						  console.log("Error with extended permission list execution");
+					  }
+					  else {
+						  permlist.concat(response.items);
+						  npt = response.nextPageToken;
+					  }
+				  });
+			  }
+			  for(i = 0; i < permlist.length; i++) {
+				  //Get type of thing here
+				  if(permlist[i].type == "user") {
+					  if(permlist[i].role == "reader") {
+						  if(permlist[i].additionalRoles.length != 0) {
+							  permuserlist.commentors.push(permlist[i].emailAddress);
+						  }
+						  else {
+							  permuserlist.viewers.push(permlist[i].emailAddress);  
+						  }
+					  }
+					  else if(permlist[i].role == "writer") {
+						  permuserlist.editors.push(permlist[i].emailAddress);
+					  }
+					  else if(permlist[i].role == "organizer") {
+						  permuserlist.organizers.push(permlist[i].emailAddress);
+					  }
+					  else {
+						  permuserlist.owner = permlist[i].emailAddress;
+						  console.log("Owner found.  There should only be one of these");
+					  }
+				  }
+				  else if(permlist[i].type == "group") {
+					  // TODO: Work with groups
+				  }
+				  // Check if anyone with the link can ___
+				  else if(permlist[i].type == "anyone") {
+					  console.log("Anyone found.  Ther should only be one of these");
+					  if(permlist[i].role == "reader") {
+						  if(permlist[i].additionalRoles.length != 0) {
+							  permuserlist.anyone = "comment";
+						  }
+						  else {
+							  permuserlist.anyone = "view";
+						  }
+					  }
+					  else if(permlist[i].role == "writer") {
+						  permuserlist.anyone = "edit";
+					  }
+					  else if(permlist[i].role == "organizer") {
+						  permuserlist.anyone = "organize";
+					  }
+				  }
+				  else {
+					  // Domain - probably can ignore
+				  }
+			  }
+		  }
+	  }
+	  return permuserlist;
+  }
+  
   populateTree() {
 	// Get list of top-level files from user
 	console.log(this.gapi);
-	this.gapi.client.load('drive', 'v2', function() {
+	//this.gapi.client.load('drive', 'v2', function() {
 		var q = "'root' in parents and trashed=false";
 		var request = this.gapi.client.drive.files.list({
 			'q': query
 		});
 		request.execute(function(response) {
 			if(response.error) {
-				console.log("Error with list execution");
+				console.log("Error with file list execution");
 			}
 			else {
-				var filelist = resp.items;
+				var filelist = response.items;
 				var npt = response.nextPageToken;
 				while(npt) {
 					request = this.gapi.client.drive.files.list({
@@ -180,7 +259,7 @@ class OverDrive{
 					});
 					request.execute(function(response) {
 						if(response.error) {
-							console.log("Error with extended list execution");
+							console.log("Error with extended file list execution");
 						}
 						else {
 							npt = resp.nextPageToken;
@@ -196,7 +275,7 @@ class OverDrive{
 				console.log(filelist);
 			}
 		});
-	});
+	//});
 	//For each file, call populateTreeRecurse
   }
   
@@ -357,6 +436,5 @@ function removeOwners(users, file) {
 var overDrive;
 
 function setupOverdrive() {
-	console.log(gapi);
 	overDrive = new OverDrive(gapi);
 }
