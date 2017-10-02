@@ -234,7 +234,7 @@ class OverDrive{
 				  }
 			  }
 		  }
-	  }
+	  })
 	  permuserlist.organizers.sort();
 	  permuserlist.editors.sort();
 	  permuserlist.commentors.sort();
@@ -442,3 +442,5 @@ var overDrive;
 function setupOverdrive() {
 	overDrive = new OverDrive(gapi);
 }
+
+$('#file-browser').jstree();
