@@ -475,11 +475,66 @@ function getChildFolders(parentName, parent, sheet) {
   }
 };
 
-function addToFile(users, role, file) {
-}
 
-function removeFromFile(users, role, file) {
-}
+
+
+function addUserToFile(userID, fileID, sheet) {
+  var root = DriveApp.getFolderById(fileId);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var file = DriveApp.getFileByID(fileID);
+  file.addViewer(fileID);
+ 
+};
+function addUserToFolder(userID, fileID, sheet) {
+  var root = DriveApp.getFolderById(fileId);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var file = DriveApp.getFileByID(fileID);
+  file.addViewer(fileID);
+ 
+  
+  var childFolders = root.getFolders();
+  while (childFolders.hasNext()) {
+    var childFolder = childFolders.next();
+    var files = childFolder.getFiles();
+    count = count + 1;
+    while (files.hasNext()) {
+      var childFile = files.next();
+      childFile.addViewer(userID)
+    }   
+    addUsersToFolder(userID, childFolder, sheet);  
+  }
+};
+
+
+function removeUserFromFile(userID, fileID, sheet) {
+  var root = DriveApp.getFolderById(fileId);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var file = DriveApp.getFileByID(fileID);
+  file.removeViewer(fileID);
+ 
+};
+function removeUserFromFolder(userID, fileID, sheet) {
+  var root = DriveApp.getFolderById(fileId);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var file = DriveApp.getFileByID(fileID);
+  file.removeViewer(fileID);
+  
+  var childFolders = root.getFolders();
+  while (childFolders.hasNext()) {
+    var childFolder = childFolders.next();
+    var files = childFolder.getFiles();
+    count = count + 1;
+    while (files.hasNext()) {
+      var childFile = files.next();
+      childFile.addViewer(userID)
+    }   
+    removeUserFromFolder(userID, childFolder, sheet);  
+  }
+};
 
 function addOwners(users, file) {
 }
