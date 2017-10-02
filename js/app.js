@@ -235,6 +235,10 @@ class OverDrive{
 			  }
 		  }
 	  }
+	  permuserlist.organizers.sort();
+	  permuserlist.editors.sort();
+	  permuserlist.commentors.sort();
+	  permuserlist.viewers.sort();
 	  return permuserlist;
   }
   
