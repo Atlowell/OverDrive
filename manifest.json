@@ -21,7 +21,7 @@
       "128": "img/icon128.png",
       "154": "img/icon154.png"
     },
-    "default_title": "URL contains drive.google.com"
+    "default_title": "OverDrive"
   },
 
   "background": {
@@ -41,7 +41,10 @@
     "identity",
     "storage",
     "tabs",
-    "https://*.google.com/"
+    "https://*.google.com/*",
+    "https://cdnjs.cloudflare.com/*",
+    "https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js",
+    "https://apis.google.com/js/api.js"
   ],
 
   "web_accessible_resources": [
