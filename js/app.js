@@ -156,21 +156,21 @@ class OverDrive{
   handleRemoveUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
-    //get file(s) from UI
+    //get checked file(s) from tree
     //call removeFromFile for given files and users
   }
 
   handleAddOwners(e) {
     e.preventDefault();
     const users = this.parseUsers();
-    //get file(s) from UI
+    //get checked file(s) from tree
     //call addOwners for given files and users
   }
 
   handleRemoveOwners(e) {
     e.preventDefault();
     const users = this.parseUsers();
-    //get file(s) from UI
+    //get checked file(s) from tree
     //call removeOwners for given files and users
   }
 
@@ -178,7 +178,7 @@ class OverDrive{
     e.preventDefault();
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
-    //get file(s) from UI
+    //get checked file(s) from tree
     //call addToFile for given files and users
   }
 
