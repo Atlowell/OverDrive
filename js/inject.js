@@ -1,3 +1,7 @@
+function prependChild(parent, child) {
+    parent.insertBefore(child, parent.firstChild);
+}
+
 var wrapper = document.createElement("div");
 wrapper.innerHTML = '\
   <div class="grid-container">\
@@ -8,8 +12,9 @@ wrapper.innerHTML = '\
   </div>\
   </div>\
 ';
-const mainPage = document.querySelector("#drive_main_page > div.a-qc-La.sd-we > div > div.a-s-tb-sc-Ja-Q.a-s-tb-sc-Ja-Q-Nm.a-s-tb-Pe-Q.a-D-Pe-Q > div > div");
-mainPage.appendChild(wrapper);
+const mainPage = document.querySelector("#drive_main_page");
+//mainPage.appendChild(wrapper);
+prependChild(mainPage, wrapper);
 var imgURL = chrome.extension.getURL("img/logo.png");
 mainPage.querySelector("#logo").src = imgURL;
 console.log("inject");
