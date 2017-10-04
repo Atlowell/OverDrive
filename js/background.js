@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener(function() {
         // That fires when a page's URL contains a 'drive.google.com' ...
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: { urlContains: '' },
+            pageUrl: { urlContains: 'drive.google.com' },
           })
         ],
         // And shows the extension's page action.
