@@ -5,6 +5,7 @@ var gauth;
 			
 function clientLoadAuth() {
 	gapi.load('client:auth2', clientInitAuth);
+    
 }
 			
 function clientInitAuth() {
@@ -24,3 +25,6 @@ function clientInitAuth() {
 		}
 	});
 }
+
+clientLoadAuth();
+setupOverDrive();
