@@ -12,7 +12,7 @@ wrapper.innerHTML = '\
   </div>\
   </div>\
 ';
-wrapper.innerHTML = '<iframe id="extFrame" class="over_drive_frame"></iframe>'
+wrapper.innerHTML = '<iframe id="extFrame" class="over_drive_frame" width="100%"></iframe>'
 const mainPage = document.querySelector("#drive_main_page");
 //mainPage.appendChild(wrapper);
 prependChild(mainPage, wrapper);

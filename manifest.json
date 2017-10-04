@@ -44,7 +44,7 @@
     "https://*.google.com/*",
     "https://cdnjs.cloudflare.com/*",
     "https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js",
-    "https://apis.google.com/js/api.js"
+    "https://apis.google.com/*"
   ],
 
   "web_accessible_resources": [
