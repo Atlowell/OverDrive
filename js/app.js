@@ -544,7 +544,7 @@ function removeOwners(users, file) {
 
 var overDrive;
 
-function setupOverdrive() {
+function setupOverDrive() {
 	overDrive = new OverDrive(gapi);
 }
 
