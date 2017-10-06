@@ -103,6 +103,8 @@ class OverDrive{
     if((this.numrequests == 0) && (this.numcalls == 0)) {
         this.displayTree();
         this.setUpEventListeners();
+        console.log(this.tree._root.children[0].file);
+        this.tree._root.children[0].file.checked = true;
     }
   }
   
@@ -127,10 +129,11 @@ class OverDrive{
     const role = this.getRoleFromUI();
 	var filelist = [];
     this.tree.DFtraversal(function(node) {
-		if(node.checked) {
-			filelist.push(node.fid);
+		if(node.file.checked) {
+			filelist.push(node.file.fid);
 		}
 	});
+    console.log(filelist);
 	
 	var newrole = role;
 	var com = false;
@@ -147,22 +150,37 @@ class OverDrive{
 		body.additonalRoles = ["commenter"];
 	}
 	console.log(body);
-	
-	for(i = 0; i < filelist.length; i++) {
-		for(j = 0; j < user.length; j++) {
-			body.value = user[j];
-			var request = this.gapi.client.drive.permissions.insert({
-				'fid': filelist[i],
-				'resource': body,
-				'sendNotificationEmails': false
-			});
-			request.execute(function(reponse) {
-				if(response.error) {
-					console.log("Error with inserting permission");
-				}
-			});
-		}
-	}
+    
+	identityAuth(function(token) { 
+        for(var i = 0; i < filelist.length; i++) {
+            for(var j = 0; j < users.length; j++) {
+                //body.value = users[j];
+                body.value = users[j];
+                //console.log(users[j]);
+                /*var request = this.gapi.client.drive.permissions.insert({
+                    'fid': filelist[i],
+                    'resource': body,
+                    'sendNotificationEmails': false
+                });
+                request.execute(function(reponse) {
+                    if(response.error) {
+                        console.log("Error with inserting permission");
+                    }
+                });*/
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filelist[i]) + "/permissions"); //+ "?sendNotificationEmails=false");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.onload = function() {
+                    console.log(xhr.response);
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                xhr.send(JSON.stringify(body));
+                console.log("sent request");
+            }
+        }
+    });
     //call addToFile for given files, users, role
   }
 
