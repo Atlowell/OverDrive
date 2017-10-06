@@ -6,7 +6,14 @@
   "version": "0",
 
   "description": "Manage file permissions in Google Drive",
+  
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjdzUU5/eAI9yIR+/fF0SnRzH7ipIbq0D4AUEUL0qO/G5E1qPOpDy8b1bX/z6UQRj5o2sUn2cF070qcBS70S+ru6bDzosZ0y4hsHp73I2KfZxS3fF3SO7u8k6WHuTmbdaTPMUjd/xTe02ZRWEtHETuFmMqsfedWdwsUnSd7LdjjozvjTWLaG2/siv9Zblj2iJ1J+n6tWiy1A/0PEpBCOv53NnkMCH28CIQy4t8Tiez+FxxoCYlG9rjOhgZaTaI3QYSjTetOOsFqcNWwOprFOGZ3sTYtaafdMaITQYv7dN1KcMo1ebbFQmQUi7AH9qf167d0I+Uh+/uXrfeaDiOCElSwIDAQAB",
 
+  "oauth2": {
+    "client_id": "706092088663-n0891u5ggoet3b6hp43igci2mt305e2p.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/drive", "profile"]
+  },
+  
   "icons": {
     "32": "img/icon32.png",
     "64": "img/icon64.png",
