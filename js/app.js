@@ -299,6 +299,7 @@ class OverDrive{
     var that = this;
 	var fid = file.id;
 	var name = file.title;
+    console.log("Adding file " + name);
 	var folder = false;
     // Check if the file is a folder
 	if(file.mimeType == "application/vnd.google-apps.folder") {
@@ -315,8 +316,9 @@ class OverDrive{
 	if (folder) {
         console.log("is a folder");
         identityAuth(function(t) {
+            var q = "'" + fid + "' in parents and trashed=false";
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q));
             xhr.setRequestHeader('Authorization', 'Bearer ' + t);
             xhr.responseType = "json";
             
@@ -341,9 +343,9 @@ class OverDrive{
                         // If the next npt is still valid
                         //if(npt) {
                         //identityAuth(function(tok) {
-                function getnpt() {
+                function getnpt() {                   
                     var xhr2 = new XMLHttpRequest();
-                    xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children" + "?pageToken=" + encodeURIComponent(npt));
+                    xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&?q=" + encodeURIComponent(q));
                     xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
                     xhr2.setRequestHeader('pageToken', npt);
                     xhr2.responseType = "json";
@@ -384,6 +386,7 @@ class OverDrive{
                 for(var i = 0; i < childlist.length; i++) {
                     console.log("Calling populatetreerecurse from populatetreerecurse");
                     //console.log(this);
+                    console.log(childlist[i]);
                     that.populateTreeRecurse(childlist[i], childnode);
                 }
                 
@@ -468,7 +471,7 @@ class OverDrive{
             
             function getnpt() {
                 var xhr2 = new XMLHttpRequest();
-                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + q);
+                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q));
                 xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
                 //xhr2.setRequestHeader('pageToken', npt);
                 //xhr2.setRequestHeader('maxResults', 460);
