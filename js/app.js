@@ -32,6 +32,7 @@ class Node{
 // for dealing with any initial file structure
 class TreeRoot{
   constructor(nodes) {
+    console.log("This is fucking proof I defined tree");
     this._root = new Node(new File(null, null, null), null, []);
     for (var i = 0; i < nodes.length; i++) {
     	this.insert(nodes[i], this._root)
@@ -88,7 +89,8 @@ class OverDrive{
   constructor(gapi) {
 	this.gapi = gapi;
 	this.tree = new TreeRoot([]);
-	this.populateTree();
+    console.log(this.tree);
+	this.populateTree(); // ASYNC!
     this.displayTree();
 	this.setUpEventListeners();
   }
@@ -291,8 +293,107 @@ class OverDrive{
 	  permuserlist.viewers.sort();
 	  return permuserlist;
   }
+
+  // NOTE: This function is asynchronous.  See populateTree() below for reasoning
+  populateTreeRecurse(file, parent) {
+	var fid = file.id;
+	var name = file.title;
+	var folder = false;
+    // Check if the file is a folder
+	if(file.mimeType == "application/vnd.google-apps.folder") {
+		folder = true;
+	}
+    
+    // create and insert node into tree
+	var child = new File(fid, name, folder);
+	var childnode = new Node(child, null, []);
+	this.tree.insert(childnode, parent);
+    
+    // If it is a folder, deal with its children as well
+	if (folder) {
+        identityAuth(function(t) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
+            xhr.setRequestHeader('Authorization', 'Bearer ' + t);
+            xhr.responseType = "json";
+            
+            // On Success
+            xhr.onload = function() {
+                var childlist = response.items;
+				var npt = response.nextPageToken;
+                var readyflag = false;
+                var endflag = true;
+                if(npt) {
+                    endflag = false;
+                    readyflag = true;
+                }
+                var i = 0;
+                
+                // While there are more pages of results
+                while((!endflag) || (i < filelist.length)) {
+                    
+                    // If the process has obtained the next npt and is ready to continue
+                    if(readyflag) {
+                        readyflag = false;
+                        // If the next npt is still valid
+                        if(npt) {
+                            identityAuth(function(tok) {
+                                var xhr2 = new XMLHttpRequest();
+                                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
+                                xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
+                                xhr2.setRequestHeader('pageToken', npt);
+                                xhr2.responseType = "json";
+                                xhr2.onload = function() {
+                                    // Update npt and filelist, mark ready for next request
+                                    npt = xhr2.response.nextPageToken;
+                                    childlist.concat(xhr2.response.items);
+                                    readyflag = 1;
+                                };
+                                xhr2.onerror = function() {
+                                    console.log(xhr2.error);
+                                };
+                                xhr2.send();
+                            });
+                        }
+                        // The npt is no longer valid.  Flag for the end
+                        else {
+                            endflag = true;
+                        }
+                    }
+ 
+                    // If there are children left that haven't been inserted, call populateTreeRecurse on them
+                    if(i < childlist.length) {
+                        populateTreeRecurse(childlist[i], childnode);
+                        i++;
+                    }
+                }
+            };
+            
+            // On Error
+            xhr.onerror = function() {
+                console.log(xhr.error);
+            };
+            
+            xhr.send();
+        });
+        
+        
+		/*var request = this.gapi.client.drive.children.list({
+			'folderId': fid
+		});
+		request.execute(function(response){
+			if(response.error) {
+				console.log("Error with child list execution");
+			}
+			else {
+				
+			} 
+		}); */
+	}
+	
+  }
   
-  
+  // This function is asynchronous.  There is no guarantee that when it returns the tree will be completely populated.  This is due to the ansynchronous nature of XMLHttpRequests
   populateTree() {
 	// Get list of top-level files from user
 	//console.log(this.gapi);
@@ -305,50 +406,107 @@ class OverDrive{
 				console.log("Error with file list execution");
 			}
 			else { */
-
+    var that = this; // I can't believe this is necessary, Javascript is actually stupid as hell
     identityAuth(function(token) {
         //Search term to get all top-level files
-        var q = "'root' in parents and trashed=false";
+        var q = "name contains 'DMK' or name contains 'Delta Mu Kappa') and 'root' in parents and trashed=false";
+        var q2 = "name contains 'shgdfh'";
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', "https://www.googleapis.com/drive/v2/files", false);
+        xhr.open('GET', "https://www.googleapis.com/drive/v2/files");
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-        xhr.setRequestHeader('q', q);
+        xhr.setRequestHeader('q', q2);
+        xhr.setRequestHeader('maxResults', 460);
         xhr.responseType = "json";
+        
         
         // On success
         xhr.onload = function() {
-            console.log("Successful get of files");
-            var filelist = xhr.response.items;
-            var npt = xhr.response.nextPageToken;
-            console.log("npt: " + npt);
+            //console.log("Successful get of files");
             
-            // While there are more pages of results
-            while(npt) {
-                console.log("About to enter next identityAuth");
-                identityAuth(function(tok) {
-                    var xhr2 = new XMLHttpRequest();
-                    xhr2.open("https://www.googleapis.com/drive/v2/files", false);
-                    xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
-                    xhr2.setRequestHeader('pageToken', npt);
-                    xhr2.responseType = "json";
-                    xhr2.onload = function() {
-                        
-                        npt = xhr2.response.nextPageToken;
-                        filelist.concat(xhr2.response.items);
-                    };
-                    xhr2.onerror = function() {
-                        console.log(xhr2.error);
-                    };
-                    xhr2.send();
-                });
-                console.log("npt: " + npt);
+            var filelist = xhr.response.items;
+            console.log(xhr.response.items);
+            console.log("original file list: " + xhr.response.items.length);
+            var npt = xhr.response.nextPageToken;
+            //console.log("npt: " + npt);
+            //var readyflag = false;
+            var endflag = true;
+            
+            function getnpt() {
+                var xhr2 = new XMLHttpRequest();
+                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files");
+                xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr2.setRequestHeader('pageToken', npt);
+                xhr2.setRequestHeader('maxResults', 460);
+                xhr2.responseType = "json";
+                xhr2.onload = function() {
+                    console.log("Got list from npt token- xhr2 succeeded");
+                    // Update npt and filelist, mark ready for next request
+                    npt = xhr2.response.nextPageToken;
+                    console.log("npt: " + npt);
+                    filelist.concat(xhr2.response.items);
+                    console.log("new file list: " + xhr2.response.items.length);
+                    //readyflag = true;
+                    if(npt) {
+                        console.log("next npt");
+                        getnpt();
+                    }
+                    else {
+                        endflag = true;
+                        console.log("no more npts");
+                    }
+                };
+                xhr2.onerror = function() {
+                    console.log("xhr2 returned with error");
+                    console.log(xhr2.error);
+                };
+                xhr2.send();
+                console.log("xhr2 was sent: " + xhr2.readyState);
             }
             
-            //For each file, call populateTreeRecurse
-            for(i = 0; i < filelist.length; i++) {
-				populateTreeRecurse(filelist[i], this.tree._root);
-			}
-            console.log("Finished populate tree recursion");
+            if(npt) {
+                endflag = false;
+                //readyflag = true;
+                console.log("Initial npt token");
+                getnpt();
+            }
+            var i = 0;
+            
+            //console.log("npt: " + npt);
+            
+            // While there are more pages of results or while we haven't finished processing the list
+            //while((!endflag) || (i < filelist.length)) {
+                //var xhr2 = undefined;
+                //console.log("endflag: " + endflag + ", i: " + i);
+                //console.log("About to enter next identityAuth");
+                // If the process has obtained the next npt and is ready to continue
+                /*if(readyflag) {
+                    readyflag = false;
+                    // If the next npt is still valid
+                    if(npt) {
+                        console.log("npt: " + npt);
+                        //identityAuth(function(tok) {
+                            //console.log("is my identity function screwing stuff up?");
+                            
+                        //});
+                    }
+                    // The npt is no longer valid.  Flag for the end
+                    else {
+                        console.log("No more npt tokens");
+                        endflag = true;
+                    }
+                }*/
+            while(!endflag) {    
+                // If there are files left that haven't been inserted, call populateTreeRecurse on them
+                if(i < filelist.length) {
+                    console.log("Calling populatetreerecurse");
+                    //console.log(that.tree);
+                    //that.populateTreeRecurse(filelist[i], that.tree._root);
+                    i++;
+                }
+                setTimeout(function() {}, 1000);
+            }
+            //}
+            console.log("Finished top-level populate tree recursion");
             
         };
         
@@ -377,82 +535,7 @@ class OverDrive{
 	//}); */
   }
   
-  populateTreeRecurse(file, parent) {
-	var fid = file.id;
-	var name = file.title;
-	var folder = false;
-    // Check if the file is a folder
-	if(file.mimeType == "application/vnd.google-apps.folder") {
-		folder = true;
-	}
-    
-    // create and insert node into tree
-	var child = new File(fid, name, folder);
-	var childnode = new Node(child, null, []);
-	this.tree.insert(childnode, parent);
-    
-    // If it is a folder, deal with its children as well
-	if (folder) {
-        identityAuth(function(t) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children", false);
-            xhr.setRequestHeader('Authorization', 'Bearer ' + t);
-            xhr.responseType = "json";
-            
-            // On Success
-            xhr.onload = function() {
-                var childlist = response.items;
-				var npt = response.nextPageToken;
-                
-                // While there are more pages of results
-                while(npt) {
-                    identityAuth(function(tok) {
-                        var xhr2 = new XMLHttpRequest();
-                        xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children", false);
-                        xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
-                        xhr2.setRequestHeader('pageToken', npt);
-                        xhr2.responseType = "json";
-                        xhr2.onload = function() {
-                            npt = xhr2.response.nextPageToken;
-                            childlist.concat(xhr2.response.items);
-                        };
-                        xhr2.onerror = function() {
-                            console.log(xhr2.error);
-                        };
-                        xhr2.send();
-                    });
-                }
-                
-                // Recursively populate children
-                for(i = 0; i < childlist.length; i++ ) {
-					populateTreeRecurse(childlist[i], childnode);
-				}
-                
-            };
-            
-            // On Error
-            xhr.onerror = function() {
-                console.log(xhr.error);
-            };
-            
-            xhr.send();
-        });
-        
-        
-		/*var request = this.gapi.client.drive.children.list({
-			'folderId': fid
-		});
-		request.execute(function(response){
-			if(response.error) {
-				console.log("Error with child list execution");
-			}
-			else {
-				
-			} 
-		}); */
-	}
-	
-  }
+
   
   displayTree() {
     //Clear current tree UI

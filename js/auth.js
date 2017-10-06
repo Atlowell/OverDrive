@@ -2,6 +2,7 @@ var clientid = '706092088663-1ur3mt6607aabki0lggij9ad9gt06r6d.apps.googleusercon
 var apikey = 'AIzaSyDHRk9uzGCpQVBAK8iwP2JYouXfzN_EKcw';
 var scopes = 'https://www.googleapis.com/auth/drive';
 var gauth;
+var authorization = false;
 			
 function clientLoadAuth() {
 	gapi.load('client:auth2', clientInitAuth);
@@ -32,7 +33,11 @@ function clientInitAuth() {
 }
 
 function identityAuth(callback) {
-    chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+    var interactive = false;
+    if(!authorization) {
+        interactive = true;
+    }
+    chrome.identity.getAuthToken({ 'interactive': interactive }, function(token) {
         if(chrome.runtime.lastError) {
             console.log(chrome.runtime.lastError);
         }
@@ -41,11 +46,20 @@ function identityAuth(callback) {
             
             callback(token);
             
+            
+
             // Test code, not my own
             /*var x = new XMLHttpRequest();
             x.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=' + token);
             x.onload = function() {
                 console.log(x.response);
+                
+                var y = new XMLHttpRequest();
+                y.open('GET', 'https://www.googleapis.com/oauth2/v2/userinfo?alt=json&access_token=' + token);
+                y.onload = function() {
+                    console.log(x.response);
+                };
+                y.send();
             };
             x.send(); */
             
@@ -67,4 +81,4 @@ function identityAuth(callback) {
 
 //identityAuth();
 //clientLoadAuth();
-//setupOverDrive();
+setupOverDrive();
