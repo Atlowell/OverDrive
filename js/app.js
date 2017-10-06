@@ -8,8 +8,8 @@ class File{
 	constructor(fid, name, folder) {
   	this.fid = fid;
     this.name = name;
-	this.folder = folder;
-	this.checked = false;
+	  this.folder = folder;
+	  this.checked = false;
   }
 }
 
@@ -28,13 +28,11 @@ class Node{
 
 // Tree Root structure
 // _root will always be the root node, with all default values.
-// constructor at the moment inserts the first set of child nodes, needs adjusting
-// for dealing with any initial file structure
 class TreeRoot{
   constructor(nodes) {
-    this._root = new Node(new File(null, null, null), null, []);
+    this._root = new Node(new File(), null, []);
     for (var i = 0; i < nodes.length; i++) {
-    	this.insert(nodes[i], this._root)
+    	this.insert(nodes[i], this._root.file.id)
     }
     this.isvalid = "its the right one!";
   }
@@ -57,13 +55,16 @@ class TreeRoot{
   
   // Insert a file as a child to a parent node
   // both file and parent are taken in assuming they're node objects
-  insert(file, parent) {
+  insert(file, parentid) {
     
     //declaring necessary variables/functions
-    /*var cur_parent = null
+    var cur_parent = null
     var callback = function(node) {
-      if (node.file.id === parent.file.id) {
+    //console.log(node)
+     // console.log("node:" + node.file.fid + ", parent:" + parentid)
+      if (node.file.fid === parentid) {
         cur_parent = node;
+        //console.log("node:" + node.file.fid + ", parent:" + parentid)
       }
     };
  
@@ -76,9 +77,34 @@ class TreeRoot{
       cur_parent.children.push(file);
     } else {
        throw new Error('Cannot add node to a non-existent parent.');
-    }*/
-	file.parent = parent;
-	parent.children.push(file);
+    }
+  }
+
+  displayTree() {
+  
+  fileBrowserUI = '';
+  //fileBrowserUI += '<ul>';
+  
+  //recursive function to create the nested unordered list in the html variable
+  (function recursive(currNode) {
+        
+        if (currNode.file.fid) {
+        	fileBrowserUI += '<li>' + currNode.file.fid;		
+        }
+        if (currNode.children.length != 0) {
+        	fileBrowserUI += '<ul>'
+        }
+        for (var i = 0; i < currNode.children.length; i++) {
+          recursive(currNode.children[i]);
+          fileBrowserUI += '</li>'
+        }
+        if (currNode.children.length != 0) {
+        	fileBrowserUI += '</ul>'
+        }
+        
+    })(this._root); //passing to recursive as initial parameter the _root node
+    
+    //this.fileBrowserUI += '</ul>'
   }
 };
 
@@ -749,10 +775,15 @@ function addOwners(users, file) {
 function removeOwners(users, file) {
 }
 
+// variable to contain the HTML for the file broswer UI
+var fileBrowserUI = '';
+tr.displayTree();
+document.getElementById('file-browser').innerHTML = fileBrowserUI;
+
+$('#file-browser').jstree();
+
 var overDrive;
 
 function setupOverDrive() {
 	overDrive = new OverDrive(gapi);
 }
-
-$('#file-browser').jstree();
