@@ -89,12 +89,23 @@ class OverDrive{
   constructor(gapi) {
 	this.gapi = gapi;
 	this.tree = new TreeRoot([]);
+    this.numrequests = 0;
+    this.numcalls = 0;
+    //this.startedtopopulate = false;
+    //this.lockrequests = false;
+    //this.lockitems = false;
     //console.log(this.tree);
 	this.populateTree(); // ASYNC!
-    this.displayTree();
-	this.setUpEventListeners();
   }
-
+  
+  triggerDisplayTree() {
+    console.log("numrequests: " + this.numrequests + ", numcalls: " + this.numcalls);
+    if((this.numrequests == 0) && (this.numcalls == 0)) {
+        this.displayTree();
+        this.setUpEventListeners();
+    }
+  }
+  
   //Add appropriate event listeners to action buttons
   setUpEventListeners() {
     const actionsForm = document.querySelector('form#actions');
@@ -296,6 +307,7 @@ class OverDrive{
 
   // NOTE: This function is asynchronous.  See populateTree() below for reasoning
   populateTreeRecurse(file, parent) {
+    
     var that = this;
 	var fid = file.id;
 	var name = file.title;
@@ -366,8 +378,11 @@ class OverDrive{
                         }
                         for(var j = 0; j < childlist2.length; j++) {
                             console.log("Calling populatetreerecurse from populatetreerecurse");
+                            that.numcalls++;
                             that.populateTreeRecurse(childlist2[j], childnode);
                         }
+                        that.numrequests--;
+                        that.triggerDisplayTree();
                     //readyflag = 1;
                     };
                     xhr2.onerror = function() {
@@ -375,6 +390,7 @@ class OverDrive{
                         console.log(xhr2.error);
                     };
                     xhr2.send();
+                    that.numrequests++;
                 };
                 
                 if(npt) {
@@ -387,8 +403,11 @@ class OverDrive{
                     console.log("Calling populatetreerecurse from populatetreerecurse");
                     //console.log(this);
                     console.log(childlist[i]);
+                    that.numcalls++;
                     that.populateTreeRecurse(childlist[i], childnode);
                 }
+                that.numrequests--;
+                that.triggerDisplayTree();
                 
                         /*}
                         // The npt is no longer valid.  Flag for the end
@@ -411,8 +430,8 @@ class OverDrive{
             };
             
             xhr.send();
+            that.numrequests++;
         });
-        
         
 		/*var request = this.gapi.client.drive.children.list({
 			'folderId': fid
@@ -426,6 +445,10 @@ class OverDrive{
 			} 
 		}); */
 	}
+    
+    this.numcalls--;
+    this.triggerDisplayTree();
+    console.log("returning from populatetreerecurse: " + name);
 	
   }
   
@@ -495,14 +518,18 @@ class OverDrive{
                     }
                     for(var j = 0; j < filelist2.length; j++) {
                         console.log("Calling populatetreerecurse");
+                        that.numcalls++;
                         that.populateTreeRecurse(filelist2[j], that.tree._root);
                     }
+                    that.numrequests--;
+                    that.triggerDisplayTree();
                 };
                 xhr2.onerror = function() {
                     console.log("chain list returned with error");
                     console.log(xhr2.error);
                 };
                 xhr2.send();
+                that.numrequests++;
                 //console.log("xhr2 was sent: " + xhr2.readyState);
             }
             
@@ -515,9 +542,12 @@ class OverDrive{
             for(var i = 0; i < filelist.length; i++) {
                 console.log("Calling populatetreerecurse");
                 //console.log(that);
+                that.numcalls++;
                 that.populateTreeRecurse(filelist[i], that.tree._root);
             }
             //var i = 0;
+            that.numrequests--;
+            that.triggerDisplayTree();
             
             //console.log("npt: " + npt);
             
@@ -564,6 +594,8 @@ class OverDrive{
         };
         
         xhr.send();
+        that.numrequests++;
+        //that.startedtopopulate = true;
     });
 				/*
 					request = this.gapi.client.drive.files.list({
@@ -591,6 +623,7 @@ class OverDrive{
 	/*for(i = 0; i < tree.root.length; i++) {
 		displayTreeRecurse(tree.root[i]);
 	}*/
+    console.log("displaytree");
   }
   
   displayTreeRecurse(node) {
