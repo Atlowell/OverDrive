@@ -321,52 +321,79 @@ class OverDrive{
             xhr.onload = function() {
                 var childlist = response.items;
 				var npt = response.nextPageToken;
-                var readyflag = false;
-                var endflag = true;
-                if(npt) {
-                    endflag = false;
-                    readyflag = true;
-                }
-                var i = 0;
+                console.log("original child list length: " + childlist.length);
+                //var readyflag = false;
+                //var endflag = true;
+                //if(npt) {
+                //    endflag = false;
+                //    readyflag = true;
+                //}
+                //var i = 0;
                 
                 // While there are more pages of results
-                while((!endflag) || (i < filelist.length)) {
-                    
+                //while((!endflag) || (i < filelist.length)) {
                     // If the process has obtained the next npt and is ready to continue
-                    if(readyflag) {
-                        readyflag = false;
+                    //if(readyflag) {
+                        //readyflag = false;
                         // If the next npt is still valid
+                        //if(npt) {
+                        //identityAuth(function(tok) {
+                function getnpt() {
+                    var xhr2 = new XMLHttpRequest();
+                    xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
+                    xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
+                    xhr2.setRequestHeader('pageToken', npt);
+                    xhr2.responseType = "json";
+                    xhr2.onload = function() {
+                        // Update npt and filelist, mark ready for next request
+                        console.log("got child from npt token - chain child succeeded");
+                        npt = xhr2.response.nextPageToken;
+                        var childlist2 = xhr2.response.items;
+                        console.log("new child list: " + childlist2.length);
+                        
                         if(npt) {
-                            identityAuth(function(tok) {
-                                var xhr2 = new XMLHttpRequest();
-                                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
-                                xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
-                                xhr2.setRequestHeader('pageToken', npt);
-                                xhr2.responseType = "json";
-                                xhr2.onload = function() {
-                                    // Update npt and filelist, mark ready for next request
-                                    npt = xhr2.response.nextPageToken;
-                                    childlist.concat(xhr2.response.items);
-                                    readyflag = 1;
-                                };
-                                xhr2.onerror = function() {
-                                    console.log(xhr2.error);
-                                };
-                                xhr2.send();
-                            });
+                            console.log("next child npt");
+                            getnpt();
                         }
+                        else {
+                            //endflag = true;
+                            console.log("no more child npts");
+                        }
+                        for(var j = 0; j < childlist2.length; j++) {
+                            console.log("Calling populatetreerecurse");
+                        }
+                    //readyflag = 1;
+                    };
+                    xhr2.onerror = function() {
+                        console.log("Chain child failed");
+                        console.log(xhr2.error);
+                    };
+                    xhr2.send();
+                };
+                
+                if(npt) {
+                    //endflag = false;
+                    //readyflag = true;
+                    console.log("Initial child npt");
+                    getnpt();
+                }
+                for(var i = 0; i < childlist.length; i++) {
+                    console.log("Calling populatetreerecurse");
+                }
+                
+                        /*}
                         // The npt is no longer valid.  Flag for the end
                         else {
                             endflag = true;
                         }
-                    }
+                    }*/
  
                     // If there are children left that haven't been inserted, call populateTreeRecurse on them
-                    if(i < childlist.length) {
+                    /*if(i < childlist.length) {
                         populateTreeRecurse(childlist[i], childnode);
                         i++;
-                    }
-                }
+                    }*/
+                //}
             };
             
             // On Error
@@ -424,12 +451,12 @@ class OverDrive{
             //console.log("Successful get of files");
             
             var filelist = xhr.response.items;
-            console.log(xhr.response.items);
-            console.log("original file list: " + xhr.response.items.length);
+            //console.log(xhr.response.items);
+            console.log("original file list: " + filelist.length);
             var npt = xhr.response.nextPageToken;
             //console.log("npt: " + npt);
             //var readyflag = false;
-            var endflag = true;
+            //var endflag = true;
             
             function getnpt() {
                 var xhr2 = new XMLHttpRequest();
@@ -439,24 +466,27 @@ class OverDrive{
                 xhr2.setRequestHeader('maxResults', 460);
                 xhr2.responseType = "json";
                 xhr2.onload = function() {
-                    console.log("Got list from npt token- xhr2 succeeded");
+                    console.log("Got list from npt token- chain list succeeded");
                     // Update npt and filelist, mark ready for next request
                     npt = xhr2.response.nextPageToken;
-                    console.log("npt: " + npt);
-                    filelist.concat(xhr2.response.items);
-                    console.log("new file list: " + xhr2.response.items.length);
+                    //console.log("list npt: " + npt);
+                    var filelist2 = xhr2.response.items;
+                    console.log("new file list: " + filelist2.length);
                     //readyflag = true;
                     if(npt) {
-                        console.log("next npt");
+                        console.log("next list npt");
                         getnpt();
                     }
                     else {
-                        endflag = true;
-                        console.log("no more npts");
+                        //endflag = true;
+                        console.log("no more list npts");
+                    }
+                    for(var j = 0; j < filelist2.length; j++) {
+                        console.log("Calling populatetreerecurse");
                     }
                 };
                 xhr2.onerror = function() {
-                    console.log("xhr2 returned with error");
+                    console.log("chain list returned with error");
                     console.log(xhr2.error);
                 };
                 xhr2.send();
@@ -464,12 +494,15 @@ class OverDrive{
             }
             
             if(npt) {
-                endflag = false;
+                //endflag = false;
                 //readyflag = true;
-                console.log("Initial npt token");
+                console.log("Initial list npt");
                 getnpt();
             }
-            var i = 0;
+            for(var i = 0; i < filelist.length; i++) {
+                console.log("Calling populatetreerecurse");
+            }
+            //var i = 0;
             
             //console.log("npt: " + npt);
             
@@ -495,7 +528,7 @@ class OverDrive{
                         endflag = true;
                     }
                 }*/
-            while(!endflag) {    
+            /*while(!endflag) {    
                 // If there are files left that haven't been inserted, call populateTreeRecurse on them
                 if(i < filelist.length) {
                     console.log("Calling populatetreerecurse");
@@ -504,9 +537,9 @@ class OverDrive{
                     i++;
                 }
                 setTimeout(function() {}, 1000);
-            }
+            }*/
             //}
-            console.log("Finished top-level populate tree recursion");
+            //console.log("Finished top-level populate tree recursion");
             
         };
         
