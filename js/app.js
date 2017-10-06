@@ -32,11 +32,11 @@ class Node{
 // for dealing with any initial file structure
 class TreeRoot{
   constructor(nodes) {
-    console.log("This is fucking proof I defined tree");
     this._root = new Node(new File(null, null, null), null, []);
     for (var i = 0; i < nodes.length; i++) {
     	this.insert(nodes[i], this._root)
     }
+    this.isvalid = "its the right one!";
   }
 
   // Recursive depth-first traversal. callback is intended as a function paremeter
@@ -89,7 +89,7 @@ class OverDrive{
   constructor(gapi) {
 	this.gapi = gapi;
 	this.tree = new TreeRoot([]);
-    console.log(this.tree);
+    //console.log(this.tree);
 	this.populateTree(); // ASYNC!
     this.displayTree();
 	this.setUpEventListeners();
@@ -296,6 +296,7 @@ class OverDrive{
 
   // NOTE: This function is asynchronous.  See populateTree() below for reasoning
   populateTreeRecurse(file, parent) {
+    var that = this;
 	var fid = file.id;
 	var name = file.title;
 	var folder = false;
@@ -307,10 +308,12 @@ class OverDrive{
     // create and insert node into tree
 	var child = new File(fid, name, folder);
 	var childnode = new Node(child, null, []);
+    //console.log("tree = " + this.tree.isvalid);
 	this.tree.insert(childnode, parent);
     
     // If it is a folder, deal with its children as well
 	if (folder) {
+        console.log("is a folder");
         identityAuth(function(t) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
@@ -319,8 +322,8 @@ class OverDrive{
             
             // On Success
             xhr.onload = function() {
-                var childlist = response.items;
-				var npt = response.nextPageToken;
+                var childlist = xhr.response.items;
+				var npt = xhr.response.nextPageToken;
                 console.log("original child list length: " + childlist.length);
                 //var readyflag = false;
                 //var endflag = true;
@@ -340,7 +343,7 @@ class OverDrive{
                         //identityAuth(function(tok) {
                 function getnpt() {
                     var xhr2 = new XMLHttpRequest();
-                    xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children");
+                    xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children" + "?pageToken=" + encodeURIComponent(npt));
                     xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
                     xhr2.setRequestHeader('pageToken', npt);
                     xhr2.responseType = "json";
@@ -360,7 +363,8 @@ class OverDrive{
                             console.log("no more child npts");
                         }
                         for(var j = 0; j < childlist2.length; j++) {
-                            console.log("Calling populatetreerecurse");
+                            console.log("Calling populatetreerecurse from populatetreerecurse");
+                            that.populateTreeRecurse(childlist2[j], childnode);
                         }
                     //readyflag = 1;
                     };
@@ -378,7 +382,9 @@ class OverDrive{
                     getnpt();
                 }
                 for(var i = 0; i < childlist.length; i++) {
-                    console.log("Calling populatetreerecurse");
+                    console.log("Calling populatetreerecurse from populatetreerecurse");
+                    //console.log(this);
+                    that.populateTreeRecurse(childlist[i], childnode);
                 }
                 
                         /*}
@@ -433,23 +439,25 @@ class OverDrive{
 				console.log("Error with file list execution");
 			}
 			else { */
-    var that = this; // I can't believe this is necessary, Javascript is actually stupid as hell
+    var that = this;
+    //console.log(this);
     identityAuth(function(token) {
         //Search term to get all top-level files
-        var q = "name contains 'DMK' or name contains 'Delta Mu Kappa') and 'root' in parents and trashed=false";
-        var q2 = "name contains 'shgdfh'";
+        var q = "'root' in parents and trashed=false";
+        //var q2 = "name contains 'shgdfh'";
+        //var q3 = "invalid search 5435";
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', "https://www.googleapis.com/drive/v2/files");
+        xhr.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q));
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-        xhr.setRequestHeader('q', q2);
-        xhr.setRequestHeader('maxResults', 460);
+        //xhr.setRequestHeader('q', q3);
+        //xhr.setRequestHeader('maxResults', 460);
         xhr.responseType = "json";
         
         
         // On success
         xhr.onload = function() {
             //console.log("Successful get of files");
-            
+            //console.log(xhr.response);
             var filelist = xhr.response.items;
             //console.log(xhr.response.items);
             console.log("original file list: " + filelist.length);
@@ -460,13 +468,14 @@ class OverDrive{
             
             function getnpt() {
                 var xhr2 = new XMLHttpRequest();
-                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files");
+                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + q);
                 xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
-                xhr2.setRequestHeader('pageToken', npt);
-                xhr2.setRequestHeader('maxResults', 460);
+                //xhr2.setRequestHeader('pageToken', npt);
+                //xhr2.setRequestHeader('maxResults', 460);
                 xhr2.responseType = "json";
                 xhr2.onload = function() {
                     console.log("Got list from npt token- chain list succeeded");
+                    //console.log(xhr2.response);
                     // Update npt and filelist, mark ready for next request
                     npt = xhr2.response.nextPageToken;
                     //console.log("list npt: " + npt);
@@ -483,6 +492,7 @@ class OverDrive{
                     }
                     for(var j = 0; j < filelist2.length; j++) {
                         console.log("Calling populatetreerecurse");
+                        that.populateTreeRecurse(filelist2[j], that.tree._root);
                     }
                 };
                 xhr2.onerror = function() {
@@ -490,7 +500,7 @@ class OverDrive{
                     console.log(xhr2.error);
                 };
                 xhr2.send();
-                console.log("xhr2 was sent: " + xhr2.readyState);
+                //console.log("xhr2 was sent: " + xhr2.readyState);
             }
             
             if(npt) {
@@ -501,6 +511,8 @@ class OverDrive{
             }
             for(var i = 0; i < filelist.length; i++) {
                 console.log("Calling populatetreerecurse");
+                //console.log(that);
+                that.populateTreeRecurse(filelist[i], that.tree._root);
             }
             //var i = 0;
             
