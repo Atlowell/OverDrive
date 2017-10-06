@@ -31,13 +31,15 @@ function clientInitAuth() {
     });
 }
 
-function identityAuth() {
+function identityAuth(callback) {
     chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
         if(chrome.runtime.lastError) {
             console.log(chrome.runtime.lastError);
         }
         else {
             console.log("Token: " + token);
+            
+            callback(token);
             
             // Test code, not my own
             /*var x = new XMLHttpRequest();
@@ -47,22 +49,22 @@ function identityAuth() {
             };
             x.send(); */
             
-            
-            return token;
+            /*var xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/files/");
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            xhr.setRequestHeader('fileId', "1GDoJXHzDnPKo4IV1PBZDViLv3dDLCqf1IYN9yTYGhAk");
+            xhr.onload = function() {
+                console.log(xhr.response);
+            };
+            xhr.onerror = function() {
+                console.log(xhr.response);
+            };
+            xhr.send(); */
+             
         }
     });
 }
 
-tok = identityAuth();
-var xhr = new XMLHttpRequest();
-xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + "1GDoJXHzDnPKo4IV1PBZDViLv3dDLCqf1IYN9yTYGhAk");
-xhr.setRequestHeader('Authorization', 'Bearer ' + tok);
-xhr.onload = function() {
-    console.log(xhr.response);
-};
-xhr.onerror = function() {
-    console.log(xhr.response);
-}
-xhr.send();
+//identityAuth();
 //clientLoadAuth();
 //setupOverDrive();

@@ -292,22 +292,74 @@ class OverDrive{
 	  return permuserlist;
   }
   
+  
   populateTree() {
 	// Get list of top-level files from user
-	console.log(this.gapi);
+	//console.log(this.gapi);
 	//this.gapi.client.load('drive', 'v2', function() {
-		var q = "'root' in parents and trashed=false";
-		var request = this.gapi.client.drive.files.list({
+		/*var request = this.gapi.client.drive.files.list({
 			'q': query
 		});
-		request.execute(function(response) {
+		request.execute(function(response) { 
 			if(response.error) {
 				console.log("Error with file list execution");
 			}
-			else {
-				var filelist = response.items;
-				var npt = response.nextPageToken;
-				while(npt) {
+			else { */
+
+    identityAuth(function(token) {
+        //Search term to get all top-level files
+        var q = "'root' in parents and trashed=false";
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "https://www.googleapis.com/drive/v2/files", false);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.setRequestHeader('q', q);
+        xhr.responseType = "json";
+        
+        // On success
+        xhr.onload = function() {
+            console.log("Successful get of files");
+            var filelist = xhr.response.items;
+            var npt = xhr.response.nextPageToken;
+            console.log("npt: " + npt);
+            
+            // While there are more pages of results
+            while(npt) {
+                console.log("About to enter next identityAuth");
+                identityAuth(function(tok) {
+                    var xhr2 = new XMLHttpRequest();
+                    xhr2.open("https://www.googleapis.com/drive/v2/files", false);
+                    xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
+                    xhr2.setRequestHeader('pageToken', npt);
+                    xhr2.responseType = "json";
+                    xhr2.onload = function() {
+                        
+                        npt = xhr2.response.nextPageToken;
+                        filelist.concat(xhr2.response.items);
+                    };
+                    xhr2.onerror = function() {
+                        console.log(xhr2.error);
+                    };
+                    xhr2.send();
+                });
+                console.log("npt: " + npt);
+            }
+            
+            //For each file, call populateTreeRecurse
+            for(i = 0; i < filelist.length; i++) {
+				populateTreeRecurse(filelist[i], this.tree._root);
+			}
+            console.log("Finished populate tree recursion");
+            
+        };
+        
+        //On failure
+        xhr.onerror = function() {
+            console.log(xhr.error);
+        };
+        
+        xhr.send();
+    });
+				/*
 					request = this.gapi.client.drive.files.list({
 						'pageToken': npt
 					});
@@ -320,31 +372,74 @@ class OverDrive{
 							filelist.concat(response.items);
 						}
 					});
-				}
-				
-				for(i = 0; i < filelist.length; i++) {
-					populateTreeRecurse(filelist[i], this.tree._root);
-				}
-				
-				console.log(filelist);
 			}
 		});
-	//});
-	//For each file, call populateTreeRecurse
+	//}); */
   }
   
   populateTreeRecurse(file, parent) {
-	fid = file.id;
-	name = file.title;
-	folder = false;
+	var fid = file.id;
+	var name = file.title;
+	var folder = false;
+    // Check if the file is a folder
 	if(file.mimeType == "application/vnd.google-apps.folder") {
 		folder = true;
 	}
-	child = new File(fid, name, folder);
-	childnode = new Node(child, null, []);
+    
+    // create and insert node into tree
+	var child = new File(fid, name, folder);
+	var childnode = new Node(child, null, []);
 	this.tree.insert(childnode, parent);
+    
+    // If it is a folder, deal with its children as well
 	if (folder) {
-		var request = this.gapi.client.drive.children.list({
+        identityAuth(function(t) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children", false);
+            xhr.setRequestHeader('Authorization', 'Bearer ' + t);
+            xhr.responseType = "json";
+            
+            // On Success
+            xhr.onload = function() {
+                var childlist = response.items;
+				var npt = response.nextPageToken;
+                
+                // While there are more pages of results
+                while(npt) {
+                    identityAuth(function(tok) {
+                        var xhr2 = new XMLHttpRequest();
+                        xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + fid + "/children", false);
+                        xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
+                        xhr2.setRequestHeader('pageToken', npt);
+                        xhr2.responseType = "json";
+                        xhr2.onload = function() {
+                            npt = xhr2.response.nextPageToken;
+                            childlist.concat(xhr2.response.items);
+                        };
+                        xhr2.onerror = function() {
+                            console.log(xhr2.error);
+                        };
+                        xhr2.send();
+                    });
+                }
+                
+                // Recursively populate children
+                for(i = 0; i < childlist.length; i++ ) {
+					populateTreeRecurse(childlist[i], childnode);
+				}
+                
+            };
+            
+            // On Error
+            xhr.onerror = function() {
+                console.log(xhr.error);
+            };
+            
+            xhr.send();
+        });
+        
+        
+		/*var request = this.gapi.client.drive.children.list({
 			'folderId': fid
 		});
 		request.execute(function(response){
@@ -352,28 +447,9 @@ class OverDrive{
 				console.log("Error with child list execution");
 			}
 			else {
-				childlist = response.items;
-				npt = response.nextPageToken;
-				while(npt) {
-					request = this.gapi.client.drive.children.list({
-						'folderId': fid,
-						'pageToken': npt
-					});
-					request.execute(function(response) {
-						if(response.error) {
-							console.log("Error with extended child list execution");
-						}
-						else {
-							childlist.concat(response.items);
-							npt = response.nextPageToken;
-						}
-					});
-				}
-				for(i = 0; i < childlist.length; i++ ) {
-					populateTreeRecurse(childlist[i], childnode);
-				}
-			}
-		});
+				
+			} 
+		}); */
 	}
 	
   }
