@@ -1001,6 +1001,18 @@ function removeUserFromFolder(userID, fileID, sheet) {
   }
 };
 
+function newOwner() {
+  createOwner(userID, fileID, sheet);
+}
+
+function createOwner(userID, fileID, sheet){
+  var root = DriveApp.getFolderById(fileId);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var file = DriveApp.getFileByID(fileID);
+  root.setOwner(userID)
+}
+
 function addOwners(users, file) {
 }
 
