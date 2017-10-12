@@ -102,6 +102,8 @@ class OverDrive{
     if((this.numrequests == 0) && (this.numcalls == 0)) {
         this.displayTree();
         this.setUpEventListeners();
+        console.log(this.tree._root.children[0].file);
+        this.tree._root.children[0].file.checked = true;
     }
   }
   
@@ -126,10 +128,11 @@ class OverDrive{
     const role = this.getRoleFromUI();
 	  var filelist = [];
     this.tree.DFtraversal(function(node) {
-		if(node.checked) {
-			filelist.push(node.fid);
+		if(node.file.checked) {
+			filelist.push(node.file.fid);
 		}
 	});
+    console.log(filelist);
 	
 	var newrole = role;
 	var com = false;
@@ -146,22 +149,37 @@ class OverDrive{
 		body.additonalRoles = ["commenter"];
 	}
 	console.log(body);
-	
-	for(i = 0; i < filelist.length; i++) {
-		for(j = 0; j < user.length; j++) {
-			body.value = user[j];
-			var request = this.gapi.client.drive.permissions.insert({
-				'fid': filelist[i],
-				'resource': body,
-				'sendNotificationEmails': false
-			});
-			request.execute(function(reponse) {
-				if(response.error) {
-					console.log("Error with inserting permission");
-				}
-			});
-		}
-	}
+    
+	identityAuth(function(token) { 
+        for(var i = 0; i < filelist.length; i++) {
+            for(var j = 0; j < users.length; j++) {
+                //body.value = users[j];
+                body.value = users[j];
+                //console.log(users[j]);
+                /*var request = this.gapi.client.drive.permissions.insert({
+                    'fid': filelist[i],
+                    'resource': body,
+                    'sendNotificationEmails': false
+                });
+                request.execute(function(reponse) {
+                    if(response.error) {
+                        console.log("Error with inserting permission");
+                    }
+                });*/
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filelist[i]) + "/permissions"); //+ "?sendNotificationEmails=false");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.onload = function() {
+                    console.log(xhr.response);
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                xhr.send(JSON.stringify(body));
+                console.log("sent request");
+            }
+        }
+    });
     //call addToFile for given files, users, role
   }
 
@@ -657,6 +675,18 @@ function listFiles(){
   var root = DriveApp.getFolderById(folderId);
   var sheet = SpreadsheetApp.getActiveSheet();
   sheet.clear();
+  var files = root.getFiles();
+  while (files.hasNext()) {
+      var childFile = files.next();
+       data = [ 
+       root.getName() + "/" + childFile.getName()
+       ];
+      sheet.appendRow(data);
+      count = count + 1;
+    }   
+  
+  
+  
   getChildFiles(root.getName(), root, sheet);
   sheet.appendRow([count.toString()]);
 };
@@ -732,24 +762,220 @@ function getChildFolders(parentName, parent, sheet) {
   }
 };
 
-
-
-
-function addUserToFile(userID, fileID, sheet) {
-  var root = DriveApp.getFolderById(fileId);
+function addUserFile() {
   var sheet = SpreadsheetApp.getActiveSheet();
   sheet.clear();
-  var file = DriveApp.getFileByID(fileID);
-  file.addViewer(fileID);
+  if (email == '') { 
+     data = [ 
+       "Error: No User Given"
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  if (fileID == '') { 
+     data = [ 
+       "Error: No File Given"
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  addUserToFile(email,fileID,sheet);
+}
+function addUserToFile(userID, fileID, sheet) { 
+  var file = DriveApp.getFileById(fileID);
+  data = [ 
+      file.getOwner()
+      ];
+    sheet.appendRow(data);
+   if (file.getOwner() == userID) {
+    
+    data = [ 
+      userID + " already in file :" + fileID
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  
+  var editors = file.getEditors();
+  for (var i = 0; i < editors.length; i++) {
+     data = [ 
+      (editors[i].getEmail())
+      ];
+      sheet.appendRow(data);
+    if ((editors[i].getEmail()) == userID) {
+      data = [ 
+      userID + " already in file :" + fileID
+      ];
+      sheet.appendRow(data);
+      return;
+    }
+  }
+  
+ 
+  
+   var viewers = file.getViewers();
+  for (var i = 0; i < viewers.length; i++) {
+     data = [ 
+      (viewers[i].getEmail())
+      ];
+      sheet.appendRow(data);
+    if ((viewers[i].getEmail()) == userID) {
+      data = [ 
+      userID + " already in file :" + fileID
+      ];
+      sheet.appendRow(data);
+      return;
+    }
+  }
+  
+  file.addViewer(userID);
+   data = [ 
+     userID + " added to file :" + fileID
+    ];
+    sheet.appendRow(data);
  
 };
+
+function addUserFolder() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  if (email == '') { 
+     data = [ 
+       "Error: No User Given"
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  if (fileID == '') { 
+     data = [ 
+       "Error: No File Given"
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  addUserToFolder(email,fileID,sheet);
+}
+
+
 function addUserToFolder(userID, fileID, sheet) {
+  var root = DriveApp.getFolderById(fileID);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var folder = DriveApp.getFolderByID(fileID);
+  folder.addViewer(UserID);
+ 
+  var files = childFolder.getFiles();
+    count = count + 1;
+    while (files.hasNext()) {
+      var file = files.next();
+      addUserToFile(userID,file,sheet);
+      count = count + 1;
+      data = [ 
+        "Added user to : " + file
+      ];
+      sheet.appendRow(data);
+    }  
+  
+  var childFolders = root.getFolders();
+  while (childFolders.hasNext()) {
+    var childFolder = childFolders.next();
+    var files = childFolder.getFiles();
+    count = count + 1;
+    while (files.hasNext()) {
+      var childFile = files.next();
+      addUserToFile(userID,childFolder,sheet);
+    }   
+    addUsersToFolder(userID, childFolder, sheet);  
+  }
+};
+
+function removeUserFile() {
+    var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  if (email == '') { 
+     data = [ 
+       "Error: No User Given"
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  if (fileID == '') { 
+     data = [ 
+       "Error: No File Given"
+      ];
+      sheet.appendRow(data);
+      return;
+  }
+  removeUserFromFile(email,fileID,sheet);
+}
+
+
+function removeUserFromFile(userID, fileID, sheet) {
+  var file = DriveApp.getFileById(fileID);
+  
+  var file = DriveApp.getFileById(fileID);
+  data = [ 
+      file.getOwner()
+      ];
+    sheet.appendRow(data);
+   if (file.getOwner() == userID) {
+    
+    file.removeViewer(userID);
+   data = [ 
+     userID + " removed from file :" + fileID
+    ];
+    sheet.appendRow(data);
+      return;
+  }
+  
+  var editors = file.getEditors();
+  for (var i = 0; i < editors.length; i++) {
+     data = [ 
+      (editors[i].getEmail())
+      ];
+      sheet.appendRow(data);
+    if ((editors[i].getEmail()) == userID) {
+      file.removeViewer(userID);
+   data = [ 
+     userID + " removed from file :" + fileID
+    ];
+    sheet.appendRow(data);
+      return;
+    }
+  }
+  
+ 
+  
+   var viewers = file.getViewers();
+  for (var i = 0; i < viewers.length; i++) {
+     data = [ 
+      (viewers[i].getEmail())
+      ];
+      sheet.appendRow(data);
+    if ((viewers[i].getEmail()) == userID) {
+      file.removeViewer(userID);
+   data = [ 
+     userID + " removed from file :" + fileID
+    ];
+    sheet.appendRow(data);
+      return;
+    }
+  }
+  
+  
+ 
+   data = [ 
+     userID + " not in file :" + fileID
+    ];
+    sheet.appendRow(data);
+ 
+};
+function removeUserFromFolder(userID, fileID, sheet) {
   var root = DriveApp.getFolderById(fileId);
   var sheet = SpreadsheetApp.getActiveSheet();
   sheet.clear();
   var file = DriveApp.getFileByID(fileID);
-  file.addViewer(fileID);
- 
+  file.removeViewer(fileID);
   
   var childFolders = root.getFolders();
   while (childFolders.hasNext()) {
@@ -760,10 +986,9 @@ function addUserToFolder(userID, fileID, sheet) {
       var childFile = files.next();
       childFile.addViewer(userID)
     }   
-    addUsersToFolder(userID, childFolder, sheet);  
+    removeUserFromFolder(userID, childFolder, sheet);  
   }
 };
-
 
 function removeUserFromFile(userID, fileID, sheet) {
   var root = DriveApp.getFolderById(fileId);
@@ -792,6 +1017,18 @@ function removeUserFromFolder(userID, fileID, sheet) {
     removeUserFromFolder(userID, childFolder, sheet);  
   }
 };
+
+function newOwner() {
+  createOwner(userID, fileID, sheet);
+}
+
+function createOwner(userID, fileID, sheet){
+  var root = DriveApp.getFolderById(fileId);
+  var sheet = SpreadsheetApp.getActiveSheet();
+  sheet.clear();
+  var file = DriveApp.getFileByID(fileID);
+  root.setOwner(userID)
+}
 
 function addOwners(users, file) {
 }
