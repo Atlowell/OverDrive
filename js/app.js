@@ -32,7 +32,7 @@ class TreeRoot{
   constructor(nodes) {
     this._root = new Node(new File(), null, []);
     for (var i = 0; i < nodes.length; i++) {
-    	this.insert(nodes[i], this._root.file.id)
+    	this.insert(nodes[i], this._root)
     }
     this.isvalid = "its the right one!";
   }
@@ -62,7 +62,7 @@ class TreeRoot{
     var callback = function(node) {
     //console.log(node)
      // console.log("node:" + node.file.fid + ", parent:" + parentid)
-      if (node.file.fid === parentid) {
+      if (node.file.fid === parentid.file.id) {
         cur_parent = node;
         //console.log("node:" + node.file.fid + ", parent:" + parentid)
       }
@@ -78,33 +78,6 @@ class TreeRoot{
     } else {
        throw new Error('Cannot add node to a non-existent parent.');
     }
-  }
-
-  displayTree() {
-  
-  fileBrowserUI = '';
-  //fileBrowserUI += '<ul>';
-  
-  //recursive function to create the nested unordered list in the html variable
-  (function recursive(currNode) {
-        
-        if (currNode.file.fid) {
-        	fileBrowserUI += '<li>' + currNode.file.fid;		
-        }
-        if (currNode.children.length != 0) {
-        	fileBrowserUI += '<ul>'
-        }
-        for (var i = 0; i < currNode.children.length; i++) {
-          recursive(currNode.children[i]);
-          fileBrowserUI += '</li>'
-        }
-        if (currNode.children.length != 0) {
-        	fileBrowserUI += '</ul>'
-        }
-        
-    })(this._root); //passing to recursive as initial parameter the _root node
-    
-    //this.fileBrowserUI += '</ul>'
   }
 };
 
@@ -151,7 +124,7 @@ class OverDrive{
     e.preventDefault();
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
-	var filelist = [];
+	  var filelist = [];
     this.tree.DFtraversal(function(node) {
 		if(node.checked) {
 			filelist.push(node.fid);
@@ -644,11 +617,29 @@ class OverDrive{
 
   
   displayTree() {
-    //Clear current tree UI
-    //For each toplevel file in tree, call displayTreeRecurse
-	/*for(i = 0; i < tree.root.length; i++) {
-		displayTreeRecurse(tree.root[i]);
-	}*/
+    console.log(this.tree)
+    fileBrowserUI = '';
+  //fileBrowserUI += '<ul>';
+  
+  //recursive function to create the nested unordered list in the html variable
+  (function recursive(currNode) {
+        
+        if (currNode.file.fid) {
+        	fileBrowserUI += '<li>' + currNode.file.fid;		
+        }
+        if (currNode.children.length != 0) {
+        	fileBrowserUI += '<ul>'
+        }
+        for (var i = 0; i < currNode.children.length; i++) {
+          recursive(currNode.children[i]);
+          fileBrowserUI += '</li>'
+        }
+        if (currNode.children.length != 0) {
+        	fileBrowserUI += '</ul>'
+        }
+        
+    })(this.tree); //passing to recursive as initial parameter the _root node
+  
     console.log("displaytree");
   }
   
@@ -810,13 +801,11 @@ function removeOwners(users, file) {
 
 // variable to contain the HTML for the file broswer UI
 var fileBrowserUI = '';
-tr.displayTree();
-document.getElementById('file-browser').innerHTML = fileBrowserUI;
-
-$('#file-browser').jstree();
-
 var overDrive;
 
 function setupOverDrive() {
 	overDrive = new OverDrive(gapi);
 }
+
+document.getElementById('file-browser').innerHTML = fileBrowserUI;
+$('#file-browser').jstree();
