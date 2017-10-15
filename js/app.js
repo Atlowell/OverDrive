@@ -132,13 +132,11 @@ class OverDrive{
     const actionsForm = document.querySelector('form#actions');
     const addUsersBtn = actionsForm.querySelector('.add-users');
     const removeUsersBtn = actionsForm.querySelector('.remove-users');
-    const addOwnersBtn = actionsForm.querySelector('.add-owners');
-    const removeOwnersBtn = actionsForm.querySelector('.remove-owners');
+    const changeOwnerBtn = actionsForm.querySelector('.change-owner');
     const changePermBtn = actionsForm.querySelector('.change-permissions');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
-    addOwnersBtn.addEventListener('click', (e) => this.handleAddOwners(e));
-    removeOwnersBtn.addEventListener('click', (e) => this.handleRemoveOwners(e));
+    changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
   }
   
@@ -210,18 +208,11 @@ class OverDrive{
     //call removeFromFile for given files and users
   }
 
-  handleAddOwners(e) {
+  handleChangeOwner(e) {
     e.preventDefault();
     const users = this.parseUsers();
     //get checked file(s) from tree
-    //call addOwners for given files and users
-  }
-
-  handleRemoveOwners(e) {
-    e.preventDefault();
-    const users = this.parseUsers();
-    //get checked file(s) from tree
-    //call removeOwners for given files and users
+    //call createOwner for given files and users
   }
 
   handleChangePermissions(e) {
@@ -1059,12 +1050,6 @@ function createOwner(userID, fileID, sheet){
   sheet.clear();
   var file = DriveApp.getFileByID(fileID);
   root.setOwner(userID)
-}
-
-function addOwners(users, file) {
-}
-
-function removeOwners(users, file) {
 }
 
 // variable to contain the HTML for the file broswer UI
