@@ -55,10 +55,13 @@ class TreeRoot{
   
   // Insert a file as a child to a parent node
   // both file and parent are taken in assuming they're node objects
-  insert(file, parentid) {
+  insert(childnode, parentnode) {
     
+	childnode.parent = parentnode;
+	parentnode.children.push(childnode);
     //declaring necessary variables/functions
-    var cur_parent = null
+	//console.log("inserted " + file.name, + ", parent: " + );
+    /*var cur_parent = null
     var callback = function(node) {
     //console.log(node)
      // console.log("node:" + node.file.fid + ", parent:" + parentid)
@@ -77,7 +80,24 @@ class TreeRoot{
       cur_parent.children.push(file);
     } else {
        throw new Error('Cannot add node to a non-existent parent.');
-    }
+    }*/
+  }
+  
+  printTree(node, cnt) {
+	//console.log("node = " + node);
+	if(node == this._root) {
+		console.log("Printing tree:")
+	}
+	else {
+		var str = "";
+		for(var i = 0; i < cnt; i++) {
+			str = str + " ";
+		}
+		console.log(str + node.file.name);
+	}
+	for(var i = 0; i < node.children.length; i++) {
+		this.printTree(node.children[i], cnt+1);
+	}
   }
 };
 
@@ -88,8 +108,8 @@ class OverDrive{
   constructor(gapi) {
 	this.gapi = gapi;
 	this.tree = new TreeRoot([]);
-    this.numrequests = 0;
-    this.numcalls = 0;
+	this.numrequests = 0;
+	this.numcalls = 0;
     //this.startedtopopulate = false;
     //this.lockrequests = false;
     //this.lockitems = false;
@@ -98,7 +118,7 @@ class OverDrive{
   }
   
   triggerDisplayTree() {
-    console.log("numrequests: " + this.numrequests + ", numcalls: " + this.numcalls);
+    //console.log("numrequests: " + this.numrequests + ", numcalls: " + this.numcalls);
     if((this.numrequests == 0) && (this.numcalls == 0)) {
         this.displayTree();
         this.setUpEventListeners();
@@ -328,7 +348,7 @@ class OverDrive{
     var that = this;
 	var fid = file.id;
 	var name = file.title;
-    console.log("Adding file " + name);
+    //console.log("Adding file " + name);
 	var folder = false;
     // Check if the file is a folder
 	if(file.mimeType == "application/vnd.google-apps.folder") {
@@ -337,13 +357,13 @@ class OverDrive{
     
     // create and insert node into tree
 	var child = new File(fid, name, folder);
-	var childnode = new Node(child, null, []);
+	var childnode = new Node(child, undefined, []);
     //console.log("tree = " + this.tree.isvalid);
 	this.tree.insert(childnode, parent);
     
     // If it is a folder, deal with its children as well
 	if (folder) {
-        console.log("is a folder");
+        //console.log("is a folder");
         identityAuth(function(t) {
             var q = "'" + fid + "' in parents and trashed=false";
             var xhr = new XMLHttpRequest();
@@ -394,7 +414,7 @@ class OverDrive{
                             console.log("no more child npts");
                         }
                         for(var j = 0; j < childlist2.length; j++) {
-                            console.log("Calling populatetreerecurse from populatetreerecurse");
+                            //console.log("Calling populatetreerecurse from populatetreerecurse");
                             that.numcalls++;
                             that.populateTreeRecurse(childlist2[j], childnode);
                         }
@@ -417,9 +437,9 @@ class OverDrive{
                     getnpt();
                 }
                 for(var i = 0; i < childlist.length; i++) {
-                    console.log("Calling populatetreerecurse from populatetreerecurse");
+                    //console.log("Calling populatetreerecurse from populatetreerecurse");
                     //console.log(this);
-                    console.log(childlist[i]);
+                    //console.log(childlist[i]);
                     that.numcalls++;
                     that.populateTreeRecurse(childlist[i], childnode);
                 }
@@ -448,6 +468,10 @@ class OverDrive{
             
             xhr.send();
             that.numrequests++;
+			//console.log("numcalls should be decreased here");
+			that.numcalls--;
+			//Don't need to trigger display tree because it won't be valid
+			//this.triggerDisplayTree();
         });
         
 		/*var request = this.gapi.client.drive.children.list({
@@ -461,11 +485,14 @@ class OverDrive{
 				
 			} 
 		}); */
+		
 	}
-    
-    this.numcalls--;
-    this.triggerDisplayTree();
-    console.log("returning from populatetreerecurse: " + name);
+	else {
+		//console.log("numcalls should be decreased here");
+		this.numcalls--;
+		this.triggerDisplayTree();
+	}
+    //console.log("returning from populatetreerecurse: " + name);
 	
   }
   
@@ -534,7 +561,7 @@ class OverDrive{
                         console.log("no more list npts");
                     }
                     for(var j = 0; j < filelist2.length; j++) {
-                        console.log("Calling populatetreerecurse");
+                        //console.log("Calling populatetreerecurse");
                         that.numcalls++;
                         that.populateTreeRecurse(filelist2[j], that.tree._root);
                     }
@@ -557,9 +584,12 @@ class OverDrive{
                 getnpt();
             }
             for(var i = 0; i < filelist.length; i++) {
-                console.log("Calling populatetreerecurse");
+                //console.log("Calling populatetreerecurse");
                 //console.log(that);
+				//console.log("numcalls increase");
+				//console.log("numcalls before: " + that.numcalls);
                 that.numcalls++;
+				//console.log("numcalls after: " + that.numcalls);
                 that.populateTreeRecurse(filelist[i], that.tree._root);
             }
             //var i = 0;
@@ -635,7 +665,8 @@ class OverDrive{
 
   
   displayTree() {
-    console.log(this.tree)
+	console.log(this.tree._root.children);
+    this.tree.printTree(this.tree._root, 0);
     fileBrowserUI = '';
   //fileBrowserUI += '<ul>';
   
