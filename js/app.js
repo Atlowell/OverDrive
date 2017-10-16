@@ -122,8 +122,6 @@ class OverDrive{
     if((this.numrequests == 0) && (this.numcalls == 0)) {
         this.displayTree();
         this.setUpEventListeners();
-        console.log(this.tree._root.children[0].file);
-        this.tree._root.children[0].file.checked = true;
     }
   }
   
@@ -149,6 +147,12 @@ class OverDrive{
 		if(node.file.checked) {
 			filelist.push(node.file.fid);
 		}
+        if(node.file.name == "file1-2") {
+            filelist.push(node.file.fid);
+        }
+        /*if(node.file.name == "folder2") {
+            filelist.push(node.file.fid);
+        }*/
 	});
     console.log(filelist);
 	
@@ -159,14 +163,14 @@ class OverDrive{
 		newrole = "reader";
 	}
 	var body = {
-		'value': undefined,
-		'type': "user",
-		'role': newrole
+        'role': newrole,
+        'type': "user",
+		'value': undefined
 	}
 	if(com) {
-		body.additonalRoles = ["commenter"];
+		body.additionalRoles = ["commenter"];
 	}
-	console.log(body);
+	//console.log(body);
     
 	identityAuth(function(token) { 
         for(var i = 0; i < filelist.length; i++) {
@@ -185,8 +189,10 @@ class OverDrive{
                     }
                 });*/
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filelist[i]) + "/permissions"); //+ "?sendNotificationEmails=false");
+                //console.log("fid: " + encodeURIComponent(filelist[i]));
+                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filelist[i]) + "/permissions" + "?sendNotificationEmails=false", false);
                 xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
                 xhr.onload = function() {
                     console.log(xhr.response);
                 };
@@ -194,7 +200,9 @@ class OverDrive{
                     console.log(xhr.error);
                 };
                 xhr.send(JSON.stringify(body));
-                console.log("sent request");
+                //console.log(body);
+                //console.log(JSON.stringify(body));
+                //console.log("sent request");
             }
         }
     });
@@ -678,7 +686,7 @@ class OverDrive{
         	fileBrowserUI += '</ul>'
         }
         
-    })(this.tree); //passing to recursive as initial parameter the _root node
+    })(this.tree._root); //passing to recursive as initial parameter the _root node
   
     console.log("displaytree");
   }
