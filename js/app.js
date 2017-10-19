@@ -236,7 +236,21 @@ class OverDrive{
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
     //get checked file(s) from tree
-    //call addToFile for given files and users
+    //This is hard coded and needs to be changed
+    var filelist = [];
+    this.tree.DFtraversal(function(node) {
+		  if(node.file.checked) {
+			  filelist.push(node.file.fid);
+		  }
+      if(node.file.name == "file1-2") {
+        filelist.push(node.file.fid);
+      }
+      /*if(node.file.name == "folder2") {
+        filelist.push(node.file.fid);
+      }*/
+	  });
+    console.log(filelist);
+    //call changePermissions for given files and users
   }
 
   parseUsers() {
@@ -1025,8 +1039,8 @@ function removeUserFromFile(userID, fileID, sheet) {
   sheet.clear();
   var file = DriveApp.getFileByID(fileID);
   file.removeViewer(fileID);
- 
 };
+
 function removeUserFromFolder(userID, fileID, sheet) {
   var root = DriveApp.getFolderById(fileId);
   var sheet = SpreadsheetApp.getActiveSheet();
