@@ -39,8 +39,8 @@ class TreeRoot{
 
   // Recursive depth-first traversal. callback is intended as a function paremeter
   // calls callback with one parameter: the current node.
-   DFtraversal(callback) {
-     //declare and immediately call our recursive function on the current node
+  DFtraversal(callback) {
+    //declare and immediately call our recursive function on the current node
     (function recursive(currNode) {
 
         //iterate on its children and call our recursive function on them
@@ -64,16 +64,16 @@ class TreeRoot{
     /*var cur_parent = null
     var callback = function(node) {
     //console.log(node)
-     // console.log("node:" + node.file.fid + ", parent:" + parentid)
+    // console.log("node:" + node.file.fid + ", parent:" + parentid)
       if (node.file.fid === parentid.file.id) {
         cur_parent = node;
         //console.log("node:" + node.file.fid + ", parent:" + parentid)
       }
     };
- 
+
     //DF traversal to find the parent
     this.DFtraversal(callback);
- 
+
     //if parent was found, insert file into its children[]
     if (cur_parent) {
     	file.parent = cur_parent;
@@ -122,8 +122,8 @@ class OverDrive{
   triggerDisplayTree() {
     //console.log("numrequests: " + this.numrequests + ", numcalls: " + this.numcalls);
     if((this.numrequests == 0) && (this.numcalls == 0)) {
-        this.displayTree();
-        this.setUpEventListeners();
+      this.displayTree();
+      this.setUpEventListeners();
     }
   }
   
@@ -154,35 +154,34 @@ class OverDrive{
     const role = this.getRoleFromUI();
 	  var filelist = [];
     this.tree.DFtraversal(function(node) {
-		if(node.file.checked) {
-			filelist.push(node.file.fid);
-		}
-        if(node.file.name == "file1-2") {
-            filelist.push(node.file.fid);
-        }
-        /*if(node.file.name == "folder2") {
-            filelist.push(node.file.fid);
-        }*/
-	});
+		  if(node.file.checked) {
+			  filelist.push(node.file.fid);
+		  }
+      if(node.file.name == "file1-2") {
+        filelist.push(node.file.fid);
+      }
+      /*if(node.file.name == "folder2") {
+        filelist.push(node.file.fid);
+      }*/
+	  });
     console.log(filelist);
 	
-	var newrole = role;
-	var com = false;
-	if(newrole == "commenter") {
-		com = true;
-		newrole = "reader";
-	}
-	var body = {
-        'role': newrole,
-        'type': "user",
-		'value': undefined
-	}
-	if(com) {
-		body.additionalRoles = ["commenter"];
-	}
+	  var newrole = role;
+	  var com = false;
+	  if(newrole == "commenter") {
+		  com = true;
+		  newrole = "reader";
+	  }
+	  var body = {
+      'role': newrole,
+      'type': "user",
+		  'value': undefined
+	  }
+	  if(com) {
+		  body.additionalRoles = ["commenter"];
+    }
 	//console.log(body);
-    
-	identityAuth(function(token) { 
+    identityAuth(function(token) { 
         for(var i = 0; i < filelist.length; i++) {
             for(var j = 0; j < users.length; j++) {
                 //body.value = users[j];
@@ -216,7 +215,6 @@ class OverDrive{
             }
         }
     });
-    //call addToFile for given files, users, role
   }
 
   handleRemoveUsers(e) {
@@ -258,8 +256,8 @@ class OverDrive{
 	  var permuserlist = {owner:undefined, canshare:undefined, editors:[], commentors:[], viewers:[], anyone:undefined};
 	  
 	  var request = this.gapi.client.drive.files.get({
-		 'fileId': fid,
-		 'fields': "writersCanShare"
+		'fileId': fid,
+		'fields': "writersCanShare"
 	  });
 	  request.execute(function(response) {
 		  if(response.error) {
@@ -461,7 +459,6 @@ class OverDrive{
                             endflag = true;
                         }
                     }*/
- 
                     // If there are children left that haven't been inserted, call populateTreeRecurse on them
                     /*if(i < childlist.length) {
                         populateTreeRecurse(childlist[i], childnode);
@@ -718,9 +715,9 @@ function listFiles(){
   var files = root.getFiles();
   while (files.hasNext()) {
       var childFile = files.next();
-       data = [ 
-       root.getName() + "/" + childFile.getName()
-       ];
+      data = [ 
+      root.getName() + "/" + childFile.getName()
+      ];
       sheet.appendRow(data);
       count = count + 1;
     }   
@@ -751,7 +748,7 @@ function listItems(){
       root + "/" + childFolder.getName()
     ];
     sheet.appendRow(data);
-   count = count + 1;
+  count = count + 1;
   }
   var files = root.getFiles();
   while (files.hasNext()) {
@@ -797,7 +794,7 @@ function getChildFolders(parentName, parent, sheet) {
     ];
     sheet.appendRow(data);
     var files = childFolder.getFiles();
-     count = count + 1;
+    count = count + 1;
     getChildFolders(parentName + "/" + childFolder.getName(), childFolder, sheet, count);  
   }
 };
@@ -806,62 +803,62 @@ function addUserFile() {
   var sheet = SpreadsheetApp.getActiveSheet();
   sheet.clear();
   if (email == '') { 
-     data = [ 
-       "Error: No User Given"
-      ];
-      sheet.appendRow(data);
-      return;
+    data = [ 
+      "Error: No User Given"
+    ];
+    sheet.appendRow(data);
+    return;
   }
   if (fileID == '') { 
-     data = [ 
-       "Error: No File Given"
-      ];
-      sheet.appendRow(data);
-      return;
+    data = [ 
+      "Error: No File Given"
+    ];
+    sheet.appendRow(data);
+    return;
   }
   addUserToFile(email,fileID,sheet);
 }
+
 function addUserToFile(userID, fileID, sheet) { 
   var file = DriveApp.getFileById(fileID);
   data = [ 
-      file.getOwner()
-      ];
-    sheet.appendRow(data);
-   if (file.getOwner() == userID) {
-    
+    file.getOwner()
+  ];
+  sheet.appendRow(data);
+  if (file.getOwner() == userID) {
     data = [ 
       userID + " already in file :" + fileID
-      ];
-      sheet.appendRow(data);
-      return;
+    ];
+    sheet.appendRow(data);
+    return;
   }
   
   var editors = file.getEditors();
   for (var i = 0; i < editors.length; i++) {
-     data = [ 
-      (editors[i].getEmail())
+    data = [ 
+        (editors[i].getEmail())
       ];
       sheet.appendRow(data);
     if ((editors[i].getEmail()) == userID) {
       data = [ 
-      userID + " already in file :" + fileID
+        userID + " already in file :" + fileID
       ];
       sheet.appendRow(data);
       return;
     }
   }
   
- 
+
   
-   var viewers = file.getViewers();
+  var viewers = file.getViewers();
   for (var i = 0; i < viewers.length; i++) {
-     data = [ 
-      (viewers[i].getEmail())
+    data = [ 
+        (viewers[i].getEmail())
       ];
       sheet.appendRow(data);
     if ((viewers[i].getEmail()) == userID) {
       data = [ 
-      userID + " already in file :" + fileID
+        userID + " already in file :" + fileID
       ];
       sheet.appendRow(data);
       return;
@@ -869,29 +866,28 @@ function addUserToFile(userID, fileID, sheet) {
   }
   
   file.addViewer(userID);
-   data = [ 
-     userID + " added to file :" + fileID
+  data = [ 
+    userID + " added to file :" + fileID
     ];
-    sheet.appendRow(data);
- 
+  sheet.appendRow(data);
 };
 
 function addUserFolder() {
   var sheet = SpreadsheetApp.getActiveSheet();
   sheet.clear();
   if (email == '') { 
-     data = [ 
-       "Error: No User Given"
-      ];
-      sheet.appendRow(data);
-      return;
+    data = [ 
+      "Error: No User Given"
+    ];
+    sheet.appendRow(data);
+    return;
   }
   if (fileID == '') { 
-     data = [ 
-       "Error: No File Given"
-      ];
-      sheet.appendRow(data);
-      return;
+    data = [ 
+      "Error: No File Given"
+    ];
+    sheet.appendRow(data);
+    return;
   }
   addUserToFolder(email,fileID,sheet);
 }
@@ -903,7 +899,7 @@ function addUserToFolder(userID, fileID, sheet) {
   sheet.clear();
   var folder = DriveApp.getFolderByID(fileID);
   folder.addViewer(UserID);
- 
+
   var files = childFolder.getFiles();
     count = count + 1;
     while (files.hasNext()) {
@@ -930,21 +926,21 @@ function addUserToFolder(userID, fileID, sheet) {
 };
 
 function removeUserFile() {
-    var sheet = SpreadsheetApp.getActiveSheet();
+  var sheet = SpreadsheetApp.getActiveSheet();
   sheet.clear();
   if (email == '') { 
-     data = [ 
-       "Error: No User Given"
-      ];
-      sheet.appendRow(data);
-      return;
+    data = [ 
+      "Error: No User Given"
+    ];
+    sheet.appendRow(data);
+    return;
   }
   if (fileID == '') { 
-     data = [ 
-       "Error: No File Given"
-      ];
-      sheet.appendRow(data);
-      return;
+    data = [ 
+      "Error: No File Given"
+    ];
+    sheet.appendRow(data);
+    return;
   }
   removeUserFromFile(email,fileID,sheet);
 }
@@ -952,63 +948,56 @@ function removeUserFile() {
 
 function removeUserFromFile(userID, fileID, sheet) {
   var file = DriveApp.getFileById(fileID);
-  
   var file = DriveApp.getFileById(fileID);
   data = [ 
-      file.getOwner()
-      ];
-    sheet.appendRow(data);
-   if (file.getOwner() == userID) {
-    
+    file.getOwner()
+  ];
+  sheet.appendRow(data);
+  if (file.getOwner() == userID) {
     file.removeViewer(userID);
-   data = [ 
-     userID + " removed from file :" + fileID
+    data = [ 
+      userID + " removed from file :" + fileID
     ];
     sheet.appendRow(data);
-      return;
+    return;
   }
   
   var editors = file.getEditors();
   for (var i = 0; i < editors.length; i++) {
-     data = [ 
+    data = [ 
       (editors[i].getEmail())
       ];
       sheet.appendRow(data);
     if ((editors[i].getEmail()) == userID) {
       file.removeViewer(userID);
-   data = [ 
-     userID + " removed from file :" + fileID
-    ];
-    sheet.appendRow(data);
-      return;
-    }
-  }
-  
- 
-  
-   var viewers = file.getViewers();
-  for (var i = 0; i < viewers.length; i++) {
-     data = [ 
-      (viewers[i].getEmail())
+      data = [ 
+        userID + " removed from file :" + fileID
       ];
       sheet.appendRow(data);
-    if ((viewers[i].getEmail()) == userID) {
-      file.removeViewer(userID);
-   data = [ 
-     userID + " removed from file :" + fileID
-    ];
-    sheet.appendRow(data);
       return;
     }
   }
   
-  
- 
-   data = [ 
-     userID + " not in file :" + fileID
+  var viewers = file.getViewers();
+  for (var i = 0; i < viewers.length; i++) {
+    data = [ 
+      (viewers[i].getEmail())
     ];
     sheet.appendRow(data);
- 
+    if ((viewers[i].getEmail()) == userID) {
+      file.removeViewer(userID);
+      data = [ 
+        userID + " removed from file :" + fileID
+      ];
+      sheet.appendRow(data);
+      return;
+    }
+  }
+
+  data = [ 
+    userID + " not in file :" + fileID
+  ];
+  sheet.appendRow(data);
 };
 function removeUserFromFolder(userID, fileID, sheet) {
   var root = DriveApp.getFolderById(fileId);
