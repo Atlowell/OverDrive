@@ -34,7 +34,7 @@ class TreeRoot{
     for (var i = 0; i < nodes.length; i++) {
     	this.insert(nodes[i], this._root)
     }
-    this.isvalid = "its the right one!";
+    this.isvalid = "it's the right one!";
   }
 
   // Recursive depth-first traversal. callback is intended as a function paremeter
@@ -106,15 +106,17 @@ class OverDrive{
   //var tree;
 	
   constructor(gapi) {
-	this.gapi = gapi;
-	this.tree = new TreeRoot([]);
-	this.numrequests = 0;
-	this.numcalls = 0;
-    //this.startedtopopulate = false;
-    //this.lockrequests = false;
-    //this.lockitems = false;
-    //console.log(this.tree);
-	this.populateTree(); // ASYNC!
+    this.gapi = gapi;
+    this.tree = new TreeRoot([]);
+    this.numrequests = 0;
+    this.numcalls = 0;
+      //this.startedtopopulate = false;
+      //this.lockrequests = false;
+      //this.lockitems = false;
+      //console.log(this.tree);
+    this.populateTree(); // ASYNC!
+    this.setUpEventListeners();
+    $('.permissions-box .file').jstree();
   }
   
   triggerDisplayTree() {
@@ -136,6 +138,14 @@ class OverDrive{
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
+    document.addEventListener('mousemove', (e) => this.displayPermissions(e));
+  }
+  
+  displayPermissions(e) {
+    e.preventDefault();
+    const permissionsBox = document.querySelector('.permissions-box');
+    permissionsBox.style.left = e.pageX + 'px';
+    permissionsBox.style.top = e.pageY + 'px';
   }
   
   handleAddUsers(e) {
