@@ -694,7 +694,7 @@ class OverDrive{
   (function recursive(currNode) {
         
         if (currNode.file.fid) {
-        	fileBrowserUI += '<li>' + currNode.file.fid;		
+        	fileBrowserUI += '<li>' + currNode.file.name;		
         }
         if (currNode.children.length != 0) {
         	fileBrowserUI += '<ul>'
@@ -710,6 +710,13 @@ class OverDrive{
     })(this.tree._root); //passing to recursive as initial parameter the _root node
   
     console.log("displaytree");
+    console.log(fileBrowserUI);
+
+    document.getElementById('file-browser').innerHTML = fileBrowserUI;
+    $('#file-browser').jstree({
+      "plugins" : ["checkbox"]
+    });
+    console.log("jstree happened")
   }
   
   displayTreeRecurse(node) {
@@ -1080,6 +1087,3 @@ var overDrive;
 function setupOverDrive() {
 	overDrive = new OverDrive(gapi);
 }
-
-document.getElementById('file-browser').innerHTML = fileBrowserUI;
-$('#file-browser').jstree();
