@@ -152,41 +152,125 @@ class OverDrive{
     e.preventDefault();
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
-	  var filelist = [];
+    var that = this;
+	/*var filelist = [];
     this.tree.DFtraversal(function(node) {
 		  if(node.file.checked) {
 			  filelist.push(node.file.fid);
 		  }
-      if(node.file.name == "file1-2") {
-        filelist.push(node.file.fid);
-      }
-      /*if(node.file.name == "folder2") {
-        filelist.push(node.file.fid);
-      }*/
 	  });
-    console.log(filelist);
-	
-	  var newrole = role;
-	  var com = false;
-	  if(newrole == "commenter") {
-		  com = true;
-		  newrole = "reader";
-	  }
-	  var body = {
-      'role': newrole,
-      'type': "user",
-		  'value': undefined
-	  }
-	  if(com) {
-		  body.additionalRoles = ["commenter"];
+    console.log(filelist);*/
+	this.tree.DFtraversal(function(node) {
+        if(node.file.name == "folder2") {
+            node.file.checked = true;
+        }
+        else if(node.file.name == "file1") {
+            node.file.checked = true;
+        }
+    });
+    
+	var newrole = role;
+	var com = false;
+	if(newrole == "commenter") {
+		com = true;
+		newrole = "reader";
+	}
+    
+    //Initial values:
+        // node = child of root
+        // usernum = 0
+        // chk = whether child of root is checked
+        // initchk = false
+    function userrecurse(node, usernum, chk, initchk) {
+        if(chk) {
+            identityAuth(function(token) { 
+                var xhr = new XMLHttpRequest();
+                //console.log("fid: " + encodeURIComponent(filelist[i]));
+                var body = {
+                    'role': newrole,
+                    'type': "user",
+                    'value': users[usernum]
+                }
+                if(com) {
+                    body.additionalRoles = ["commenter"];
+                }
+                
+                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                xhr.onload = function() {
+                    //console.log(xhr.response);
+                    if(!initchk) {
+                        if((usernum + 1) < users.length) {
+                            userrecurse(node, usernum + 1, chk, initchk);
+                        }
+                    }
+                    for(var i = 0; i < node.children.length; i++) {
+                        var chk2 = false;
+                        if(node.children[i].file.checked) {
+                            chk2 = true;
+                        }
+                        userrecurse(node.children[i], usernum, chk2, true);
+                    }
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                xhr.send(JSON.stringify(body));
+                //console.log(body);
+                //console.log(JSON.stringify(body));
+                //console.log("sent request");
+            });
+        }
+        else {
+            // TODO: Restore the previous permissions
+            if(initchk) {
+                /*var xhr = new XMLHttpRequest();
+                //TODO: BODY
+                
+                //TODO: Open request
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.onload = function() {*/
+                    for(var i = 0; i < node.children.length; i++) {
+                        var chk2 = false;
+                        if(node.children[i].file.checked) {
+                            chk2 = true;
+                        }
+                        userrecurse(node.children[i], usernum, chk2, true);
+                    }
+                /*};
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };*/
+                //TODO: SEND
+                
+            }
+            else {
+                for(var i = 0; i < node.children.length; i++) {
+                    var chk2 = false;
+                    if(node.children[i].file.checked) {
+                        chk2 = true;
+                    }
+                    userrecurse(node.children[i], 0, chk2, false);
+                }
+            }
+        }
     }
+    
 	//console.log(body);
-    identityAuth(function(token) { 
-        for(var i = 0; i < filelist.length; i++) {
+    
+    for(var i = 0; i < that.tree._root.children.length; i++) {
+        var chk = false;
+        if(that.tree._root.children[i].file.checked == true) {
+            chk = true;
+        }
+        userrecurse(that.tree._root.children[i], 0, chk, false);
+    }
+        /*for(var i = 0; i < filelist.length; i++) {
             for(var j = 0; j < users.length; j++) {
                 //body.value = users[j];
                 body.value = users[j];
-                //console.log(users[j]);
+                //console.log(users[j]); */
                 /*var request = this.gapi.client.drive.permissions.insert({
                     'fid': filelist[i],
                     'resource': body,
@@ -197,24 +281,12 @@ class OverDrive{
                         console.log("Error with inserting permission");
                     }
                 });*/
-                var xhr = new XMLHttpRequest();
-                //console.log("fid: " + encodeURIComponent(filelist[i]));
-                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filelist[i]) + "/permissions" + "?sendNotificationEmails=false", false);
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                xhr.onload = function() {
-                    console.log(xhr.response);
-                };
-                xhr.onerror = function() {
-                    console.log(xhr.error);
-                };
-                xhr.send(JSON.stringify(body));
+
                 //console.log(body);
                 //console.log(JSON.stringify(body));
                 //console.log("sent request");
-            }
-        }
-    });
+            /*}
+        } */
   }
 
   handleRemoveUsers(e) {
