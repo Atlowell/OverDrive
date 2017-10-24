@@ -292,9 +292,66 @@ class OverDrive{
   handleRemoveUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
-    //get checked file(s) from tree
-    //call removeFromFile for given files and users
+    const role = this.getRoleFromUI();
+    var that = this;
+    var filelist = [];
+    this.tree.DFtraversal(function(node) {
+	  if(node.file.checked) {
+		 filelist.push(node.file.fid);
+	  }
+     });
+        
+    //Initial values:
+        // node = child of root
+        // usernum = 0
+        // chk = whether child of root is checked
+        // initchk = false
+    function userrecurse(node, usernum, chk, initchk) {
+        if(chk) {
+            identityAuth(function(token) { 
+                var xhr = new XMLHttpRequest();
+                //console.log("fid: " + encodeURIComponent(filelist[i]));
+                var body = {
+                    'role': newrole,
+                    'type': "user",
+                    'value': users[usernum]
+                }
+                var filetoremove = filelist.pop();
+                xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filetoremove.node.file.fid));
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                xhr.onload = function() {
+                    //console.log(xhr.response);
+                    //if(!initchk) {
+                     //   if((usernum + 1) < users.length) {
+                     //       userrecurse(node, usernum + 1, chk, initchk);
+                      //  }
+                  //  }
+                    for(var i = 0; i < filetoremove.children.length; i++) {
+                        var chk2 = false;
+                        if(node.children[i].file.checked) {
+                            chk2 = true;
+                        }
+                        userrecurse(node.children[i], usernum, chk2, true);
+                    }
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                xhr.send(JSON.stringify(body));
+                //console.log(body);
+                //console.log(JSON.stringify(body));
+                //console.log("sent request");
+            });
+        }
+ 
+    }
+    
+	//console.log(body);
+    
+
   }
+
 
   handleChangeOwner(e) {
     e.preventDefault();
