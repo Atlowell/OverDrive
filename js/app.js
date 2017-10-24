@@ -144,8 +144,8 @@ class OverDrive{
   displayPermissions(e) {
     e.preventDefault();
     const permissionsBox = document.querySelector('.permissions-box');
-    permissionsBox.style.left = e.pageX + 'px';
-    permissionsBox.style.top = e.pageY + 'px';
+    permissionsBox.style.left = (e.pageX + 5) + 'px';
+    permissionsBox.style.top = (e.pageY + 5) + 'px';
   }
   
   handleAddUsers(e) {
