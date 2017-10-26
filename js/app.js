@@ -153,14 +153,14 @@ class OverDrive{
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
     var that = this;
-	/*var filelist = [];
+	  /*var filelist = [];
     this.tree.DFtraversal(function(node) {
 		  if(node.file.checked) {
 			  filelist.push(node.file.fid);
 		  }
 	  });
     console.log(filelist);*/
-	this.tree.DFtraversal(function(node) {
+	  this.tree.DFtraversal(function(node) {
         if(node.file.name == "folder2") {
             node.file.checked = true;
         }
@@ -169,12 +169,12 @@ class OverDrive{
         }
     });
     
-	var newrole = role;
-	var com = false;
-	if(newrole == "commenter") {
-		com = true;
-		newrole = "reader";
-	}
+	  var newrole = role;
+	  var com = false;
+	  if(newrole == "commenter") {
+		  com = true;
+		  newrole = "reader";
+	  }
     
     //Initial values:
         // node = child of root
@@ -257,7 +257,7 @@ class OverDrive{
         }
     }
     
-	//console.log(body);
+	  //console.log(body);
     
     for(var i = 0; i < that.tree._root.children.length; i++) {
         var chk = false;
@@ -364,22 +364,107 @@ class OverDrive{
     e.preventDefault();
     const users = this.parseUsers();
     const role = this.getRoleFromUI();
-    //get checked file(s) from tree
-    //This is hard coded and needs to be changed
-    var filelist = [];
+    var that = this;
+
     this.tree.DFtraversal(function(node) {
-		  if(node.file.checked) {
-			  filelist.push(node.file.fid);
-		  }
-      if(node.file.name == "file1-2") {
-        filelist.push(node.file.fid);
+      if(node.file.name == "folder2") {
+        node.file.checked = true;
+      } else if(node.file.name == "file1") {
+        node.file.checked = true;
       }
-      /*if(node.file.name == "folder2") {
-        filelist.push(node.file.fid);
-      }*/
-	  });
-    console.log(filelist);
-    //call changePermissions for given files and users
+    });
+    
+	  var newrole = role;
+	  var com = false;
+	  if(newrole == "commenter") {
+		  com = true;
+		  newrole = "reader";
+    }
+    
+    function userrecurse(node, usernum, chk, initchk) {
+      if(chk) {
+          identityAuth(function(token) { 
+              var xhr = new XMLHttpRequest();
+              //console.log("fid: " + encodeURIComponent(filelist[i]));
+              var body = {
+                  'role': newrole,
+                  'type': "user",
+                  'value': users[usernum]
+              }
+              if(com) {
+                  body.additionalRoles = ["commenter"];
+              }
+              
+              xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
+              xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+              xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+              xhr.onload = function() {
+                  //console.log(xhr.response);
+                  if(!initchk) {
+                      if((usernum + 1) < users.length) {
+                          userrecurse(node, usernum + 1, chk, initchk);
+                      }
+                  }
+                  for(var i = 0; i < node.children.length; i++) {
+                      var chk2 = false;
+                      if(node.children[i].file.checked) {
+                          chk2 = true;
+                      }
+                      userrecurse(node.children[i], usernum, chk2, true);
+                  }
+              };
+              xhr.onerror = function() {
+                  console.log(xhr.error);
+              };
+              xhr.send(JSON.stringify(body));
+              //console.log(body);
+              //console.log(JSON.stringify(body));
+              //console.log("sent request");
+          });
+      } else {
+          // TODO: Restore the previous permissions
+          if(initchk) {
+              /*var xhr = new XMLHttpRequest();
+              //TODO: BODY
+              
+              //TODO: Open request
+              xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+              xhr.onload = function() {*/
+                  for(var i = 0; i < node.children.length; i++) {
+                      var chk2 = false;
+                      if(node.children[i].file.checked) {
+                          chk2 = true;
+                      }
+                      userrecurse(node.children[i], usernum, chk2, true);
+                  }
+              /*};
+              xhr.onerror = function() {
+                  console.log(xhr.error);
+              };*/
+              //TODO: SEND
+              
+          }
+          else {
+              for(var i = 0; i < node.children.length; i++) {
+                  var chk2 = false;
+                  if(node.children[i].file.checked) {
+                      chk2 = true;
+                  }
+                  userrecurse(node.children[i], 0, chk2, false);
+              }
+          }
+      }
+    }
+
+    for(var i = 0; i < that.tree._root.children.length; i++) {
+      var chk = false;
+      if(that.tree._root.children[i].file.checked == true) {
+          chk = true;
+      }
+      userrecurse(that.tree._root.children[i], 0, chk, false);
+    }
+
+
   }
 
   parseUsers() {
