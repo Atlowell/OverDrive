@@ -127,6 +127,14 @@ class OverDrive{
     }
   }
   
+  triggerAddUsers(args) {
+    console.log("triggering add users check");
+    //console.log(args);
+    if((args.numrequests == 0) && (args.numcalls == 0)) {
+        args.that.addUsers(args);
+    }
+  }
+  
   //Add appropriate event listeners to action buttons
   setUpEventListeners() {
     const actionsForm = document.querySelector('form#actions');
@@ -148,11 +156,60 @@ class OverDrive{
     permissionsBox.style.top = (e.pageY + 5) + 'px';
   }
   
-  handleAddUsers(e) {
-    e.preventDefault();
-    const users = this.parseUsers();
-    const role = this.getRoleFromUI();
-    var that = this;
+  // Will only get permissions from files below those folders that are checked
+  // permid - the permission id of the user you want to check
+  // num - the array index of the tree array (see args.rt)
+  // cb - the check function that is executed (example: triggerAddUsers)
+  // args - an object containing arguments for the callback - some of these arguments are also used by this function, and thus must be defined:
+        // args.numrequests - Counter detailing the number of currently pending requests sent.  Usually 0 at beginning
+        // args.numcalls - Counter detailing the number of times the getPermissiontree has been called.  Usually the number of trees at the beginning
+        // args.rt - array of trees.  It is assumed that args.rt[num] is not out of bounds
+  getPermissionTree(permid, num, cb, args) {
+    console.log("entering gpt");
+    //console.log(args);
+    var root = {
+        parent: null,
+        children: [],
+        value: null
+    }
+    
+    function gptRecurse(permid, node1, node2, initchk, cb, args) {
+        console.log("entering gptrecurse");
+        //console.log(args);
+        for(var i = 0; i < node1.children.length; i++) {
+            var tempnode = {
+                parent: node2,
+                children: [],
+                value: undefined
+            }
+            node2.children.push(tempnode);
+            var initchk2 = false;
+            if(initchk) {
+                //request
+                args.numrequests++;
+                //on callback:
+                //tempnode.value = 
+                args.numrequests--;
+                cb(args);
+            }
+            else if(node1.children[i].file.checked) {
+                initchk2 = true;
+            }
+            gptRecurse(permid, node1.children[i], tempnode, initchk2, cb, args);
+        }
+    }
+    
+    gptRecurse(permid, this.tree._root, root, false, cb, args);
+    args.rt[num] = root;
+    args.numcalls--;
+    cb(args);
+  }
+  
+  addUsers(args) {
+    var users = args.users;
+    var role = args.role;
+    var rt = args.rt;
+    var that = args.that;
 	  /*var filelist = [];
     this.tree.DFtraversal(function(node) {
 		  if(node.file.checked) {
@@ -287,6 +344,41 @@ class OverDrive{
                 //console.log("sent request");
             /*}
         } */
+  }
+  
+  handleAddUsers(e) {
+    e.preventDefault();
+    const users = this.parseUsers();
+    for(var i = 0; i < users.length; i++) {
+        console.log("user" + i + ": " + users[i]);
+    }
+    const role = this.getRoleFromUI();
+    var that = this;
+    var args = {
+        users: users,
+        role: role,
+        rt: [],
+        numcalls: users.length,
+        numrequests: 0,
+        that: that
+    }
+    for(var i = 0; i < users.length; i++) {
+        args.rt.push(undefined);
+        identityAuth(function(token) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[i]));
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            xhr.responseType = "json";
+            xhr.onload = function() {
+                var permid = xhr.response.id; // = response permid
+                that.getPermissionTree(permid, i, that.triggerAddUsers, args);
+            };
+            xhr.onerror = function() {
+                console.log(xhr.error);
+            };
+            xhr.send();
+        });
+    }
   }
 
   handleRemoveUsers(e) {
