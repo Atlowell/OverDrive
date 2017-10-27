@@ -645,7 +645,7 @@ class OverDrive{
                 var permid = xhr.response.id; // = response permid
                 args.userids[i] = permid;
                 console.log("permid before entering: " + permid);
-                that.getPermissionTree(permid, i, that.triggerAddUsers, args);
+                that.getPermissionTree(permid, i, that.triggerChangePermissions, args);
             };
             xhr.onerror = function() {
                 console.log(xhr.error);
@@ -656,16 +656,16 @@ class OverDrive{
   }
 
   triggerChangePermissions(args) {
-    console.log("triggering add users check");
+    console.log("triggering changePermissions check");
     //console.log(args);
     if((args.numrequests == 0) && (args.numcalls == 0)) {
-        args.that.addUsers(args);
+        args.that.changePermissions(args);
     }
   }
 
   changePermissions(args) {
     var users = args.users;
-    var userids = args.userids;
+    var userids = args.userids; //permissions ids
     var role = args.role;
     var rt = args.rt;
     var that = args.that;
@@ -713,7 +713,7 @@ class OverDrive{
                     body.additionalRoles = ["commenter"];
                 }
                 
-                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
+                xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
                 xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                 xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
                 xhr.responseType = "json";
