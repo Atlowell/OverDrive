@@ -110,13 +110,18 @@ class OverDrive{
     this.tree = new TreeRoot([]);
     this.numrequests = 0;
     this.numcalls = 0;
-      //this.startedtopopulate = false;
-      //this.lockrequests = false;
-      //this.lockitems = false;
-      //console.log(this.tree);
+    //this.startedtopopulate = false;
+    //this.lockrequests = false;
+    //this.lockitems = false;
+    //console.log(this.tree);
     this.populateTree(); // ASYNC!
     this.setUpEventListeners();
+
+    //permissions box
     $('.permissions-box .file').jstree();
+    const permissionsBox = document.querySelector('.permissions-box');
+    permissionsBox.style.left = (-500) + 'px';
+    permissionsBox.style.top = (-500) + 'px';
   }
   
   triggerDisplayTree() {
@@ -142,13 +147,16 @@ class OverDrive{
     const removeUsersBtn = actionsForm.querySelector('.remove-users');
     const changeOwnerBtn = actionsForm.querySelector('.change-owner');
     const changePermBtn = actionsForm.querySelector('.change-permissions');
+    const fileBrowser = document.querySelector('div#file-browser');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
-    document.addEventListener('mousemove', (e) => this.displayPermissions(e));
+    //document.addEventListener('mousemove', (e) => this.displayPermissions(e));
+    fileBrowser.addEventListener('click', (e) => this.displayPermissions(e));
   }
   
+  //Move permissions window and fill with data
   displayPermissions(e) {
     e.preventDefault();
     const permissionsBox = document.querySelector('.permissions-box');
