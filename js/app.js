@@ -115,15 +115,23 @@ class OverDrive{
       //this.lockitems = false;
       //console.log(this.tree);
     this.populateTree(); // ASYNC!
-    this.setUpEventListeners();
+    //this.setUpEventListeners();
     $('.permissions-box .file').jstree();
   }
   
   triggerDisplayTree() {
     //console.log("numrequests: " + this.numrequests + ", numcalls: " + this.numcalls);
     if((this.numrequests == 0) && (this.numcalls == 0)) {
-      this.displayTree();
-      this.setUpEventListeners();
+        this.tree.DFtraversal(function(node) {
+            if(node.file.name == "folder2") {
+                node.file.checked = true;
+            }
+            else if(node.file.name == "file1") {
+                node.file.checked = true;
+            }
+        });
+        this.displayTree();
+        this.setUpEventListeners();
     }
   }
   
@@ -190,10 +198,14 @@ class OverDrive{
             // true false = request (can set initchk)
             // true true = nothing (can set initchk)
             let initchk2 = initchk;
+            console.log("file is checked: " + node1.children[i].file.checked);
+            console.log("initchk: " + initchk);
             if(node1.children[i].file.checked) {
+                console.log(node1.children[i].file.name + "is checked");
                 initchk2 = true;
             }
             else if(initchk) {
+                console.log("sending permissions request for " + node1.children[i].file.name);
                 identityAuth(function(token) {
                     console.log("getting permissions for " + node1.children[i].file.name);
                     var xhr = new XMLHttpRequest();
@@ -249,21 +261,13 @@ class OverDrive{
 		  }
 	  });
     console.log(filelist);*/
-	  this.tree.DFtraversal(function(node) {
-        if(node.file.name == "folder2") {
-            node.file.checked = true;
-        }
-        else if(node.file.name == "file1") {
-            node.file.checked = true;
-        }
-    });
     
-	  var newrole = role;
-	  var com = false;
-	  if(newrole == "commenter") {
-		  com = true;
-		  newrole = "reader";
-	  }
+	var newrole = role;
+	var com = false;
+	if(newrole == "commenter") {
+		com = true;
+		newrole = "reader";
+	}
     
     //Initial values:
         // node = child of root
@@ -272,10 +276,10 @@ class OverDrive{
         // initchk = false
         // perm = array of permission nodes for each user corresponding to node
     function userrecurse(node, perm, usernum, chk, initchk) {
+        console.log("userrecurse: " + node.file.name);
         if(chk) {
+            console.log("initiating add request for " + node.file.name);
             identityAuth(function(token) { 
-                var xhr = new XMLHttpRequest();
-                //console.log("fid: " + encodeURIComponent(filelist[i]));
                 var body = {
                     'role': newrole,
                     'type': "user",
@@ -286,40 +290,60 @@ class OverDrive{
                     body.additionalRoles = ["commenter"];
                 }
                 
-                xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                xhr.responseType = "json";
-                xhr.onload = function() {
-                    if(xhr.status != 200) {
-                        console.log(xhr.response);
-                    }
-                    console.log("permission added to " + node.file.name);
-                    //console.log(xhr.response);
-                    if(!initchk) {
-                        if((usernum + 1) < users.length) {
-                            userrecurse(node, perm, usernum + 1, chk, initchk);
+                var numretries = 1;
+                
+                function addRequest() {
+                
+                    var xhr = new XMLHttpRequest();
+                    //console.log("fid: " + encodeURIComponent(filelist[i]));
+                    xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhr.responseType = "json";
+                    xhr.onload = function() {
+                        if(xhr.status == 200) {
+                            console.log("permission added to " + node.file.name);
+                            //console.log(xhr.response);
+                            if(!initchk) {
+                                if((usernum + 1) < users.length) {
+                                    userrecurse(node, perm, usernum + 1, chk, initchk);
+                                }
+                            }
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                let permarr = [];
+                                for(let j = 0; j < users.length; j++) {
+                                    permarr.push(perm[j].children[i]); 
+                                }
+                                userrecurse(node.children[i], permarr, usernum, chk2, true);
+                            }
                         }
-                    }
-                    for(let i = 0; i < node.children.length; i++) {
-                        let chk2 = false;
-                        if(node.children[i].file.checked) {
-                            chk2 = true;
+                        else if(xhr.status == 500) {
+                            console.log("Error with add request in addusers");
+                            console.log(xhr.response);
+                            console.log("Retrying " + numretries + " more times");
+                            numretries--;
+                            if(numretries >= 0) {
+                                addRequest();
+                            }
                         }
-                        let permarr = [];
-                        for(let j = 0; j < users.length; j++) {
-                            permarr.push(perm[j].children[i]); 
+                        else {
+                            console.log("Error with add request in addusers");
+                            console.log(xhr.response);
                         }
-                        userrecurse(node.children[i], permarr, usernum, chk2, true);
-                    }
-                };
-                xhr.onerror = function() {
-                    console.log(xhr.error);
-                };
-                xhr.send(JSON.stringify(body));
-                //console.log(body);
-                //console.log(JSON.stringify(body));
-                //console.log("sent request");
+                    };
+                    xhr.onerror = function() {
+                        console.log(xhr.error);
+                    };
+                    xhr.send(JSON.stringify(body));
+                    //console.log(body);
+                    //console.log(JSON.stringify(body));
+                    //console.log("sent request");
+                }
+                addRequest();
             });
         }
         else {
@@ -362,39 +386,62 @@ class OverDrive{
                     // commenter writer
                     // viewer writer
                 
+                console.log(perm);
                 var oldrole = perm[usernum].value;
                 if(oldrole == "none") {
                     // Remove
+                    console.log("initiating remove request for " + node.file.name);
                     identityAuth(function(token) {
-                        console.log("sending delete request on " + node.file.name);
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                        xhr.responseType = "json";
-                        xhr.onload = function() {
-                            if(xhr.status != 200) {
-                                console.log(xhr.response);
-                            }
-                            for(let i = 0; i < node.children.length; i++) {
-                                let chk2 = false;
-                                if(node.children[i].file.checked) {
-                                    chk2 = true;
+                        var numretries = 5;
+                        function removeRequest() {
+                            console.log("sending delete request on " + node.file.name);
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                            xhr.responseType = "json";
+                            xhr.onload = function() {
+                                //console.log("delete request returned");
+                                //console.log(xhr.response);
+                                if(xhr.status == 204) {
+                                    for(let i = 0; i < node.children.length; i++) {
+                                        let chk2 = false;
+                                        if(node.children[i].file.checked) {
+                                            chk2 = true;
+                                        }
+                                        let permarr = [];
+                                        for(let j = 0; j < users.length; j++) {
+                                            permarr.push(perm[j].children[i]); 
+                                        }
+                                        userrecurse(node.children[i], permarr, usernum, chk2, true);
+                                    }
                                 }
-                                let permarr = [];
-                                for(let j = 0; j < users.length; j++) {
-                                    permarr.push(perm[j].children[i]); 
+                                else if((xhr.status == 500) || (xhr.status == 404)) {
+                                    console.log("Error with remove request in addusers");
+                                    console.log(xhr.response);
+                                    console.log("Retrying " + numretries + " more times");
+                                    numretries--;
+                                    if(numretries >= 0) {
+                                        setTimeout(function() {
+                                            removeRequest();
+                                        }, 500);
+                                    }
                                 }
-                                userrecurse(node.children[i], permarr, usernum, chk2, true);
-                            }
-                        };
-                        xhr.onerror = function() {
-                            console.log(xhr.error);
-                        };
-                        xhr.send();
+                                else {
+                                    console.log("Error with remove request in addusers");
+                                    console.log(xhr.response);
+                                }
+                            };
+                            xhr.onerror = function() {
+                                console.log(xhr.error);
+                            };
+                            xhr.send();
+                        }
+                        removeRequest();
                     });
                 }
                 else if((newrole == "writer") && ((oldrole == "reader") || (oldrole == "commenter"))) {
                     // Restore
+                    console.log("initiating restore request for " + node.file.name);
                     identityAuth(function(token) {
                         
                         var body = {
@@ -404,36 +451,55 @@ class OverDrive{
                             body.additionalRoles = ["commenter"];
                             body.role = "reader";
                         }
+                        
+                        var numretries = 1;
                        
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
-                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                        xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                        xhr.responseType = "json";
-                        xhr.onload = function() {
-                            if(xhr.status != 200) {
-                                console.log(xhr.response);
-                            }
-                            for(let i = 0; i < node.children.length; i++) {
-                                let chk2 = false;
-                                if(node.children[i].file.checked) {
-                                    chk2 = true;
+                        function restoreRequest() {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                            xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                            xhr.responseType = "json";
+                            xhr.onload = function() {
+                                if(xhr.status == 200) {
+                                    console.log("restore request successful for " + node.file.name);
+                                    for(let i = 0; i < node.children.length; i++) {
+                                        let chk2 = false;
+                                        if(node.children[i].file.checked) {
+                                            chk2 = true;
+                                        }
+                                        let permarr = [];
+                                        for(let j = 0; j < users.length; j++) {
+                                            permarr.push(perm[j].children[i]); 
+                                        }
+                                        userrecurse(node.children[i], permarr, usernum, chk2, true);
+                                    }
                                 }
-                                let permarr = [];
-                                for(let j = 0; j < users.length; j++) {
-                                    permarr.push(perm[j].children[i]); 
+                                else if(xhr.status == 500) {
+                                    console.log("Error with restore request in addusers");
+                                    console.log(xhr.response);
+                                    console.log("Retrying " + numretries + " more times");
+                                    numretries--;
+                                    if(numretries >= 0) {
+                                        restoreRequest();
+                                    }
                                 }
-                                userrecurse(node.children[i], permarr, usernum, chk2, true);
-                            }
-                        };
-                        xhr.onerror = function() {
-                            console.log(xhr.error);
-                        };
-                        xhr.send(JSON.stringify(body));
+                                else {
+                                    console.log("Error with restore request in addusers");
+                                    console.log(xhr.response);
+                                }
+                            };
+                            xhr.onerror = function() {
+                                console.log(xhr.error);
+                            };
+                            xhr.send(JSON.stringify(body));
+                        }
+                        restoreRequest();
                     });
                 }
                 else {
                     // No restore needed
+                    console.log("No remove/restore needed for " + node.file.name);
                     for(let i = 0; i < node.children.length; i++) {
                         let chk2 = false;
                         if(node.children[i].file.checked) {
@@ -448,6 +514,7 @@ class OverDrive{
                 }  
             }
             else {
+                console.log("No action needed for " + node.file.name);
                 for(let i = 0; i < node.children.length; i++) {
                     let chk2 = false;
                     if(node.children[i].file.checked) {
