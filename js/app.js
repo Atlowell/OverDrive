@@ -177,7 +177,6 @@ class OverDrive{
     }
   }
 
-  //
   populatePermissions() {
     const permissionsBox = document.querySelector('.permissions-box');
     permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
@@ -185,6 +184,15 @@ class OverDrive{
     for (let i = 0; i < this.currentPermissions.editors.length; i++) {
         permissionsBox.querySelector('.writers').innerHTML += '<li>' + this.currentPermissions.editors[i] + '<\li>';
     }
+    permissionsBox.querySelector('.commenters').innerHTML = '';
+    for (let i = 0; i < this.currentPermissions.commenters.length; i++) {
+        permissionsBox.querySelector('.commenters').innerHTML += '<li>' + this.currentPermissions.commenters[i] + '<\li>';
+    }
+    permissionsBox.querySelector('.readers').innerHTML = '';
+    for (let i = 0; i < this.currentPermissions.viewers.length; i++) {
+        permissionsBox.querySelector('.readers').innerHTML += '<li>' + this.currentPermissions.viewers[i] + '<\li>';
+    }
+
   }
   
   // Will only get permissions from files below those folders that are checked
