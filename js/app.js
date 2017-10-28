@@ -110,13 +110,21 @@ class OverDrive{
     this.tree = new TreeRoot([]);
     this.numrequests = 0;
     this.numcalls = 0;
-      //this.startedtopopulate = false;
-      //this.lockrequests = false;
-      //this.lockitems = false;
-      //console.log(this.tree);
+    this.currentName = null;
+    this.currentFid = null;
+    this.currentPermissions = null;
+    //this.startedtopopulate = false;
+    //this.lockrequests = false;
+    //this.lockitems = false;
+    //console.log(this.tree);
     this.populateTree(); // ASYNC!
     //this.setUpEventListeners();
+
+    //permissions box
     $('.permissions-box .file').jstree();
+    const permissionsBox = document.querySelector('.permissions-box');
+    permissionsBox.style.left = (-500) + 'px';
+    permissionsBox.style.top = (-500) + 'px';
   }
   
   triggerDisplayTree() {
@@ -132,6 +140,7 @@ class OverDrive{
         });
         this.displayTree();
         this.setUpEventListeners();
+        //this.getPermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
     }
   }
   
@@ -150,18 +159,59 @@ class OverDrive{
     const removeUsersBtn = actionsForm.querySelector('.remove-users');
     const changeOwnerBtn = actionsForm.querySelector('.change-owner');
     const changePermBtn = actionsForm.querySelector('.change-permissions');
+    const fileBrowser = document.querySelector('div#file-browser');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
-    document.addEventListener('mousemove', (e) => this.displayPermissions(e));
+    //document.addEventListener('mousemove', (e) => this.displayPermissions(e));
+    fileBrowser.addEventListener('mousedown', (e) => this.displayPermissions(e));
   }
   
+  //Move permissions window
   displayPermissions(e) {
     e.preventDefault();
+    if (e.target.classList.contains("jstree-anchor")) {
+        //Clicked item is file
+        const fid = e.target.id.slice(0, e.target.id.lastIndexOf("_anchor"));
+        const permissionsBox = document.querySelector('.permissions-box');
+        console.log(fid);
+        console.log(this.currentFid);
+        console.log(fid === this.currentFid);
+        if (fid === this.currentFid) {
+            permissionsBox.style.left = (-500) + 'px';
+            permissionsBox.style.top = (-500) + 'px';
+            this.currentFid = 0;
+        } else {
+            permissionsBox.style.left = (e.pageX + 5) + 'px';
+            permissionsBox.style.top = (e.pageY + 5) + 'px';
+            this.currentFid = fid;
+            this.getPermissions(fid); 
+        }
+            
+    }
+  }
+
+  //Populate permissions box with data
+  populatePermissions() {
     const permissionsBox = document.querySelector('.permissions-box');
-    permissionsBox.style.left = (e.pageX + 5) + 'px';
-    permissionsBox.style.top = (e.pageY + 5) + 'px';
+    if (this.currentPermissions.canshare)
+        permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: Yes';
+    else
+    permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: No';
+    permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
+    permissionsBox.querySelector('.writers').innerHTML = '';
+    for (let i = 0; i < this.currentPermissions.editors.length; i++) {
+        permissionsBox.querySelector('.writers').innerHTML += '<li>' + this.currentPermissions.editors[i] + '<\li>';
+    }
+    permissionsBox.querySelector('.commenters').innerHTML = '';
+    for (let i = 0; i < this.currentPermissions.commenters.length; i++) {
+        permissionsBox.querySelector('.commenters').innerHTML += '<li>' + this.currentPermissions.commenters[i] + '<\li>';
+    }
+    permissionsBox.querySelector('.readers').innerHTML = '';
+    for (let i = 0; i < this.currentPermissions.viewers.length; i++) {
+        permissionsBox.querySelector('.readers').innerHTML += '<li>' + this.currentPermissions.viewers[i] + '<\li>';
+    }
   }
   
   // Will only get permissions from files below those folders that are checked
@@ -363,7 +413,7 @@ class OverDrive{
                 // Discard cases: oldrole newrole
                 // same permissions - overwriting won't do anything
                     // writer writer
-                    // commentor commenter
+                    // commenter commenter
                     // viewer viewer
                 // old > new - overwriting won't do anything
                     // owner writer
@@ -530,7 +580,7 @@ class OverDrive{
         }
     }
     
-	  //console.log(body);
+	//console.log(body);
     for(let i = 0; i < that.tree._root.children.length; i++) {
         let chk = false;
         if(that.tree._root.children[i].file.checked == true) {
@@ -538,7 +588,7 @@ class OverDrive{
         }
         let permarr = [];
         for(let j = 0; j < users.length; j++) {
-           permarr.push(rt[j].children[i]); 
+            permarr.push(rt[j].children[i]); 
         }
         userrecurse(that.tree._root.children[i], permarr, 0, chk, false);
     }
@@ -615,10 +665,10 @@ class OverDrive{
     var that = this;
     var filelist = [];
     this.tree.DFtraversal(function(node) {
-	  if(node.file.checked) {
-		 filelist.push(node.file.fid);
-	  }
-     });
+        if(node.file.checked) {
+		    filelist.push(node.file.fid);
+	    }
+    });
         
     //Initial values:
         // node = child of root
@@ -682,108 +732,314 @@ class OverDrive{
   handleChangePermissions(e) {
     e.preventDefault();
     const users = this.parseUsers();
+    for(var i = 0; i < users.length; i++) {
+        console.log("user" + i + ": " + users[i]);
+    }
     const role = this.getRoleFromUI();
     var that = this;
+    var args = {
+        users: users,
+        userids: [],
+        role: role,
+        rt: [],
+        numcalls: users.length,
+        numrequests: 0,
+        that: that
+    }
+    for(let i = 0; i < users.length; i++) {
+        args.rt.push(undefined);
+        args.userids.push(undefined);
+        identityAuth(function(token) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[i]));
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            xhr.responseType = "json";
+            xhr.onload = function() {
+                if(xhr.status != 200) {
+                    console.log(xhr.response);
+                }
+                //console.log(xhr.response);
+                var permid = xhr.response.id; // = response permid
+                args.userids[i] = permid;
+                console.log("permid before entering: " + permid);
+                that.getPermissionTree(permid, i, that.triggerChangePermissions, args);
+            };
+            xhr.onerror = function() {
+                console.log(xhr.error);
+            };
+            xhr.send();
+        });
+    }
+  }
 
+  triggerChangePermissions(args) {
+    console.log("triggering changePermissions check");
+    //console.log(args);
+    if((args.numrequests == 0) && (args.numcalls == 0)) {
+        args.that.changePermissions(args);
+    }
+  }
+
+  changePermissions(args) {
+    var users = args.users;
+    var userids = args.userids; //permissions ids
+    var role = args.role;
+    var rt = args.rt;
+    var that = args.that;
+	  /*var filelist = [];
     this.tree.DFtraversal(function(node) {
-      if(node.file.name == "folder2") {
-        node.file.checked = true;
-      } else if(node.file.name == "file1") {
-        node.file.checked = true;
-      }
+		  if(node.file.checked) {
+			  filelist.push(node.file.fid);
+		  }
+	  });
+    console.log(filelist);*/
+	this.tree.DFtraversal(function(node) {
+        if(node.file.name == "folder2") {
+            node.file.checked = true;
+        }
+        else if(node.file.name == "file1") {
+            node.file.checked = true;
+        }
     });
     
-	  var newrole = role;
-	  var com = false;
-	  if(newrole == "commenter") {
-		  com = true;
-		  newrole = "reader";
+	var newrole = role;
+	var com = false;
+	if(newrole == "commenter") {
+		com = true;
+		newrole = "reader";
+	}
+    
+    //Initial values:
+        // node = child of root
+        // usernum = 0
+        // chk = whether child of root is checked
+        // initchk = false
+        // perm = array of permission nodes for each user corresponding to node
+    function userrecurse(node, perm, usernum, chk, initchk) {
+        if(chk) {
+            identityAuth(function(token) { 
+                var xhr = new XMLHttpRequest();
+                //console.log("fid: " + encodeURIComponent(filelist[i]));
+                var body = {
+                    'role': newrole,
+                    'type': "user",
+                    'value': users[usernum]
+                }
+                //Commenter role is not valid for a folder.  Give it reader instead
+                if((com) && (!node.file.folder)) {
+                    body.additionalRoles = ["commenter"];
+                }
+                
+                xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                xhr.responseType = "json";
+                xhr.onload = function() {
+                    if(xhr.status != 200) {
+                        console.log(xhr.response);
+                    }
+                    console.log("permission added to " + node.file.name);
+                    //console.log(xhr.response);
+                    if(!initchk) {
+                        if((usernum + 1) < users.length) {
+                            userrecurse(node, perm, usernum + 1, chk, initchk);
+                        }
+                    }
+                    for(let i = 0; i < node.children.length; i++) {
+                        let chk2 = false;
+                        if(node.children[i].file.checked) {
+                            chk2 = true;
+                        }
+                        let permarr = [];
+                        for(let j = 0; j < users.length; j++) {
+                            permarr.push(perm[j].children[i]); 
+                        }
+                        userrecurse(node.children[i], permarr, usernum, chk2, true);
+                    }
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                xhr.send(JSON.stringify(body));
+                //console.log(body);
+                //console.log(JSON.stringify(body));
+                //console.log("sent request");
+            });
+        }
+        else {
+            // TODO: Restore the previous permissions
+            if(initchk) {
+                // oldrole:
+                    // owner
+                    // writer
+                    // commenter
+                    // reader
+                    // none
+                // newrole:
+                    // writer
+                    // commenter
+                    // reader
+                
+                // Discard cases: oldrole newrole
+                // same permissions - overwriting won't do anything
+                    // writer writer
+                    // commenter commenter
+                    // viewer viewer
+                // old > new - overwriting won't do anything
+                    // owner writer
+                    // owner commenter
+                    // owner reader
+                    // writer commenter
+                    // writer viewer
+                    // commenter viewer
+                // viewer commenter - adding commenter to folders adds viewer, since commenter isn't a valid role for folders, thus it propogates changes like viewer
+                    // viewer commenter
+                
+                // Remove cases: oldrole newrole
+                // oldrole = none - Didn't already exist, so was just added
+                    // none writer
+                    // none commenter
+                    // none viewer
+                
+                // Restore cases: oldrole newrole
+                // new > old (excepting viewer commenter) - Overwritten by new role
+                    // commenter writer
+                    // viewer writer
+                
+                var oldrole = perm[usernum].value;
+                if(oldrole == "none") {
+                    // Remove
+                    identityAuth(function(token) {
+                        console.log("sending delete request on " + node.file.name);
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                        xhr.responseType = "json";
+                        xhr.onload = function() {
+                            if(xhr.status != 200) {
+                                console.log(xhr.response);
+                            }
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                let permarr = [];
+                                for(let j = 0; j < users.length; j++) {
+                                    permarr.push(perm[j].children[i]); 
+                                }
+                                userrecurse(node.children[i], permarr, usernum, chk2, true);
+                            }
+                        };
+                        xhr.onerror = function() {
+                            console.log(xhr.error);
+                        };
+                        xhr.send();
+                    });
+                }
+                else if((newrole == "writer") && ((oldrole == "reader") || (oldrole == "commenter"))) {
+                    // Restore
+                    identityAuth(function(token) {
+                        
+                        var body = {
+                            role: oldrole
+                        }
+                        if(oldrole == "commenter") {
+                            body.additionalRoles = ["commenter"];
+                            body.role = "reader";
+                        }
+                        
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                        xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                        xhr.responseType = "json";
+                        xhr.onload = function() {
+                            if(xhr.status != 200) {
+                                console.log(xhr.response);
+                            }
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                let permarr = [];
+                                for(let j = 0; j < users.length; j++) {
+                                    permarr.push(perm[j].children[i]); 
+                                }
+                                userrecurse(node.children[i], permarr, usernum, chk2, true);
+                            }
+                        };
+                        xhr.onerror = function() {
+                            console.log(xhr.error);
+                        };
+                        xhr.send(JSON.stringify(body));
+                    });
+                }
+                else {
+                    // No restore needed
+                    for(let i = 0; i < node.children.length; i++) {
+                        let chk2 = false;
+                        if(node.children[i].file.checked) {
+                            chk2 = true;
+                        }
+                        let permarr = [];
+                        for(let j = 0; j < users.length; j++) {
+                            permarr.push(perm[j].children[i]); 
+                        }
+                        userrecurse(node.children[i], permarr, usernum, chk2, true);
+                    }
+                }  
+            }
+            else {
+                for(let i = 0; i < node.children.length; i++) {
+                    let chk2 = false;
+                    if(node.children[i].file.checked) {
+                        chk2 = true;
+                    }
+                    let permarr = [];
+                    for(let j = 0; j < users.length; j++) {
+                        permarr.push(perm[j].children[i]); 
+                    }
+                    userrecurse(node.children[i], permarr, 0, chk2, false);
+                }
+            }
+        }
     }
     
-    function userrecurse(node, usernum, chk, initchk) {
-      if(chk) {
-          identityAuth(function(token) { 
-              var xhr = new XMLHttpRequest();
-              //console.log("fid: " + encodeURIComponent(filelist[i]));
-              var body = {
-                  'role': newrole,
-                  'type': "user",
-                  'value': users[usernum]
-              }
-              if(com) {
-                  body.additionalRoles = ["commenter"];
-              }
-              
-              xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
-              xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-              xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-              xhr.onload = function() {
-                  //console.log(xhr.response);
-                  if(!initchk) {
-                      if((usernum + 1) < users.length) {
-                          userrecurse(node, usernum + 1, chk, initchk);
-                      }
-                  }
-                  for(var i = 0; i < node.children.length; i++) {
-                      var chk2 = false;
-                      if(node.children[i].file.checked) {
-                          chk2 = true;
-                      }
-                      userrecurse(node.children[i], usernum, chk2, true);
-                  }
-              };
-              xhr.onerror = function() {
-                  console.log(xhr.error);
-              };
-              xhr.send(JSON.stringify(body));
-              //console.log(body);
-              //console.log(JSON.stringify(body));
-              //console.log("sent request");
-          });
-      } else {
-          // TODO: Restore the previous permissions
-          if(initchk) {
-              /*var xhr = new XMLHttpRequest();
-              //TODO: BODY
-              
-              //TODO: Open request
-              xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-              xhr.onload = function() {*/
-                  for(var i = 0; i < node.children.length; i++) {
-                      var chk2 = false;
-                      if(node.children[i].file.checked) {
-                          chk2 = true;
-                      }
-                      userrecurse(node.children[i], usernum, chk2, true);
-                  }
-              /*};
-              xhr.onerror = function() {
-                  console.log(xhr.error);
-              };*/
-              //TODO: SEND
-              
-          }
-          else {
-              for(var i = 0; i < node.children.length; i++) {
-                  var chk2 = false;
-                  if(node.children[i].file.checked) {
-                      chk2 = true;
-                  }
-                  userrecurse(node.children[i], 0, chk2, false);
-              }
-          }
-      }
+	//console.log(body);
+    for(let i = 0; i < that.tree._root.children.length; i++) {
+        let chk = false;
+        if(that.tree._root.children[i].file.checked == true) {
+            chk = true;
+        }
+        let permarr = [];
+        for(let j = 0; j < users.length; j++) {
+            permarr.push(rt[j].children[i]); 
+        }
+        userrecurse(that.tree._root.children[i], permarr, 0, chk, false);
     }
+        /*for(var i = 0; i < filelist.length; i++) {
+            for(var j = 0; j < users.length; j++) {
+                //body.value = users[j];
+                body.value = users[j];
+                //console.log(users[j]); */
+                /*var request = this.gapi.client.drive.permissions.insert({
+                    'fid': filelist[i],
+                    'resource': body,
+                    'sendNotificationEmails': false
+                });
+                request.execute(function(reponse) {
+                    if(response.error) {
+                        console.log("Error with inserting permission");
+                    }
+                });*/
 
-    for(var i = 0; i < that.tree._root.children.length; i++) {
-      var chk = false;
-      if(that.tree._root.children[i].file.checked == true) {
-          chk = true;
-      }
-      userrecurse(that.tree._root.children[i], 0, chk, false);
-    }
-
-
+                //console.log(body);
+                //console.log(JSON.stringify(body));
+                //console.log("sent request");
+            /*}
+        } */
   }
 
   parseUsers() {
@@ -798,11 +1054,48 @@ class OverDrive{
     return role;
   }
   
-  // Assumes a fid for simplicity.  When implemented it might take a different argument
-  getpermissions(fid) {
-	  var permuserlist = {owner:undefined, canshare:undefined, editors:[], commentors:[], viewers:[], anyone:undefined};
-	  
-	  var request = this.gapi.client.drive.files.get({
+  // async
+  getPermissions(fid) {
+	var getflag = false;
+	var listflag = false;
+	var permuserlist = {
+		owner:undefined,
+		canshare:undefined,
+		editors:[],
+		commenters:[],
+		viewers:[],
+		anyone:undefined
+	}
+	function triggercompletion() {
+		if((getflag) && (listflag)) {
+            console.log(permuserlist);
+            // TODO: Clayton set what you want to call here - use permuserList
+            overDrive.currentPermissions = permuserlist;
+            overDrive.populatePermissions();
+		}
+	}
+	
+	identityAuth(function(token) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fid));
+		xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.responseType = "json";
+        xhr.onload = function() {
+			if(xhr.status != 200) {
+				console.log(xhr.response);
+			}
+			else {
+				permuserlist.canshare = xhr.response.writersCanShare;
+				getflag = true;
+				triggercompletion();
+			}
+		};
+		xhr.onerror = function() {
+			console.log(xhr.error);
+		};
+		xhr.send();
+		
+		/*var request = this.gapi.client.drive.files.get({
 		'fileId': fid,
 		'fields': "writersCanShare"
 	  });
@@ -813,16 +1106,115 @@ class OverDrive{
 		  else {
 			  canshare = response.writersCanShare;
 		  }
-	  });
-	  
-	  request = this.gapi.client.drive.permissions.list({
+	  });*/
+		
+		var xhr2 = new XMLHttpRequest();
+		xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fid) + "/permissions");
+		xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
+		xhr2.responseType = "json";
+		xhr2.onload = function() {
+			if(xhr2.status != 200) {
+				console.log(xhr2.response);
+			}
+			else {
+				var npt = xhr2.response.nextPageToken;
+				var permlist = xhr2.response.items;
+				// Async
+				function nptcheck() {
+					if(npt) {
+						var xhr3 = new XMLHttpRequest();
+						xhr3.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fid) + "/permissions?pageToken=" + encodeURIComponent(npt));
+						xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
+						xhr3.onload = function() {
+							if(xhr3.status != 200) {
+								console.log(xhr3.response);
+							}
+							else {
+								npt = xhr3.response.nextPageToken;
+								permlist.concat(xhr3.response.items);
+								nptcheck();
+							}
+						};
+						xhr3.onerror = function() {
+							console.log(xhr.error);
+						};
+						xhr3.send();
+					}
+					else {
+						// Compile data
+						for(let i = 0; i < permlist.length; i++) {
+							//Get type of thing here
+							if(permlist[i].type == "user") {
+								if(permlist[i].role == "reader") {
+									if(permlist[i].additionalRoles) {
+										permuserlist.commenters.push(permlist[i].emailAddress);
+									}
+									else {
+										permuserlist.viewers.push(permlist[i].emailAddress);  
+									}
+								}
+								else if(permlist[i].role == "writer") {
+									permuserlist.editors.push(permlist[i].emailAddress);
+								}
+								else if(permlist[i].role == "owner") {
+									permuserlist.owner = permlist[i].emailAddress;
+									console.log("Owner found.  There should only be one of these");
+								}
+								else {
+									console.log("invalid user role");
+								}
+							}
+							else if(permlist[i].type == "group") {
+								// TODO: Work with groups
+							}
+							// Check if anyone with the link can ___
+							else if(permlist[i].type == "anyone") {
+								console.log("Anyone found.  There should only be one of these");
+								if(permlist[i].role == "reader") {
+									if(permlist[i].additionalRoles) {
+										permuserlist.anyone = "comment";
+									}
+									else {
+										permuserlist.anyone = "view";
+									}
+								}
+								else if(permlist[i].role == "writer") {
+									permuserlist.anyone = "edit";
+								}
+								else {
+									console.log("invalid anyone role");
+								}
+							}
+							else {
+								// Domain - probably can ignore
+							}
+						}
+						
+						// Sort output
+						permuserlist.editors.sort();
+						permuserlist.commenters.sort();
+						permuserlist.viewers.sort();
+						
+						listflag = true;
+						triggercompletion();
+					}
+				}
+				nptcheck();
+			}
+		};
+		xhr2.onerror = function() {
+			console.log(xhr2.error);
+		};
+		xhr2.send();
+	});
+	  /*request = this.gapi.client.drive.permissions.list({
 		  'fileId': fid
 	  });
 	  request.execute(function(response) {
 		  if(response.error) {
 			  console.log("Error with permission list execution");
 		  }
-		  else {
+		  else { 
 			  var permlist = response.items;
 			  var npt = response.nextPageToken;
 			  while(npt) {
@@ -839,61 +1231,7 @@ class OverDrive{
 						  npt = response.nextPageToken;
 					  }
 				  });
-			  }
-			  for(i = 0; i < permlist.length; i++) {
-				  //Get type of thing here
-				  if(permlist[i].type == "user") {
-					  if(permlist[i].role == "reader") {
-						  if(permlist[i].additionalRoles.length != 0) {
-							  permuserlist.commentors.push(permlist[i].emailAddress);
-						  }
-						  else {
-							  permuserlist.viewers.push(permlist[i].emailAddress);  
-						  }
-					  }
-					  else if(permlist[i].role == "writer") {
-						  permuserlist.editors.push(permlist[i].emailAddress);
-					  }
-					  else if(permlist[i].role == "owner") {
-						  permuserlist.owner = permlist[i].emailAddress;
-						  console.log("Owner found.  There should only be one of these");
-					  }
-					  else {
-						  console.log("invalid user role");
-					  }
-				  }
-				  else if(permlist[i].type == "group") {
-					  // TODO: Work with groups
-				  }
-				  // Check if anyone with the link can ___
-				  else if(permlist[i].type == "anyone") {
-					  console.log("Anyone found.  Ther should only be one of these");
-					  if(permlist[i].role == "reader") {
-						  if(permlist[i].additionalRoles.length != 0) {
-							  permuserlist.anyone = "comment";
-						  }
-						  else {
-							  permuserlist.anyone = "view";
-						  }
-					  }
-					  else if(permlist[i].role == "writer") {
-						  permuserlist.anyone = "edit";
-					  }
-					  else {
-						  console.log("invalid anyone role");
-					  }
-				  }
-				  else {
-					  // Domain - probably can ignore
-				  }
-			  }
-		  }
-	  })
-	  permuserlist.organizers.sort();
-	  permuserlist.editors.sort();
-	  permuserlist.commentors.sort();
-	  permuserlist.viewers.sort();
-	  return permuserlist;
+			  } */
   }
 
   // NOTE: This function is asynchronous.  See populateTree() below for reasoning
@@ -1227,7 +1565,7 @@ class OverDrive{
   (function recursive(currNode) {
         
         if (currNode.file.fid) {
-        	fileBrowserUI += '<li>' + currNode.file.name;		
+        	fileBrowserUI += '<li id="' + currNode.file.fid + '" >' + currNode.file.name;		
         }
         if (currNode.children.length != 0) {
         	fileBrowserUI += '<ul>'
