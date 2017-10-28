@@ -176,7 +176,7 @@ class OverDrive{
         } else {
             //permissionsBox.querySelector('.file').innerHTML = '<ul><li>' + fileName + '</li></ul>';
             //$('.permissions-box .file').jstree();
-            permissionsBox.style.left = (e.pageX + 5) + 'px';
+            permissionsBox.style.left = (e.pageX + 15) + 'px';
             permissionsBox.style.top = (e.pageY + 5) + 'px';
             this.currentFid = fid;
             this.getPermissions(fid);
