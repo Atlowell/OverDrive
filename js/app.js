@@ -179,6 +179,10 @@ class OverDrive{
 
   populatePermissions() {
     const permissionsBox = document.querySelector('.permissions-box');
+    if (this.currentPermissions.canshare)
+        permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: Yes';
+    else
+    permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: No';
     permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
     permissionsBox.querySelector('.writers').innerHTML = '';
     for (let i = 0; i < this.currentPermissions.editors.length; i++) {
@@ -192,7 +196,6 @@ class OverDrive{
     for (let i = 0; i < this.currentPermissions.viewers.length; i++) {
         permissionsBox.querySelector('.readers').innerHTML += '<li>' + this.currentPermissions.viewers[i] + '<\li>';
     }
-
   }
   
   // Will only get permissions from files below those folders that are checked
