@@ -130,9 +130,9 @@ class OverDrive{
   triggerDisplayTree() {
     //console.log("numrequests: " + this.numrequests + ", numcalls: " + this.numcalls);
     if((this.numrequests == 0) && (this.numcalls == 0)) {
-      this.displayTree();
-      this.setUpEventListeners();
-	  this.getPermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
+        this.displayTree();
+        //this.setUpEventListeners();
+	    this.getPermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
     }
   }
   
@@ -157,7 +157,7 @@ class OverDrive{
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
     //document.addEventListener('mousemove', (e) => this.displayPermissions(e));
-    fileBrowser.addEventListener('click', (e) => this.displayPermissions(e));
+    fileBrowser.addEventListener('mousedown', (e) => this.displayPermissions(e));
   }
   
   //Move permissions window
@@ -165,18 +165,26 @@ class OverDrive{
     e.preventDefault();
     if (e.target.classList.contains("jstree-anchor")) {
         //Clicked item is file
-        //Update permissions box
-        const permissionsBox = document.querySelector('.permissions-box');
-        permissionsBox.style.left = (e.pageX + 5) + 'px';
-        permissionsBox.style.top = (e.pageY + 5) + 'px';
-        console.log(e.target);
         const fid = e.target.id.slice(0, e.target.id.lastIndexOf("_anchor"));
+        const permissionsBox = document.querySelector('.permissions-box');
         console.log(fid);
-        this.currentFid = fid;
-        this.getPermissions(fid);
+        console.log(this.currentFid);
+        console.log(fid === this.currentFid);
+        if (fid === this.currentFid) {
+            permissionsBox.style.left = (-500) + 'px';
+            permissionsBox.style.top = (-500) + 'px';
+            this.currentFid = 0;
+        } else {
+            permissionsBox.style.left = (e.pageX + 5) + 'px';
+            permissionsBox.style.top = (e.pageY + 5) + 'px';
+            this.currentFid = fid;
+            this.getPermissions(fid); 
+        }
+            
     }
   }
 
+  //Populate permissions box with data
   populatePermissions() {
     const permissionsBox = document.querySelector('.permissions-box');
     if (this.currentPermissions.canshare)
