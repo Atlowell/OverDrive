@@ -77,9 +77,9 @@ class TreeRoot{
     //if parent was found, insert file into its children[]
     if (cur_parent) {
     	file.parent = cur_parent;
-      cur_parent.children.push(file);
+        cur_parent.children.push(file);
     } else {
-       throw new Error('Cannot add node to a non-existent parent.');
+        throw new Error('Cannot add node to a non-existent parent.');
     }*/
   }
   
@@ -121,7 +121,7 @@ class OverDrive{
     this.setUpEventListeners();
 
     //permissions box
-    $('.permissions-box .file').jstree();
+    //$('.permissions-box .file').jstree();
     const permissionsBox = document.querySelector('.permissions-box');
     permissionsBox.style.left = (-500) + 'px';
     permissionsBox.style.top = (-500) + 'px';
@@ -167,20 +167,20 @@ class OverDrive{
         //Clicked item is file
         const fid = e.target.id.slice(0, e.target.id.lastIndexOf("_anchor"));
         const permissionsBox = document.querySelector('.permissions-box');
-        console.log(fid);
-        console.log(this.currentFid);
-        console.log(fid === this.currentFid);
+        console.log(e.target.innerHTML);
+        //const fileName = e.target.innerHTML.slice(e.target.innerHTML.lastIndexOf('</i>') + 4);
         if (fid === this.currentFid) {
             permissionsBox.style.left = (-500) + 'px';
             permissionsBox.style.top = (-500) + 'px';
             this.currentFid = 0;
         } else {
+            //permissionsBox.querySelector('.file').innerHTML = '<ul><li>' + fileName + '</li></ul>';
+            //$('.permissions-box .file').jstree();
             permissionsBox.style.left = (e.pageX + 5) + 'px';
             permissionsBox.style.top = (e.pageY + 5) + 'px';
             this.currentFid = fid;
-            this.getPermissions(fid); 
+            this.getPermissions(fid);
         }
-            
     }
   }
 
