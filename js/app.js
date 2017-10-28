@@ -129,6 +129,7 @@ class OverDrive{
     if((this.numrequests == 0) && (this.numcalls == 0)) {
       this.displayTree();
       this.setUpEventListeners();
+	  this.getpermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
     }
   }
   
@@ -946,11 +947,46 @@ class OverDrive{
     return role;
   }
   
-  // Assumes a fid for simplicity.  When implemented it might take a different argument
+  // async
   getpermissions(fid) {
-	  var permuserlist = {owner:undefined, canshare:undefined, editors:[], commentors:[], viewers:[], anyone:undefined};
-	  
-	  var request = this.gapi.client.drive.files.get({
+	var getflag = false;
+	var listflag = false;
+	var permuserlist = {
+		owner:undefined,
+		canshare:undefined,
+		editors:[],
+		commentors:[],
+		viewers:[],
+		anyone:undefined
+	}
+	function triggercompletion() {
+		if((getflag) && (listflag)) {
+			console.log(permuserlist);
+			// TODO: Clayton set what you want to call here - use permuserlist
+		}
+	}
+	
+	identityAuth(function(token) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fid));
+		xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.responseType = "json";
+        xhr.onload = function() {
+			if(xhr.status != 200) {
+				console.log(xhr.response);
+			}
+			else {
+				permuserlist.canshare = xhr.response.writersCanShare;
+				getflag = true;
+				triggercompletion();
+			}
+		};
+		xhr.onerror = function() {
+			console.log(xhr.error);
+		};
+		xhr.send();
+		
+		/*var request = this.gapi.client.drive.files.get({
 		'fileId': fid,
 		'fields': "writersCanShare"
 	  });
@@ -961,16 +997,115 @@ class OverDrive{
 		  else {
 			  canshare = response.writersCanShare;
 		  }
-	  });
-	  
-	  request = this.gapi.client.drive.permissions.list({
+	  });*/
+		
+		var xhr2 = new XMLHttpRequest();
+		xhr2.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fid) + "/permissions");
+		xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
+		xhr2.responseType = "json";
+		xhr2.onload = function() {
+			if(xhr2.status != 200) {
+				console.log(xhr2.response);
+			}
+			else {
+				var npt = xhr2.response.nextPageToken;
+				var permlist = xhr2.response.items;
+				// Async
+				function nptcheck() {
+					if(npt) {
+						var xhr3 = new XMLHttpRequest();
+						xhr3.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fid) + "/permissions?pageToken=" + encodeURIComponent(npt));
+						xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
+						xhr3.onload = function() {
+							if(xhr3.status != 200) {
+								console.log(xhr3.response);
+							}
+							else {
+								npt = xhr3.response.nextPageToken;
+								permlist.concat(xhr3.response.items);
+								nptcheck();
+							}
+						};
+						xhr3.onerror = function() {
+							console.log(xhr.error);
+						};
+						xhr3.send();
+					}
+					else {
+						// Compile data
+						for(let i = 0; i < permlist.length; i++) {
+							//Get type of thing here
+							if(permlist[i].type == "user") {
+								if(permlist[i].role == "reader") {
+									if(permlist[i].additionalRoles) {
+										permuserlist.commentors.push(permlist[i].emailAddress);
+									}
+									else {
+										permuserlist.viewers.push(permlist[i].emailAddress);  
+									}
+								}
+								else if(permlist[i].role == "writer") {
+									permuserlist.editors.push(permlist[i].emailAddress);
+								}
+								else if(permlist[i].role == "owner") {
+									permuserlist.owner = permlist[i].emailAddress;
+									console.log("Owner found.  There should only be one of these");
+								}
+								else {
+									console.log("invalid user role");
+								}
+							}
+							else if(permlist[i].type == "group") {
+								// TODO: Work with groups
+							}
+							// Check if anyone with the link can ___
+							else if(permlist[i].type == "anyone") {
+								console.log("Anyone found.  There should only be one of these");
+								if(permlist[i].role == "reader") {
+									if(permlist[i].additionalRoles) {
+										permuserlist.anyone = "comment";
+									}
+									else {
+										permuserlist.anyone = "view";
+									}
+								}
+								else if(permlist[i].role == "writer") {
+									permuserlist.anyone = "edit";
+								}
+								else {
+									console.log("invalid anyone role");
+								}
+							}
+							else {
+								// Domain - probably can ignore
+							}
+						}
+						
+						// Sort output
+						permuserlist.editors.sort();
+						permuserlist.commentors.sort();
+						permuserlist.viewers.sort();
+						
+						listflag = true;
+						triggercompletion();
+					}
+				}
+				nptcheck();
+			}
+		};
+		xhr2.onerror = function() {
+			console.log(xhr2.error);
+		};
+		xhr2.send();
+	});
+	  /*request = this.gapi.client.drive.permissions.list({
 		  'fileId': fid
 	  });
 	  request.execute(function(response) {
 		  if(response.error) {
 			  console.log("Error with permission list execution");
 		  }
-		  else {
+		  else { 
 			  var permlist = response.items;
 			  var npt = response.nextPageToken;
 			  while(npt) {
@@ -987,61 +1122,7 @@ class OverDrive{
 						  npt = response.nextPageToken;
 					  }
 				  });
-			  }
-			  for(i = 0; i < permlist.length; i++) {
-				  //Get type of thing here
-				  if(permlist[i].type == "user") {
-					  if(permlist[i].role == "reader") {
-						  if(permlist[i].additionalRoles.length != 0) {
-							  permuserlist.commentors.push(permlist[i].emailAddress);
-						  }
-						  else {
-							  permuserlist.viewers.push(permlist[i].emailAddress);  
-						  }
-					  }
-					  else if(permlist[i].role == "writer") {
-						  permuserlist.editors.push(permlist[i].emailAddress);
-					  }
-					  else if(permlist[i].role == "owner") {
-						  permuserlist.owner = permlist[i].emailAddress;
-						  console.log("Owner found.  There should only be one of these");
-					  }
-					  else {
-						  console.log("invalid user role");
-					  }
-				  }
-				  else if(permlist[i].type == "group") {
-					  // TODO: Work with groups
-				  }
-				  // Check if anyone with the link can ___
-				  else if(permlist[i].type == "anyone") {
-					  console.log("Anyone found.  Ther should only be one of these");
-					  if(permlist[i].role == "reader") {
-						  if(permlist[i].additionalRoles.length != 0) {
-							  permuserlist.anyone = "comment";
-						  }
-						  else {
-							  permuserlist.anyone = "view";
-						  }
-					  }
-					  else if(permlist[i].role == "writer") {
-						  permuserlist.anyone = "edit";
-					  }
-					  else {
-						  console.log("invalid anyone role");
-					  }
-				  }
-				  else {
-					  // Domain - probably can ignore
-				  }
-			  }
-		  }
-	  })
-	  permuserlist.organizers.sort();
-	  permuserlist.editors.sort();
-	  permuserlist.commentors.sort();
-	  permuserlist.viewers.sort();
-	  return permuserlist;
+			  } */
   }
 
   // NOTE: This function is asynchronous.  See populateTree() below for reasoning
