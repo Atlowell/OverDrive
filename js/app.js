@@ -162,6 +162,7 @@ class OverDrive{
     const permissionsBox = document.querySelector('.permissions-box');
     permissionsBox.style.left = (e.pageX + 5) + 'px';
     permissionsBox.style.top = (e.pageY + 5) + 'px';
+    console.log(e.target);
   }
   
   // Will only get permissions from files below those folders that are checked
@@ -1374,7 +1375,7 @@ class OverDrive{
   (function recursive(currNode) {
         
         if (currNode.file.fid) {
-        	fileBrowserUI += '<li>' + currNode.file.name;		
+        	fileBrowserUI += '<li id="' + currNode.file.fid + '" >' + currNode.file.name;		
         }
         if (currNode.children.length != 0) {
         	fileBrowserUI += '<ul>'
