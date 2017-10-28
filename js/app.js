@@ -110,6 +110,9 @@ class OverDrive{
     this.tree = new TreeRoot([]);
     this.numrequests = 0;
     this.numcalls = 0;
+    this.currentName = null;
+    this.currentFid = null;
+    this.currentPermissions = null;
     //this.startedtopopulate = false;
     //this.lockrequests = false;
     //this.lockitems = false;
@@ -129,7 +132,7 @@ class OverDrive{
     if((this.numrequests == 0) && (this.numcalls == 0)) {
       this.displayTree();
       this.setUpEventListeners();
-	  this.getpermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
+	  this.getPermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
     }
   }
   
@@ -157,13 +160,31 @@ class OverDrive{
     fileBrowser.addEventListener('click', (e) => this.displayPermissions(e));
   }
   
-  //Move permissions window and fill with data
+  //Move permissions window
   displayPermissions(e) {
     e.preventDefault();
+    if (e.target.classList.contains("jstree-anchor")) {
+        //Clicked item is file
+        //Update permissions box
+        const permissionsBox = document.querySelector('.permissions-box');
+        permissionsBox.style.left = (e.pageX + 5) + 'px';
+        permissionsBox.style.top = (e.pageY + 5) + 'px';
+        console.log(e.target);
+        const fid = e.target.id.slice(0, e.target.id.lastIndexOf("_anchor"));
+        console.log(fid);
+        this.currentFid = fid;
+        this.getPermissions(fid);
+    }
+  }
+
+  //
+  populatePermissions() {
     const permissionsBox = document.querySelector('.permissions-box');
-    permissionsBox.style.left = (e.pageX + 5) + 'px';
-    permissionsBox.style.top = (e.pageY + 5) + 'px';
-    console.log(e.target);
+    permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
+    permissionsBox.querySelector('.writers').innerHTML = '';
+    for (let i = 0; i < this.currentPermissions.editors.length; i++) {
+        permissionsBox.querySelector('.writers').innerHTML += '<li>' + this.currentPermissions.editors[i] + '<\li>';
+    }
   }
   
   // Will only get permissions from files below those folders that are checked
@@ -349,7 +370,7 @@ class OverDrive{
                 // Discard cases: oldrole newrole
                 // same permissions - overwriting won't do anything
                     // writer writer
-                    // commentor commenter
+                    // commenter commenter
                     // viewer viewer
                 // old > new - overwriting won't do anything
                     // owner writer
@@ -776,7 +797,7 @@ class OverDrive{
                 // Discard cases: oldrole newrole
                 // same permissions - overwriting won't do anything
                     // writer writer
-                    // commentor commenter
+                    // commenter commenter
                     // viewer viewer
                 // old > new - overwriting won't do anything
                     // owner writer
@@ -948,21 +969,23 @@ class OverDrive{
   }
   
   // async
-  getpermissions(fid) {
+  getPermissions(fid) {
 	var getflag = false;
 	var listflag = false;
 	var permuserlist = {
 		owner:undefined,
 		canshare:undefined,
 		editors:[],
-		commentors:[],
+		commenters:[],
 		viewers:[],
 		anyone:undefined
 	}
 	function triggercompletion() {
 		if((getflag) && (listflag)) {
-			console.log(permuserlist);
-			// TODO: Clayton set what you want to call here - use permuserlist
+            console.log(permuserlist);
+            // TODO: Clayton set what you want to call here - use permuserList
+            overDrive.currentPermissions = permuserlist;
+            overDrive.populatePermissions();
 		}
 	}
 	
@@ -1038,7 +1061,7 @@ class OverDrive{
 							if(permlist[i].type == "user") {
 								if(permlist[i].role == "reader") {
 									if(permlist[i].additionalRoles) {
-										permuserlist.commentors.push(permlist[i].emailAddress);
+										permuserlist.commenters.push(permlist[i].emailAddress);
 									}
 									else {
 										permuserlist.viewers.push(permlist[i].emailAddress);  
@@ -1083,7 +1106,7 @@ class OverDrive{
 						
 						// Sort output
 						permuserlist.editors.sort();
-						permuserlist.commentors.sort();
+						permuserlist.commenters.sort();
 						permuserlist.viewers.sort();
 						
 						listflag = true;
