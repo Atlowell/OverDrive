@@ -152,12 +152,34 @@ class OverDrive{
     const changeOwnerBtn = actionsForm.querySelector('.change-owner');
     const changePermBtn = actionsForm.querySelector('.change-permissions');
     const fileBrowser = document.querySelector('div#file-browser');
+    const checkBox_fileIcon_fileName = document.querySelectorAll('.jstree-anchor');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
     //document.addEventListener('mousemove', (e) => this.displayPermissions(e));
     fileBrowser.addEventListener('click', (e) => this.displayPermissions(e));
+
+    /*for (var ele of checkBox_fileIcon_fileName) {
+        ele.addEventListener('click', (e) => {
+            e.preventDefault;
+            console.dir(ele)
+            var pos = ele.innerHTML.lastIndexOf('</i>');
+            console.log(pos)
+            pos += 4;
+            var fileName = ele.innerHTML.slice(pos);
+            console.log("filename: " + fileName)
+            this.tree.DFtraversal(function(node) {
+            console.log("from: " + node.file.checked)
+            if (fileName == node.file.name) {
+                node.file.checked = !node.file.checked;
+            }
+            console.log("to: " + node.file.checked)
+            })
+        })
+        //console.log(ele.innerHTML)
+    }*/
+
   }
   
   //Move permissions window
@@ -1494,15 +1516,44 @@ class OverDrive{
         
     })(this.tree._root); //passing to recursive as initial parameter the _root node
   
-    console.log("displaytree");
-    console.log(fileBrowserUI);
+    //console.log("displaytree");
+    //console.log(fileBrowserUI);
 
     document.getElementById('file-browser').innerHTML = fileBrowserUI;
-    $('#file-browser').jstree({
-      "plugins" : ["checkbox"]
+    var fileTree = $('#file-browser');
+    fileTree.jstree({
+        "checkbox" : {
+            "tie_selection" : false
+        },
+      "plugins" : ["checkbox"],
     });
-    console.log("jstree happened")
-  }
+
+    fileTree.on("check_node.jstree", function(event, data) {
+        console.log("CHECKED:" + data.node.text)
+        this.tree.DFtraversal(function(node) {
+            console.log("from: " + node.file.checked)
+            console.log(node.file.name)
+            if (data.node.text == node.file.name) {
+                node.file.checked = true;
+            }
+            console.log("to: " + node.file.checked)
+            })
+    }.bind(this))
+
+    fileTree.on("uncheck_node.jstree", function(event, data) {
+        console.log("CHECKED:" + data.node.text)
+        console.log("CHECKED:" + data.node.text)
+        this.tree.DFtraversal(function(node) {
+            console.log("from: " + node.file.checked)
+            console.log(node.file.name)
+            if (data.node.text == node.file.name) {
+                node.file.checked = false;
+            }
+            console.log("to: " + node.file.checked)
+            })
+    //console.log("jstree happened")
+  }.bind(this))
+}
   
   displayTreeRecurse(node) {
     //Add file to tree UI
