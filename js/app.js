@@ -715,21 +715,42 @@ class OverDrive{
                 xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filetoremove.node.file.fid));
                 xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                 xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                xhr.onload = function() {
-                    //console.log(xhr.response);
-                    //if(!initchk) {
-                     //   if((usernum + 1) < users.length) {
-                     //       userrecurse(node, usernum + 1, chk, initchk);
-                      //  }
-                  //  }
-                    for(var i = 0; i < filetoremove.children.length; i++) {
-                        var chk2 = false;
-                        if(node.children[i].file.checked) {
-                            chk2 = true;
+  
+
+		 xhr.onload = function() {
+                        if(xhr.status == 200) {
+                            console.log("User Removed from " + node.file.name);
+                            //console.log(xhr.response);
+                            if(!initchk) {
+                                if((usernum + 1) < users.length) {
+                                    userrecurse(node, perm, usernum + 1, chk, initchk);
+                                }
+                            }
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                let permarr = [];
+                                for(let j = 0; j < users.length; j++) {
+                                    permarr.push(perm[j].children[i]); 
+                                }
+                                userrecurse(node.children[i], permarr, usernum, chk2, true);
+                            }
                         }
-                        userrecurse(node.children[i], usernum, chk2, true);
-                    }
-                };
+                        else if(xhr.status == 500) {
+                            console.log("Error with remove request in removeusers");
+                            console.log(xhr.response);
+                            console.log("Retrying " + numretries + " more times");
+                            numretries--;
+                          
+                        }
+                        else {
+                            console.log("Error with remove request in removeusers");
+                            console.log(xhr.response);
+                        }
+                    };
+
                 xhr.onerror = function() {
                     console.log(xhr.error);
                 };
@@ -739,6 +760,64 @@ class OverDrive{
                 //console.log("sent request");
             });
         }
+/*
+	 else {
+            // TODO: Restore the previous permissions
+            if(initchk) {
+                console.log(perm);
+                var oldrole = perm[usernum].value;
+                if(oldrole == "none") {
+                    // Remove
+                    console.log("initiating remove request for " + node.file.name);
+                    identityAuth(function(token) {
+                        var numretries = 5;
+                        function removeRequest() {
+                            console.log("sending delete request on " + node.file.name);
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                            xhr.responseType = "json";
+                            xhr.onload = function() {
+                                //console.log("delete request returned");
+                                //console.log(xhr.response);
+                                if(xhr.status == 204) {
+                                    for(let i = 0; i < node.children.length; i++) {
+                                        let chk2 = false;
+                                        if(node.children[i].file.checked) {
+                                            chk2 = true;
+                                        }
+                                        let permarr = [];
+                                        for(let j = 0; j < users.length; j++) {
+                                            permarr.push(perm[j].children[i]); 
+                                        }
+                                        userrecurse(node.children[i], permarr, usernum, chk2, true);
+                                    }
+                                }
+                                else if((xhr.status == 500) || (xhr.status == 404)) {
+                                    console.log("Error with remove request in removeusers");
+                                    console.log(xhr.response);
+                                    console.log("Retrying " + numretries + " more times");
+                                    numretries--;
+                                    if(numretries >= 0) {
+                                        setTimeout(function() {
+                                            removeRequest();
+                                        }, 500);
+                                    }
+                                }
+                                else {
+                                    console.log("Error with remove request in removeusers");
+                                    console.log(xhr.response);
+                                }
+                            };
+                            xhr.onerror = function() {
+                                console.log(xhr.error);
+                            };
+                            xhr.send();
+                        }
+                        removeRequest();
+                    });
+                }
+*/
  
     }
     
