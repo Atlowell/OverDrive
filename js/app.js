@@ -166,7 +166,7 @@ class OverDrive{
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
-    fileBrowser.addEventListener('mousedown', (e) => this.displayPermissions(e));
+    fileBrowser.addEventListener('contextmenu', (e) => this.displayPermissions(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
