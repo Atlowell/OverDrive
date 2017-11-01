@@ -118,7 +118,7 @@ class OverDrive{
     //this.lockitems = false;
     //console.log(this.tree);
     this.populateTree(); // ASYNC!
-    //this.setUpEventListeners();
+    this.setUpEventListeners();
 
     //permissions box
     //$('.permissions-box .file').jstree();
@@ -139,7 +139,7 @@ class OverDrive{
             }
         });
         this.displayTree();
-        this.setUpEventListeners();
+        //this.setUpEventListeners();
         //this.getPermissions("15UXz-ORMDjp34Hejbuwto3-UWQmREGXU0438537xWjw");
     }
   }
@@ -165,9 +165,7 @@ class OverDrive{
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
-    //document.addEventListener('mousemove', (e) => this.displayPermissions(e));
-<<<<<<< HEAD
-    fileBrowser.addEventListener('click', (e) => this.displayPermissions(e));
+    fileBrowser.addEventListener('mousedown', (e) => this.displayPermissions(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -188,10 +186,6 @@ class OverDrive{
         })
         //console.log(ele.innerHTML)
     }*/
-
-=======
-    fileBrowser.addEventListener('mousedown', (e) => this.displayPermissions(e));
->>>>>>> 1a0129f263d11ea2d3fe943ba0e1149b11298e2b
   }
   
   //Move permissions window
@@ -228,15 +222,15 @@ class OverDrive{
     permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
     permissionsBox.querySelector('.writers').innerHTML = '';
     for (let i = 0; i < this.currentPermissions.editors.length; i++) {
-        permissionsBox.querySelector('.writers').innerHTML += '<li>' + this.currentPermissions.editors[i] + '<\li>';
+        permissionsBox.querySelector('.writers').innerHTML += '<li>' + this.currentPermissions.editors[i] + '</li>';
     }
     permissionsBox.querySelector('.commenters').innerHTML = '';
     for (let i = 0; i < this.currentPermissions.commenters.length; i++) {
-        permissionsBox.querySelector('.commenters').innerHTML += '<li>' + this.currentPermissions.commenters[i] + '<\li>';
+        permissionsBox.querySelector('.commenters').innerHTML += '<li>' + this.currentPermissions.commenters[i] + '</li>';
     }
     permissionsBox.querySelector('.readers').innerHTML = '';
     for (let i = 0; i < this.currentPermissions.viewers.length; i++) {
-        permissionsBox.querySelector('.readers').innerHTML += '<li>' + this.currentPermissions.viewers[i] + '<\li>';
+        permissionsBox.querySelector('.readers').innerHTML += '<li>' + this.currentPermissions.viewers[i] + '</li>';
     }
   }
   
@@ -717,7 +711,7 @@ class OverDrive{
                 xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
   
 
-		 xhr.onload = function() {
+		    xhr.onload = function() {
                         if(xhr.status == 200) {
                             console.log("User Removed from " + node.file.name);
                             //console.log(xhr.response);
@@ -743,7 +737,7 @@ class OverDrive{
                             console.log(xhr.response);
                             console.log("Retrying " + numretries + " more times");
                             numretries--;
-                          
+                        
                         }
                         else {
                             console.log("Error with remove request in removeusers");
@@ -761,7 +755,7 @@ class OverDrive{
             });
         }
 /*
-	 else {
+	else {
             // TODO: Restore the previous permissions
             if(initchk) {
                 console.log(perm);
@@ -973,7 +967,7 @@ class OverDrive{
         }
         else {
             // TODO: Restore the previous permissions
-            if(initchk) {
+            /*if(initchk) {
                 // oldrole:
                     // owner
                     // writer
@@ -1109,6 +1103,7 @@ class OverDrive{
                     userrecurse(node.children[i], permarr, 0, chk2, false);
                 }
             }
+            */
         }
     }
     
