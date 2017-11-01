@@ -197,13 +197,13 @@ class OverDrive{
         const fid = e.target.id.slice(0, e.target.id.lastIndexOf("_anchor"));
         const permissionsBox = document.querySelector('.permissions-box');
         console.log(e.target.innerHTML);
-        //const fileName = e.target.innerHTML.slice(e.target.innerHTML.lastIndexOf('</i>') + 4);
+        const fileName = e.target.innerHTML.slice(e.target.innerHTML.lastIndexOf('</i>') + 4);
         if (fid === this.currentFid) {
             permissionsBox.style.left = (-500) + 'px';
             permissionsBox.style.top = (-500) + 'px';
             this.currentFid = 0;
         } else {
-            //permissionsBox.querySelector('.file').innerHTML = '<ul><li>' + fileName + '</li></ul>';
+            permissionsBox.querySelector('.file').innerHTML = fileName;
             //$('.permissions-box .file').jstree();
             permissionsBox.style.left = (e.pageX + 15) + 'px';
             permissionsBox.style.top = (e.pageY + 5) + 'px';
@@ -219,7 +219,11 @@ class OverDrive{
     if (this.currentPermissions.canshare)
         permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: Yes';
     else
-    permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: No';
+        permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: No';
+    if (this.currentPermissions.anyone)
+        permissionsBox.querySelector('.anyone').innerHTML = 'Anyone can' + this.currentPermissions.anyone;
+    else
+        permissionsBox.querySelector('.anyone').innerHTML = 'Specific access only';
     permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
     permissionsBox.querySelector('.writers').innerHTML = '';
     for (let i = 0; i < this.currentPermissions.editors.length; i++) {
