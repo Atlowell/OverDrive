@@ -53,6 +53,19 @@ class TreeRoot{
     })(this._root); //passing to recursive as initial parameter the _root node
   }
   
+  DFtraversalNode(callback, startNode) {
+       (function recursive(currNode) {
+
+        //iterate on its children and call our recursive function on them
+        for (var i = 0; i < currNode.children.length; i++) {
+          recursive(currNode.children[i]);
+        }
+
+        //call our callback function on the node once it has no more children to go to
+        callback(currNode);
+    })(startNode); //passing to recursive as initial parameter the _root node
+  }
+  
   // Insert a file as a child to a parent node
   // both file and parent are taken in assuming they're node objects
   insert(childnode, parentnode) {
@@ -1689,32 +1702,39 @@ class OverDrive{
         "checkbox" : {
             "tie_selection" : false
         },
-      "plugins" : ["checkbox"],
+      "plugins" : ["checkbox", "sort"],
     });
 
     fileTree.on("check_node.jstree", function(event, data) {
         console.log("CHECKED:" + data.node.text)
+        console.log(this.tree);
         this.tree.DFtraversal(function(node) {
-            console.log("from: " + node.file.checked)
-            console.log(node.file.name)
             if (data.node.text == node.file.name) {
                 node.file.checked = true;
+                if (node.file.folder) {
+                    this.tree.DFtraversalNode(function(cNode) {
+                        cNode.file.checked = true
+                    }, node)
+                }
             }
-            console.log("to: " + node.file.checked)
-            })
+        }.bind(this))
+        console.log(this.tree);
     }.bind(this))
 
     fileTree.on("uncheck_node.jstree", function(event, data) {
         console.log("CHECKED:" + data.node.text)
-        console.log("CHECKED:" + data.node.text)
+        console.log(this.tree)
         this.tree.DFtraversal(function(node) {
-            console.log("from: " + node.file.checked)
-            console.log(node.file.name)
             if (data.node.text == node.file.name) {
                 node.file.checked = false;
+                if (node.file.folder) {
+                    this.tree.DFtraversalNode(function(cNode) {
+                        cNode.file.checked = false
+                    }, node)
+                }
             }
-            console.log("to: " + node.file.checked)
-            })
+        }.bind(this))
+        console.log(this.tree)
     //console.log("jstree happened")
   }.bind(this))
 }
