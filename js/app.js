@@ -1511,7 +1511,7 @@ class OverDrive{
         if (currNode.file.fid) {
         	fileBrowserUI += '<li id="' + currNode.file.fid + '"';
             if (!currNode.file.folder) {
-                fileBrowserUI += '" data-jstree=\'{"icon":"glyphicon glyphicon-file"}\''
+                fileBrowserUI += '" data-jstree=\'{"icon":"jstree-file"}\''
             }
             fileBrowserUI += '>' + currNode.file.name;		
         }
