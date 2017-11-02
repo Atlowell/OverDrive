@@ -1507,9 +1507,13 @@ class OverDrive{
   
   //recursive function to create the nested unordered list in the html variable
   (function recursive(currNode) {
-        
+        //console.log(currNode)
         if (currNode.file.fid) {
-        	fileBrowserUI += '<li id="' + currNode.file.fid + '" >' + currNode.file.name;		
+        	fileBrowserUI += '<li id="' + currNode.file.fid + '"';
+            if (!currNode.file.folder) {
+                fileBrowserUI += '" data-jstree=\'{"icon":"glyphicon glyphicon-file"}\''
+            }
+            fileBrowserUI += '>' + currNode.file.name;		
         }
         if (currNode.children.length != 0) {
         	fileBrowserUI += '<ul>'
@@ -1553,7 +1557,7 @@ class OverDrive{
     }.bind(this))
 
     fileTree.on("uncheck_node.jstree", function(event, data) {
-        console.log("CHECKED:" + data.node.text)
+        console.log("UNCHECKED:" + data.node.text)
         console.log(this.tree)
         this.tree.DFtraversal(function(node) {
             if (data.node.text == node.file.name) {
