@@ -1720,6 +1720,7 @@ class OverDrive{
 
     fileTree.on("check_node.jstree", function(event, data) {
         console.log("CHECKED:" + data.node.text)
+		
         console.log(this.tree);
         this.tree.DFtraversal(function(node) {
             if (data.node.text == node.file.name) {
@@ -1732,10 +1733,14 @@ class OverDrive{
             }
         }.bind(this))
         console.log(this.tree);
+		var ret = this.handleNumChecked();
+		document.getElementById('fileCount').innerHTML ="Number of Files Selected: "+ ret.numFilesChecked;
+		document.getElementById('folderCount').innerHTML ="Number of Folders Selected: "+ ret.numFoldersChecked;
     }.bind(this))
 
     fileTree.on("uncheck_node.jstree", function(event, data) {
         console.log("UNCHECKED:" + data.node.text)
+		
         console.log(this.tree)
         this.tree.DFtraversal(function(node) {
             if (data.node.text == node.file.name) {
@@ -1753,9 +1758,42 @@ class OverDrive{
         }.bind(this))
         console.log(this.tree)
     //console.log("jstree happened")
+		this.handleNumChecked();
+		var ret = this.handleNumChecked();
+		document.getElementById('fileCount').innerHTML ="Number of Files Selected: "+ ret.numFilesChecked;
+		document.getElementById('folderCount').innerHTML ="Number of Folders Selected: "+ ret.numFoldersChecked;
   }.bind(this))
 }
  
+ 
+ handleOneFileCount(node) {
+	numFiles = -1;
+	numFolders = 0;
+	function fileCount(node) {
+		
+			if(node.file.folder) {
+				numFolders++;
+			}
+			else {
+				numFiles++;
+			}
+			
+			console.log(node.file.name);
+		
+	
+		
+	}
+	for(var i = 0; i < node.children.length; i++) {
+			fileCount(node.children[i]);
+	}
+	console.log("Files " + numFiles + "Folders : " + numFolders);
+	var ret = {
+        numFiles: numFiles,
+        numFolders: numFolders,
+
+    }
+	return ret;
+}
 
 
  handleFileCount(node) {
