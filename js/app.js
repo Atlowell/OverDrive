@@ -1775,9 +1775,14 @@ class OverDrive{
                     }, node)
                 }
 
-                if (node.parent) {
-                    node.parent.file.checked = false;
-                }
+                (function recurse(node) {
+                    if (node.parent) {
+                        node.parent.file.checked = false;
+                        recurse(node.parent);
+                    } else {
+                        return;
+                    }
+                })(node);
             }
         }.bind(this))
         console.log(this.tree)
@@ -1787,6 +1792,11 @@ class OverDrive{
 		document.getElementById('fileCount').innerHTML ="Number of Files Selected: "+ ret.numFilesChecked;
 		document.getElementById('folderCount').innerHTML ="Number of Folders Selected: "+ ret.numFoldersChecked;
   }.bind(this))
+
+let tot = this.handleFileCount();
+console.log("counting happened" + tot.numFiles + tot.numFolders)
+document.getElementById('fileCountTotal').innerHTML = "Total Number of Files: " + tot.numFiles;
+document.getElementById('folderCountTotal').innerHTML = "Total Number of Folders: " + tot.numFolders;
 }
  
  
