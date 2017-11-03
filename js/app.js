@@ -526,7 +526,8 @@ class OverDrive{
         that: that
     }
     this.removeUsers(args);
-
+	this.handleFileCount();
+	this.handleNumChecked();
   }
   
 
@@ -1731,47 +1732,42 @@ class OverDrive{
   }.bind(this))
 }
  
-handleFileCount() {
+
+
+ handleFileCount(node) {
 	numFiles = -1;
 	numFolders = 0;
-	this.fileCount(this._root);
-	console.log("Files " + numFiles + "Folders : " + numFolders);
-}
-
- fileCount(node) {
-  
-	//console.log("node = " + node);
-	if(node == this._root) {
-		console.log("Getting Count");
-	}
-	else {
-		if(node.file.folder) {
+	function fileCount(node) {
+		
+			if(node.file.folder) {
 				numFolders++;
-		}
-		else {
+			}
+			else {
 				numFiles++;
-		}
-		console.log(node.file.name);
-	}
+			}
+			
+			console.log(node.file.name);
+		
 	
-	for(var i = 0; i < node.children.length; i++) {
-		this.fileCount(node.children[i]);
+		for(var i = 0; i < node.children.length; i++) {
+			fileCount(node.children[i]);
+		}
 	}
-  	
+	fileCount(this.tree._root);
+	console.log("Files " + numFiles + "Folders : " + numFolders);
+	var ret = {
+        numFiles: numFiles,
+        numFolders: numFolders,
+
+    }
+	return ret;
 }
 
 handleNumChecked() {
 	numFilesChecked = 0;
 	numFoldersChecked = 0;
-	this.numChecked(this._root);
-	console.log("Files " + numFilesChecked + "Folders : " + numFoldersChecked);
-}
+	function numChecked(node) {
 
-numChecked(node) {
-	if(node == this._root) {
-		console.log("Getting Count");
-	}
-	else {
 		if (node.file.checked) {
 			if(node.file.folder) {
 				numFoldersChecked++;
@@ -1779,17 +1775,26 @@ numChecked(node) {
 			else {
 				numFilesChecked++;
 			}
+			console.log(node.file.name);
 		}
-		console.log(node.file.name);
-	}
+		
+		
 	
-	for(var i = 0; i < node.children.length; i++) {
-		this.numChecked(node.children[i]);
+		for(var i = 0; i < node.children.length; i++) {
+			numChecked(node.children[i]);
+		}
 	}
-	
+	numChecked(this.tree._root);
+	console.log("Files " + numFilesChecked + "Folders : " + numFoldersChecked);
+	var ret = {
+        numFilesChecked: numFiles,
+        numFoldersChecked: numFolders,
 
-
+    }
+	return ret;
 }
+
+
 
  
  
