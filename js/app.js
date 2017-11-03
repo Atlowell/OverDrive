@@ -1,6 +1,7 @@
 
 
 
+
 var count = 0;
 var	numFiles = -1;
 var	numFolders = 0;
@@ -1682,42 +1683,29 @@ class OverDrive{
     this.tree.printTree(this.tree._root, 0);
     fileBrowserUI = '';
   //fileBrowserUI += '<ul>';
-	var testing = this.handleOneFileCount(this.tree._root);
-	var that = this;
-	console.log(testing);
+  
   //recursive function to create the nested unordered list in the html variable
-  (function recursive(currNode, that) {
+  (function recursive(currNode) {
         //console.log(currNode)
         if (currNode.file.fid) {
         	fileBrowserUI += '<li id="' + currNode.file.fid + '"';
             if (!currNode.file.folder) {
                 fileBrowserUI += '" data-jstree=\'{"icon":"jstree-file"}\''
             }
-            fileBrowserUI += '>' + currNode.file.name;	
-			if(currNode.file.folder) {
-					//try{
-					var ret = that.handleOneFileCount(currNode);
-					
-					//var total = 1;
-					fileBrowserUI += '(Files: ' + ret.numFiles + " Folders: " + ret.numFolders + ')';
-					//}
-					//catch(e){
-						
-					//}
-			}			
+            fileBrowserUI += '>' + currNode.file.name;		
         }
         if (currNode.children.length != 0) {
         	fileBrowserUI += '<ul>'
         }
         for (var i = 0; i < currNode.children.length; i++) {
-          recursive(currNode.children[i], that);
+          recursive(currNode.children[i]);
           fileBrowserUI += '</li>'
         }
         if (currNode.children.length != 0) {
         	fileBrowserUI += '</ul>'
         }
         
-    })(this.tree._root, that); //passing to recursive as initial parameter the _root node
+    })(this.tree._root); //passing to recursive as initial parameter the _root node
   
     //console.log("displaytree");
     //console.log(fileBrowserUI);
@@ -1730,20 +1718,13 @@ class OverDrive{
         },
       "plugins" : ["checkbox", "sort"],
     });
-	var counts = this.handleFileCount();
-	document.getElementById('fileCountTotal').innerHTML ="Number of Files Total: "+ counts.numFiles;
-	document.getElementById('folderCountTotal').innerHTML ="Number of Folders Total: "+ counts.numFolders;
-	
+
     fileTree.on("check_node.jstree", function(event, data) {
         console.log("CHECKED:" + data.node.text)
 		
         console.log(this.tree);
         this.tree.DFtraversal(function(node) {
-			var ret = that.handleOneFileCount(node);
-					
-					//var total = 1;
-			
-            if (data.node.text == node.file.name +'(Files: ' + ret.numFiles + " Folders: " + ret.numFolders + ')') {
+            if (data.node.text == node.file.name) {
                 node.file.checked = true;
                 if (node.file.folder) {
                     this.tree.DFtraversalNode(function(cNode) {
@@ -1763,11 +1744,7 @@ class OverDrive{
 		
         console.log(this.tree)
         this.tree.DFtraversal(function(node) {
- 			var ret = that.handleOneFileCount(node);
-					
-					//var total = 1;
-			
-            if (data.node.text == node.file.name +'(Files: ' + ret.numFiles + " Folders: " + ret.numFolders + ')') {
+            if (data.node.text == node.file.name) {
                 node.file.checked = false;
                 if (node.file.folder) {
                     this.tree.DFtraversalNode(function(cNode) {
@@ -1791,7 +1768,7 @@ class OverDrive{
  
  
  handleOneFileCount(node) {
-	numFiles = 0;
+	numFiles = -1;
 	numFolders = 0;
 	function fileCount(node) {
 		
