@@ -509,45 +509,56 @@ class OverDrive{
   }
 
   handleRemoveUsers(e) {
+	 console.log("Removing");
     e.preventDefault();
     const users = this.parseUsers();
-    const role = this.getRoleFromUI();
+    if(users.length == 0) {
+        alert("No valid emails entered");
+        return;
+    }
+ 
     var that = this;
-    var filelist = [];
-    this.tree.DFtraversal(function(node) {
-        if(node.file.checked) {
-		    filelist.push(node.file.fid);
-	    }
-    });
-        
-    //Initial values:
-        // node = child of root
-        // usernum = 0
-        // chk = whether child of root is checked
-        // initchk = false
-    function userrecurse(node, usernum, chk, initchk) {
-        if(chk) {
-            identityAuth(function(token) { 
-                var xhr = new XMLHttpRequest();
-                //console.log("fid: " + encodeURIComponent(filelist[i]));
-                var body = {
-                    'role': newrole,
-                    'type': "user",
-                    'value': users[usernum]
-                }
-                var filetoremove = filelist.pop();
-                xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(filetoremove.node.file.fid));
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+    var args = {
+        users: users,
+        role: role,
+        that: that
+    }
+    this.removeUsers(args);
+  }
   
 
-		    xhr.onload = function() {
-                        if(xhr.status == 200) {
-                            console.log("User Removed from " + node.file.name);
+	
+
+ 
+  removeUsers(args) {
+	var users = args.users;
+    var role = args.role;
+    var that = args.that;
+
+	
+	function userrecurse(node, usernum, chk, initchk) {
+		if(chk) {
+		//console.log("userrecurse");
+		console.log(usernum);
+		var permid;
+        identityAuth(function(token) { 
+                var numretries = 1;
+                function removeRequest(fileid, permid) {
+					//console.log("Removing file: " + fileid + " with permid: " + permid);
+                    var xhr = new XMLHttpRequest();
+                    //console.log("fid: " + encodeURIComponent(filelist[i]));
+					//console.log("https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fileid) + "/permissions/" + encodeURIComponent(permid));
+                    xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fileid) + "/permissions/" + encodeURIComponent(permid));
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhr.responseType = "json";
+                    xhr.onload = function() {
+                        if(xhr.status == 204) {
+                            console.log("User removed from " + node.file.name);
                             //console.log(xhr.response);
                             if(!initchk) {
                                 if((usernum + 1) < users.length) {
-                                    userrecurse(node, perm, usernum + 1, chk, initchk);
+                                    userrecurse(node, usernum + 1, true, false);
                                 }
                             }
                             for(let i = 0; i < node.children.length; i++) {
@@ -555,100 +566,113 @@ class OverDrive{
                                 if(node.children[i].file.checked) {
                                     chk2 = true;
                                 }
-                                let permarr = [];
-                                for(let j = 0; j < users.length; j++) {
-                                    permarr.push(perm[j].children[i]); 
-                                }
-                                userrecurse(node.children[i], permarr, usernum, chk2, true);
+                                userrecurse(node.children[i], usernum, chk2, true);
                             }
                         }
-                        else if(xhr.status == 500) {
-                            console.log("Error with remove request in removeusers");
+                        else if(xhr.status == 404) {
+                            console.log("Error with remove request in remove users");
                             console.log(xhr.response);
                             console.log("Retrying " + numretries + " more times");
                             numretries--;
-                        
+                            if(numretries >= 0) {
+                                setTimeout(function() {
+                                    removeRequest(fileid,permid);
+                                }, 200);
+                            }
+                            else {
+                                console.log("Giving up retrying");
+                                //Continue on anyways
+                                if(!initchk) {
+                                    if((usernum + 1) < users.length) {
+                                        userrecurse(node, usernum + 1, true, false);
+                                    }
+                                }
+                                for(let i = 0; i < node.children.length; i++) {
+                                    let chk2 = false;
+                                    if(node.children[i].file.checked) {
+                                        chk2 = true;
+                                    }
+                                    userrecurse(node.children[i], usernum, chk2, true);
+                                }
+                            }
                         }
-                        else {
-                            console.log("Error with remove request in removeusers");
+                       else {
+                            console.log("Error with remove request in remove users");
                             console.log(xhr.response);
+                            if(xhr.status == 400 || xhr.status == 403) {
+                                for(let i = 0; i < xhr.response.error.errors.length; i++) {
+                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest" || xhr.status == 403) {
+                                        console.log("Insufficient permissions to share " + node.file.name);
+                                    }
+                                }
+                            }
+                            // Continue on with other files anyways
+                            if(!initchk) {
+                                if((usernum + 1) < users.length) {
+                                    userrecurse(node, usernum + 1, true, false);
+                                }
+                            }
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                userrecurse(node.children[i], usernum, chk2, true);
+                            }
                         }
+
                     };
-
-                xhr.onerror = function() {
-                    console.log(xhr.error);
-                };
-                xhr.send(JSON.stringify(body));
-                //console.log(body);
-                //console.log(JSON.stringify(body));
-                //console.log("sent request");
-            });
-        }
-/*
-	else {
-            // TODO: Restore the previous permissions
-            if(initchk) {
-                console.log(perm);
-                var oldrole = perm[usernum].value;
-                if(oldrole == "none") {
-                    // Remove
-                    console.log("initiating remove request for " + node.file.name);
-                    identityAuth(function(token) {
-                        var numretries = 5;
-                        function removeRequest() {
-                            console.log("sending delete request on " + node.file.name);
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
-                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                            xhr.responseType = "json";
-                            xhr.onload = function() {
-                                //console.log("delete request returned");
-                                //console.log(xhr.response);
-                                if(xhr.status == 204) {
-                                    for(let i = 0; i < node.children.length; i++) {
-                                        let chk2 = false;
-                                        if(node.children[i].file.checked) {
-                                            chk2 = true;
-                                        }
-                                        let permarr = [];
-                                        for(let j = 0; j < users.length; j++) {
-                                            permarr.push(perm[j].children[i]); 
-                                        }
-                                        userrecurse(node.children[i], permarr, usernum, chk2, true);
-                                    }
-                                }
-                                else if((xhr.status == 500) || (xhr.status == 404)) {
-                                    console.log("Error with remove request in removeusers");
-                                    console.log(xhr.response);
-                                    console.log("Retrying " + numretries + " more times");
-                                    numretries--;
-                                    if(numretries >= 0) {
-                                        setTimeout(function() {
-                                            removeRequest();
-                                        }, 500);
-                                    }
-                                }
-                                else {
-                                    console.log("Error with remove request in removeusers");
-                                    console.log(xhr.response);
-                                }
-                            };
-                            xhr.onerror = function() {
-                                console.log(xhr.error);
-                            };
-                            xhr.send();
-                        }
-                        removeRequest();
-                    });
+                    xhr.onerror = function() {
+                        console.log(xhr.error);
+                    };
+                    xhr.send();
+                    //console.log(body);
+                    //console.log(JSON.stringify(body));
+                    //console.log("sent request");
                 }
-*/
- 
+				function getpermid(node) {
+				
+					//console.log("Getting permid");
+					var xhr = new XMLHttpRequest();
+					xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[usernum]));
+					xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+					xhr.responseType = "json";
+					xhr.onload = function() {
+						if(xhr.status != 200) {
+							console.log(xhr.response);
+						}
+						console.log(xhr.response.id);
+						permid = xhr.response.id; 
+						//console.log("Permid :" +permid);
+						removeRequest(node.file.fid, permid);
+						//console.log("Permid");
+						//console.log(permid);
+					};
+					xhr.onerror = function() {
+						console.log(xhr.error);
+					}
+				
+				xhr.send();
+				//console.log(permid);
+				
+				}
+                //removeRequest(node.file.fid,"04201321183946580125");
+				getpermid(node);
+            });
+        
+			
+		}
+	}
+	for(let i = 0; i < that.tree._root.children.length; i++) {
+        let chk = false;
+        if(that.tree._root.children[i].file.checked == true) {
+            chk = true;
+        }
+        userrecurse(that.tree._root.children[i], 0, chk, false);
     }
-    
-	//console.log(body);
-    
+ }
+ 
 
-  }
 
 
   handleChangeOwner(e) {
@@ -1209,6 +1233,7 @@ class OverDrive{
             
             // On Success
             xhr.onload = function() {
+				console.log(xhr.response);
                 var childlist = xhr.response.items;
 				var npt = xhr.response.nextPageToken;
                 console.log("original child list length: " + childlist.length);
@@ -1379,6 +1404,7 @@ class OverDrive{
                 //xhr2.setRequestHeader('maxResults', 460);
                 xhr2.responseType = "json";
                 xhr2.onload = function() {
+					console.log(xhr.response);
                     console.log("Got list from npt token- chain list succeeded");
                     //console.log(xhr2.response);
                     // Update npt and filelist, mark ready for next request
