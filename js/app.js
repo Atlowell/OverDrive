@@ -1500,7 +1500,7 @@ class OverDrive{
     //console.log(this);
     identityAuth(function(token) {
         //Search term to get all top-level files
-        var q = "('root' in parents or sharedWithMe = true) and trashed=false";
+        var q = "('root' in parents) and trashed=false";
         //var q2 = "name contains 'shgdfh'";
         //var q3 = "invalid search 5435";
         var xhr = new XMLHttpRequest();
@@ -1523,6 +1523,8 @@ class OverDrive{
             //var readyflag = false;
             //var endflag = true;
             
+			
+			// TODO: FIX NPT
             function getnpt() {
                 var xhr2 = new XMLHttpRequest();
                 xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q));
@@ -1548,7 +1550,7 @@ class OverDrive{
                         //endflag = true;
                         console.log("no more list npts");
                     }
-                    for(var j = 0; j < filelist2.length; j++) {
+                    for(let j = 0; j < filelist2.length; j++) {
                         //console.log("Calling populatetreerecurse");
                         that.numcalls++;
                         that.populateTreeRecurse(filelist2[j], that.tree._root);
@@ -1569,58 +1571,82 @@ class OverDrive{
                 //endflag = false;
                 //readyflag = true;
                 console.log("Initial list npt");
-                getnpt();
+                //getnpt();
             }
-            for(var i = 0; i < filelist.length; i++) {
-                //console.log("Calling populatetreerecurse");
-                //console.log(that);
-				//console.log("numcalls increase");
-				//console.log("numcalls before: " + that.numcalls);
-                that.numcalls++;
-				//console.log("numcalls after: " + that.numcalls);
-                that.populateTreeRecurse(filelist[i], that.tree._root);
-            }
-            //var i = 0;
-            that.numrequests--;
-            that.triggerDisplayTree();
+			
+			var q2 = "(sharedWithMe = true) and trashed=false";
+			var xhr3 = new XMLHttpRequest();
+			xhr3.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q2));
+			xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
+			xhr3.responseType = "json";
+			
+			xhr3.onload = function() {
+				var sharelist = xhr3.response.items;
+				
+				// NPT
+				
+				for(let i = 0; i < sharelist.length; i++) {
+					if(sharelist[i].parents.length == 0) {
+						filelist.push(sharelist[i]);
+					}
+				}
+				for(let i = 0; i < filelist.length; i++) {
+					//console.log("Calling populatetreerecurse");
+					//console.log(that);
+					//console.log("numcalls increase");
+					//console.log("numcalls before: " + that.numcalls);
+					that.numcalls++;
+					//console.log("numcalls after: " + that.numcalls);
+					that.populateTreeRecurse(filelist[i], that.tree._root);
+				}
+				//var i = 0;
+				that.numrequests--;
+				that.triggerDisplayTree();
+			
+			
+				//console.log("npt: " + npt);
+				
+				// While there are more pages of results or while we haven't finished processing the list
+				//while((!endflag) || (i < filelist.length)) {
+					//var xhr2 = undefined;
+					//console.log("endflag: " + endflag + ", i: " + i);
+					//console.log("About to enter next identityAuth");
+					// If the process has obtained the next npt and is ready to continue
+					/*if(readyflag) {
+						readyflag = false;
+						// If the next npt is still valid
+						if(npt) {
+							console.log("npt: " + npt);
+							//identityAuth(function(tok) {
+								//console.log("is my identity function screwing stuff up?");
+								
+							//});
+						}
+						// The npt is no longer valid.  Flag for the end
+						else {
+							console.log("No more npt tokens");
+							endflag = true;
+						}
+					}*/
+				/*while(!endflag) {    
+					// If there are files left that haven't been inserted, call populateTreeRecurse on them
+					if(i < filelist.length) {
+						console.log("Calling populatetreerecurse");
+						//console.log(that.tree);
+						//that.populateTreeRecurse(filelist[i], that.tree._root);
+						i++;
+					}
+					setTimeout(function() {}, 1000);
+				}*/
+				//}
+				//console.log("Finished top-level populate tree recursion");
             
-            //console.log("npt: " + npt);
-            
-            // While there are more pages of results or while we haven't finished processing the list
-            //while((!endflag) || (i < filelist.length)) {
-                //var xhr2 = undefined;
-                //console.log("endflag: " + endflag + ", i: " + i);
-                //console.log("About to enter next identityAuth");
-                // If the process has obtained the next npt and is ready to continue
-                /*if(readyflag) {
-                    readyflag = false;
-                    // If the next npt is still valid
-                    if(npt) {
-                        console.log("npt: " + npt);
-                        //identityAuth(function(tok) {
-                            //console.log("is my identity function screwing stuff up?");
-                            
-                        //});
-                    }
-                    // The npt is no longer valid.  Flag for the end
-                    else {
-                        console.log("No more npt tokens");
-                        endflag = true;
-                    }
-                }*/
-            /*while(!endflag) {    
-                // If there are files left that haven't been inserted, call populateTreeRecurse on them
-                if(i < filelist.length) {
-                    console.log("Calling populatetreerecurse");
-                    //console.log(that.tree);
-                    //that.populateTreeRecurse(filelist[i], that.tree._root);
-                    i++;
-                }
-                setTimeout(function() {}, 1000);
-            }*/
-            //}
-            //console.log("Finished top-level populate tree recursion");
-            
+			};
+			var onerror = function() {
+				console.log(xhr3.error);
+			}
+			xhr3.send();
+			that.numrequests++;
         };
         
         //On failure
@@ -1629,7 +1655,6 @@ class OverDrive{
         };
         
         xhr.send();
-        that.numrequests++;
         //that.startedtopopulate = true;
     });
 				/*
