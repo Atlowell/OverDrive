@@ -1,7 +1,11 @@
-//$(document).foundation();
+
+
 
 var count = 0;
-
+var	numFiles = -1;
+var	numFolders = 0;
+var	numFilesChecked = 0;
+var	numFoldersChecked = 0;
 // File structure
 // No default values because every file needs a name and a file ID
 class File{
@@ -83,10 +87,8 @@ class TreeRoot{
         //console.log("node:" + node.file.fid + ", parent:" + parentid)
       }
     };
-
     //DF traversal to find the parent
     this.DFtraversal(callback);
-
     //if parent was found, insert file into its children[]
     if (cur_parent) {
     	file.parent = cur_parent;
@@ -524,6 +526,7 @@ class OverDrive{
         that: that
     }
     this.removeUsers(args);
+
   }
   
 
@@ -1727,7 +1730,69 @@ class OverDrive{
     //console.log("jstree happened")
   }.bind(this))
 }
+ 
+handleFileCount() {
+	numFiles = -1;
+	numFolders = 0;
+	this.fileCount(this._root);
+	console.log("Files " + numFiles + "Folders : " + numFolders);
+}
+
+ fileCount(node) {
   
+	//console.log("node = " + node);
+	if(node == this._root) {
+		console.log("Getting Count");
+	}
+	else {
+		if(node.file.folder) {
+				numFolders++;
+		}
+		else {
+				numFiles++;
+		}
+		console.log(node.file.name);
+	}
+	
+	for(var i = 0; i < node.children.length; i++) {
+		this.fileCount(node.children[i]);
+	}
+  	
+}
+
+handleNumChecked() {
+	numFilesChecked = 0;
+	numFoldersChecked = 0;
+	this.numChecked(this._root);
+	console.log("Files " + numFilesChecked + "Folders : " + numFoldersChecked);
+}
+
+numChecked(node) {
+	if(node == this._root) {
+		console.log("Getting Count");
+	}
+	else {
+		if (node.file.checked) {
+			if(node.file.folder) {
+				numFoldersChecked++;
+			}
+			else {
+				numFilesChecked++;
+			}
+		}
+		console.log(node.file.name);
+	}
+	
+	for(var i = 0; i < node.children.length; i++) {
+		this.numChecked(node.children[i]);
+	}
+	
+
+
+}
+
+ 
+ 
   displayTreeRecurse(node) {
     //Add file to tree UI
     //Call displayTreeRecurse() on each child
@@ -1735,6 +1800,10 @@ class OverDrive{
 		displayTreeRecurse(node.children[i]);
 	}*/
   }
+  
+  
+  
+  //overdrive class ends
 }
 
 
