@@ -524,10 +524,6 @@ class OverDrive{
         alert("No valid emails entered");
         return;
     }
-	if(!this.handleNumChecked().numFiles) {
-		alert("No files selected");
-		return;
-	}
 	var numchecked = this.handleNumChecked();
 	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
 		alert("No files selected");
@@ -680,6 +676,23 @@ class OverDrive{
         
 			
 		}
+		else {
+            // This condition should never be reached
+            if(initchk) {
+                console.log("Problem with checkboxes or filetree: initcheck is checked but chk is false.  File name: " + node.file.name);
+            }
+            else {
+                console.log("No action needed for " + node.file.name);
+                for(let i = 0; i < node.children.length; i++) {
+                    let chk2 = false;
+                    if(node.children[i].file.checked) {
+                        chk2 = true;
+                    }
+                    let permarr = [];
+                    userrecurse(node.children[i], 0, chk2, false);
+                }
+            }
+        }
 	}
 	for(let i = 0; i < that.tree._root.children.length; i++) {
         let chk = false;
@@ -702,10 +715,6 @@ class OverDrive{
     }
 	if(users.length > 1) {
 		alert("Too many emails entered.  There can only be one owner");
-		return;
-	}
-	if(!this.handleNumChecked().numFiles) {
-		alert("No files selected");
 		return;
 	}
 	var numchecked = this.handleNumChecked();
@@ -836,10 +845,23 @@ class OverDrive{
   handleChangePermissions(e) {
     e.preventDefault();
     const users = this.parseUsers();
+	if(users.length == 0) {
+        alert("No valid emails entered");
+        return;
+    }
+    const role = this.getRoleFromUI();
+    if(!role) {
+        alert("No role selected");
+        return;
+    }
+	var numchecked = this.handleNumChecked();
+	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+		alert("No files selected");
+		return;
+	}
     for(var i = 0; i < users.length; i++) {
         console.log("user" + i + ": " + users[i]);
     }
-    const role = this.getRoleFromUI();
     var that = this;
     var args = {
         users: users,
@@ -897,14 +919,6 @@ class OverDrive{
 		  }
 	  });
     console.log(filelist);*/
-	this.tree.DFtraversal(function(node) {
-        if(node.file.name == "folder2") {
-            node.file.checked = true;
-        }
-        else if(node.file.name == "file1") {
-            node.file.checked = true;
-        }
-    });
     
 	var newrole = role;
 	var com = false;
@@ -971,7 +985,24 @@ class OverDrive{
             });
         }
         else {
-            // TODO: Restore the previous permissions
+			// This condition should never be reached
+            if(initchk) {
+                console.log("Problem with checkboxes or filetree: initcheck is checked but chk is false.  File name: " + node.file.name);
+            }
+            else {
+                console.log("No action needed for " + node.file.name);
+                for(let i = 0; i < node.children.length; i++) {
+                    let chk2 = false;
+                    if(node.children[i].file.checked) {
+                        chk2 = true;
+                    }
+					let permarr = [];
+                    for(let j = 0; j < users.length; j++) {
+                        permarr.push(perm[j].children[i]); 
+                    }
+                    userrecurse(node.children[i], permarr, 0, chk2, false);
+                }
+            }
             /*if(initchk) {
                 // oldrole:
                     // owner
