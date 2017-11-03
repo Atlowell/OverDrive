@@ -867,21 +867,6 @@ class OverDrive{
     var role = args.role;
     var rt = args.rt;
     var that = args.that;
-	  /*var filelist = [];
-    this.tree.DFtraversal(function(node) {
-		  if(node.file.checked) {
-			  filelist.push(node.file.fid);
-		  }
-	  });
-    console.log(filelist);*/
-	this.tree.DFtraversal(function(node) {
-        if(node.file.name == "folder2") {
-            node.file.checked = true;
-        }
-        else if(node.file.name == "file1") {
-            node.file.checked = true;
-        }
-    });
     
 	var newrole = role;
 	var com = false;
