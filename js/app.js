@@ -1752,9 +1752,14 @@ class OverDrive{
                     }, node)
                 }
 
-                if (node.parent) {
-                    node.parent.file.checked = false;
-                }
+                (function recurse(node) {
+                    if (node.parent) {
+                        node.parent.file.checked = false;
+                        recurse(node.parent);
+                    } else {
+                        return;
+                    }
+                })(node);
             }
         }.bind(this))
         console.log(this.tree)
