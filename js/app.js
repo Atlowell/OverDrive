@@ -1786,8 +1786,8 @@ handleNumChecked() {
 	numChecked(this.tree._root);
 	console.log("Files " + numFilesChecked + "Folders : " + numFoldersChecked);
 	var ret = {
-        numFilesChecked: numFiles,
-        numFoldersChecked: numFolders,
+        numFilesChecked: numFilesChecked,
+        numFoldersChecked: numFoldersChecked,
 
     }
 	return ret;
