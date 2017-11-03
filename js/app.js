@@ -501,6 +501,10 @@ class OverDrive{
         alert("No role selected");
         return;
     }
+	if(!this.handleNumChecked().numFiles) {
+		alert("No files selected");
+		return;
+	}
     var that = this;
     var args = {
         users: users,
@@ -518,6 +522,10 @@ class OverDrive{
         alert("No valid emails entered");
         return;
     }
+	if(!this.handleNumChecked().numFiles) {
+		alert("No files selected");
+		return;
+	}
  
     var that = this;
     var args = {
@@ -687,6 +695,10 @@ class OverDrive{
     }
 	if(users.length > 1) {
 		alert("Too many emails entered.  There can only be one owner");
+		return;
+	}
+	if(!this.handleNumChecked().numFiles) {
+		alert("No files selected");
 		return;
 	}
 	this.changeOwners(users[0]);
