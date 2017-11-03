@@ -502,7 +502,8 @@ class OverDrive{
         alert("No role selected");
         return;
     }
-	if(!this.handleNumChecked().numFiles) {
+	var numchecked = this.handleNumChecked();
+	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
 		alert("No files selected");
 		return;
 	}
@@ -524,6 +525,11 @@ class OverDrive{
         return;
     }
 	if(!this.handleNumChecked().numFiles) {
+		alert("No files selected");
+		return;
+	}
+	var numchecked = this.handleNumChecked();
+	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
 		alert("No files selected");
 		return;
 	}
@@ -699,6 +705,11 @@ class OverDrive{
 		return;
 	}
 	if(!this.handleNumChecked().numFiles) {
+		alert("No files selected");
+		return;
+	}
+	var numchecked = this.handleNumChecked();
+	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
 		alert("No files selected");
 		return;
 	}
