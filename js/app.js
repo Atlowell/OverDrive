@@ -1699,7 +1699,7 @@ class OverDrive{
 					var ret = that.handleOneFileCount(currNode);
 					
 					//var total = 1;
-					fileBrowserUI += '   (Files: ' + ret.numFiles + " Folders: " + numFolders + ')';
+					fileBrowserUI += '(Files: ' + ret.numFiles + " Folders: " + ret.numFolders + ')';
 					//}
 					//catch(e){
 						
@@ -1739,7 +1739,11 @@ class OverDrive{
 		
         console.log(this.tree);
         this.tree.DFtraversal(function(node) {
-            if (data.node.text == node.file.name) {
+			var ret = that.handleOneFileCount(node);
+					
+					//var total = 1;
+			
+            if (data.node.text == node.file.name +'(Files: ' + ret.numFiles + " Folders: " + ret.numFolders + ')') {
                 node.file.checked = true;
                 if (node.file.folder) {
                     this.tree.DFtraversalNode(function(cNode) {
@@ -1759,7 +1763,11 @@ class OverDrive{
 		
         console.log(this.tree)
         this.tree.DFtraversal(function(node) {
-            if (data.node.text == node.file.name) {
+ 			var ret = that.handleOneFileCount(node);
+					
+					//var total = 1;
+			
+            if (data.node.text == node.file.name +'(Files: ' + ret.numFiles + " Folders: " + ret.numFolders + ')') {
                 node.file.checked = false;
                 if (node.file.folder) {
                     this.tree.DFtraversalNode(function(cNode) {
