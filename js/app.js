@@ -234,7 +234,7 @@ class OverDrive{
     else
         permissionsBox.querySelector('.editorsCanShare').innerHTML = 'Editors can share: No';
     if (this.currentPermissions.anyone)
-        permissionsBox.querySelector('.anyone').innerHTML = 'Anyone can' + this.currentPermissions.anyone;
+        permissionsBox.querySelector('.anyone').innerHTML = 'Anyone can ' + this.currentPermissions.anyone;
     else
         permissionsBox.querySelector('.anyone').innerHTML = 'Specific access only';
     permissionsBox.querySelector('.owner').innerHTML = '<strong>Owner: </strong>' + this.currentPermissions.owner;
@@ -406,7 +406,7 @@ class OverDrive{
                                 }, 200);
                             }
                             else {
-                                console.log("Giving up retrying");
+                                console.log("Giving up retrying adduser: " + node.file.name);
                                 //Continue on anyways
                                 if(!initchk) {
                                     if((usernum + 1) < users.length) {
@@ -654,8 +654,132 @@ class OverDrive{
   handleChangeOwner(e) {
     e.preventDefault();
     const users = this.parseUsers();
+	if(users.length == 0) {
+        alert("No valid emails entered");
+        return;
+    }
+	if(users.length > 1) {
+		alert("Too many emails entered.  There can only be one owner");
+		return;
+	}
+	this.changeOwners(users[0]);
+		
     //get checked file(s) from tree
     //call createOwner for given files and users
+  }
+  
+  changeOwners(user) {
+	
+	function userrecurse(node, chk, initchk) {
+        if(chk) {
+            console.log("initiating owner request for " + node.file.name);
+            identityAuth(function(token) { 
+                var body = {
+                    'role': "owner",
+                    'type': "user",
+                    'value': user
+                }
+                
+                var numretries = 1;
+                
+                function ownerRequest() {
+                
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhr.responseType = "json";
+                    xhr.onload = function() {
+                        if(xhr.status == 200) {
+                            console.log("Owner changed for " + node.file.name);
+                            //console.log(xhr.response);
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                userrecurse(node.children[i], chk2, true);
+                            }
+                        }
+                        else if(xhr.status == 500) {
+                            console.log("Error with owner request in addusers");
+                            console.log(xhr.response);
+                            console.log("Retrying " + numretries + " more times");
+                            numretries--;
+                            if(numretries >= 0) {
+                                setTimeout(function() {
+                                    addRequest();
+                                }, 200);
+                            }
+                            else {
+                                console.log("Giving up retrying changeowners: " + node.file.name);
+                                //Continue on anyways
+                                for(let i = 0; i < node.children.length; i++) {
+                                    let chk2 = false;
+                                    if(node.children[i].file.checked) {
+                                        chk2 = true;
+                                    }
+                                    userrecurse(node.children[i], chk2, true);
+                                }
+                            }
+                        }
+                        else {
+                            console.log("Error with add request in addusers");
+                            console.log(xhr.response);
+                            if(xhr.status == 400) {
+                                for(let i = 0; i < xhr.response.error.errors.length; i++) {
+                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
+                                        console.log("You are not the owner of " + node.file.name);
+                                    }
+                                }
+                            }
+                            // Continue on with other files anyways
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                userrecurse(node.children[i], chk2, true);
+                            }
+                        }
+                    };
+                    xhr.onerror = function() {
+                        console.log(xhr.error);
+                    };
+                    xhr.send(JSON.stringify(body));
+                    //console.log(body);
+                    //console.log(JSON.stringify(body));
+                    //console.log("sent request");
+                }
+                ownerRequest();
+            });
+        }
+        else {
+            // This condition should never be reached
+            if(initchk) {
+                console.log("Problem with checkboxes or filetree: initcheck is checked but chk is false.  File name: " + node.file.name);
+            }
+            else {
+                console.log("No action needed for " + node.file.name);
+                for(let i = 0; i < node.children.length; i++) {
+                    let chk2 = false;
+                    if(node.children[i].file.checked) {
+                        chk2 = true;
+                    }
+                    userrecurse(node.children[i], chk2, false);
+                }
+            }
+        }
+    }
+	
+	for(let i = 0; i < this.tree._root.children.length; i++) {
+        let chk = false;
+        if(this.tree._root.children[i].file.checked == true) {
+            chk = true;
+        }
+        userrecurse(this.tree._root.children[i], chk, false);
+    }
+	
   }
 
   handleChangePermissions(e) {
