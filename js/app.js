@@ -1567,6 +1567,10 @@ class OverDrive{
                         cNode.file.checked = false
                     }, node)
                 }
+
+                if (node.parent) {
+                    node.parent.file.checked = false;
+                }
             }
         }.bind(this))
         console.log(this.tree)
