@@ -1,7 +1,3 @@
-
-
-
-
 var count = 0;
 var	numFiles = -1;
 var	numFolders = 0;
@@ -178,11 +174,13 @@ class OverDrive{
     const changePermBtn = actionsForm.querySelector('.change-permissions');
     const fileBrowser = document.querySelector('div#file-browser');
     const checkBox_fileIcon_fileName = document.querySelectorAll('.jstree-anchor');
+    const groupsBtn = document.querySelector('.groups');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
     fileBrowser.addEventListener('contextmenu', (e) => this.displayPermissions(e));
+    groupsBtn.addEventListener('click', (e) => this.showGroups(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -203,6 +201,11 @@ class OverDrive{
         })
         //console.log(ele.innerHTML)
     }*/
+  }
+
+  showGroups(e) {
+    var win = window.open(chrome.extension.getURL("groups.html"), '_blank');
+    win.focus();
   }
   
   //Move permissions window
