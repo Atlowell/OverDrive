@@ -91,24 +91,46 @@
                                     <i class="fa fa-user-circle"></i> Change Owner
                                 </button>
                             </div>
+                            <!-- Request ownership button -->
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action request-ownership" type="button">
+                                    <i class="fa fa-envelope"></i> Request Ownership
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid-x grid-padding-1">
                             <!-- Change permissions button -->
                             <div class="large-6 medium-6">
                                 <button class="button secondary action change-permissions" type="button">
                                     <i class="fa fa-pencil"></i> Change Permissions
                                 </button>
                             </div>
+                            <!-- Change editor sharing button -->
+                            <div class="large-6 medium-6">
+                                <button class="button secondary action change-editor-sharing" type="button">
+                                    <i class="fa fa-share-alt"></i> Change Editor Sharing
+                                </button>
+                            </div>
                         </div>
+                        
 
                         <!-- Permissions options -->
                         <div class="input-group grid-x grid-padding-1">
-                            <div class="large-12 medium-12">                                        
-                                <input type="radio" name="role" id="role" value="writer"> <strong>Writer</strong>: can write, read and comment
+                            <div class="large-6 medium-6"> 
+                                <div class="input-group grid-x grid-padding-1">
+                                    <div class="large-12 medium-12"> 
+                                        <input type="radio" name="role" id="role" value="writer"> <strong>Writer</strong>: can write, read and comment
+                                    </div>
+                                    <div class="large-12 medium-12"> 
+                                        <input type="radio" name="role" id="role" value="commenter"> <strong>Commenter</strong>: can read and comment                                     
+                                    </div>
+                                    <div class="large-12 medium-12"> 
+                                        <input type="radio" name="role" id="role" value="reader"> <strong>Reader</strong>: can read
+                                    </div>
+                                </div>
                             </div>
-                            <div class="large-12 medium-12">                                        
-                                <input type="radio" name="role" id="role" value="commenter"> <strong>Commenter</strong>: can read and comment
-                            </div>
-                            <div class="large-12 medium-12">                                        
-                                <input type="radio" name="role" id="role" value="reader"> <strong>Reader</strong>: can read
+                            <div class="large-6 medium-6">
+                                <input type="checkbox" name="editor-sharing" id="editor-sharing"> Editors can share
                             </div>
                         </div>
 
