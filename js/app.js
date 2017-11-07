@@ -1782,8 +1782,8 @@ class OverDrive{
         }.bind(this))
         console.log(this.tree);
 		var ret = this.handleNumChecked();
-		document.getElementById('fileCount').innerHTML ="Number of Files Selected: "+ ret.numFilesChecked;
-		document.getElementById('folderCount').innerHTML ="Number of Folders Selected: "+ ret.numFoldersChecked;
+		document.getElementById('fileCount').innerHTML = ret.numFilesChecked;
+		document.getElementById('folderCount').innerHTML = ret.numFoldersChecked;
     }.bind(this))
 
     fileTree.on("uncheck_node.jstree", function(event, data) {
@@ -1813,14 +1813,14 @@ class OverDrive{
     //console.log("jstree happened")
 		this.handleNumChecked();
 		var ret = this.handleNumChecked();
-		document.getElementById('fileCount').innerHTML ="Number of Files Selected: "+ ret.numFilesChecked;
-		document.getElementById('folderCount').innerHTML ="Number of Folders Selected: "+ ret.numFoldersChecked;
+		document.getElementById('fileCount').innerHTML = ret.numFilesChecked;
+		document.getElementById('folderCount').innerHTML = ret.numFoldersChecked;
   }.bind(this))
 
 let tot = this.handleFileCount();
 console.log("counting happened" + tot.numFiles + tot.numFolders)
-document.getElementById('fileCountTotal').innerHTML = "Total Number of Files: " + tot.numFiles;
-document.getElementById('folderCountTotal').innerHTML = "Total Number of Folders: " + tot.numFolders;
+document.getElementById('fileCountTotal').innerHTML = tot.numFiles;
+document.getElementById('folderCountTotal').innerHTML = tot.numFolders;
 }
  
  

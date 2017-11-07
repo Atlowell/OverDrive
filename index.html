@@ -36,7 +36,7 @@
 				
 		
                     <!-- File browser -->
-                    <div class="large-6 medium-6 cell">
+                    <div class="large-6 medium-6 small-12 cell">
                         <div class="callout">
                             <div class="input-group">
                                 <input class="input-group-field" type="text" placeholder="Search for file(s)">
@@ -46,6 +46,25 @@
                                     </button>
                                 </div>
                             </div>
+                            <div class="grid-x grid-padding-1 counts">
+                                <div class="large-3 medium-3">
+                                    <i class="fa fa-file"></i>
+                                    <i id="fileCount">0</i>
+                                </div>
+                                <div class="large-3 medium-3">
+                                    <i class="fa fa-folder"></i>
+                                    <i id="folderCount">0</i>
+                                </div>
+                                <div class="large-3 medium-3">
+                                    <i class="fa fa-file-o"></i>
+                                    <i id="fileCountTotal">0</i>
+                                </div>
+                                <div class="large-3 medium-3">
+                                    <i class="fa fa-folder-o"></i>
+                                    <i id="folderCountTotal">0</i>
+                                </div>
+                                <p> </p>
+                            </div>
                             <div id="file-browser">
                             </div>
                         </div>
@@ -54,7 +73,7 @@
 					
 
                     <!-- Actions -->
-                    <form class="large-6 medium-6 cell callout" id="actions">
+                    <form class="large-6 medium-6 small-12 cell callout" id="actions">
                         <div class="grid-x grid-padding-1">
                             <div class="large-6 medium-6">
                                 <h3>Edit file or files.</h3>
@@ -81,14 +100,14 @@
                         <!-- Action buttons -->
                         <div class="grid-x grid-padding-1">
                             <!-- Add users button -->
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action add-users" type="button">
                                     <i class="fa fa-plus"></i> Add Users
                                 </button>
                             </div>
 
                             <!-- Remove users button -->
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action remove-users" type="button">
                                     <i class="fa fa-minus"></i> Remove Users
                                 </button>
@@ -96,13 +115,13 @@
                         </div>
                         <div class="grid-x grid-padding-1">
                             <!-- Change owner button -->
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action change-owner" type="button">
                                     <i class="fa fa-user-circle"></i> Change Owner
                                 </button>
                             </div>
                             <!-- Request ownership button -->
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action request-ownership" type="button">
                                     <i class="fa fa-envelope"></i> Request Ownership
                                 </button>
@@ -110,13 +129,13 @@
                         </div>
                         <div class="grid-x grid-padding-1">
                             <!-- Change permissions button -->
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action change-permissions" type="button">
                                     <i class="fa fa-pencil"></i> Change Permissions
                                 </button>
                             </div>
                             <!-- Change editor sharing button -->
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action change-editor-sharing" type="button">
                                     <i class="fa fa-share-alt"></i> Change Editor Sharing
                                 </button>
@@ -126,7 +145,7 @@
 
                         <!-- Permissions options -->
                         <div class="input-group grid-x grid-padding-1">
-                            <div class="large-6 medium-6"> 
+                            <div class="large-6 medium-6 small-12"> 
                                 <div class="input-group grid-x grid-padding-1">
                                     <div class="large-12 medium-12"> 
                                         <input type="radio" name="role" id="role" value="writer"> <strong>Writer</strong>: can write, read and comment
@@ -139,7 +158,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="large-6 medium-6">
+                            <div class="large-6 medium-6 small-12">
                                 <input type="checkbox" name="editor-sharing" id="editor-sharing"> Editors can share
                             </div>
                         </div>
@@ -151,11 +170,8 @@
                 </div>
             </div>
         </div>
-		
-		<p id="fileCount">Number of Files Selected: 0</p>
-        <p id="folderCount">Number of Folders Selected: 0</p>
-		<p id="fileCountTotal">Total Number of Files: 0 </p>
-        <p id="folderCountTotal">Total Number of Folders: 0</p>
+
+        <!-- Permissions Box -->
         <div class="callout permissions-box">
             <h6 class="file"></h6>
             <p class="editorsCanShare">Editors can share: Yes</p>

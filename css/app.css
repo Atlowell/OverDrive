@@ -1,6 +1,5 @@
 .action {
   width: 95%;
-  height: 50px;
   font-size: 18px;
   text-align: left
 }
@@ -15,4 +14,10 @@
   height: 256px;*/
   left: 0;
   top: 0
+}
+
+.counts {
+  font-size: 18px;
+  color: #767676;
+  padding: 8px
 }
