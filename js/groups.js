@@ -15,9 +15,15 @@ groupsUI += "<ul>";
 for (i in group.users) {
     groupsUI += "<li>";
     groupsUI += group.users[i];
+    groupsUI += "&emsp;<button class='remove' group='"
+    groupsUI += group.name;
+    groupsUI += "' user='";
+    groupsUI += group.users[i];
+    groupsUI += "'><i class='fa fa-minus-circle'></i></button>";
     groupsUI += "</li>";
 }
-groupsUI += "</ul></li>";
-groupsUI += "</ul>";
+groupsUI += "<li>Add User&emsp;<button class='add' group='";
+groupsUI += group.name;
+groupsUI += "'><i class='fa fa-plus-circle'></i></button></li></ul></li></ul>";
 groupsList.innerHTML = groupsUI;
 $('#groups-list').jstree();
