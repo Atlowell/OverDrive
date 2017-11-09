@@ -484,6 +484,45 @@ class OverDrive{
     }
   }
   
+  // An experiment in batching - Let's see if it's faster
+  // Problem: Sending many requests has a ton of overhead with response
+  // Solution: Batching, sending many requests at once
+  // Problem: Cannot have multiple concurrent permissions operations on a file, so can't batch all users for 1 file
+  // Solution: Batch for multiple files with 1 user
+  // Other considerations: We could potentially be smart and figure out which requests actually need to be send (because of propogation)
+		// Problem: Development cost for this is high - Have to design system to know whether to propogate
+		// Problem: This requires sending requests to retrieve permissions for all relevant files - can be done via batching
+		// Tradeoff: We send less post/delete requests overall, but we also send many more get requests
+			// Potential Solution: Retrieve entire permissions tree at beginning, update per file
+			// Tradeoff: High upfront overhead and high storage need, but makes permissions requests (both get and add/remove/change) faster
+			// Question: How much faster?  Is it worth it?
+  // Decision: Try basic batching.  If this takes too long, may have to resort to choosing which requests to send
+  addUserBatch(users) {
+	  //BFS
+	var fulltreearray = [];
+	var checkedtreearray = [];
+	for(let i = 0; i < this.tree._root.children.length; i++) {
+		fulltreearray.push(this.tree._root.children[i]);
+		if(fulltreearray[i].checked) {
+			checkedtreearray.push(fulltreearray[i]);
+		}
+	}
+	for(let i = 0; i < fulltreearray.length; i++) {
+		for(let j = 0; j = fulltreearray[i].children.length; j++) {
+			fulltreearray.push(fulltreearray[i].children[j]);
+			if(fulltreearray[i].children[j].checked) {
+				checkedtreearray.push(fulltreearray[i].children[j]);
+			}
+		}
+	}
+	
+	identityAuth(function(token) {
+		for(let i = 0; i < users.length; i++) {
+			//TODO: SEND A BATCH REQUEST FOR EACH USER WITH ALL FILES IN checkedtreearray (MAX 100 AT A TIME)
+		}
+	});
+  }
+  
 
   handleRemoveUsers(e) {
 	 console.log("Removing");
