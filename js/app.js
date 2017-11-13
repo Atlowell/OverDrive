@@ -547,14 +547,16 @@ class OverDrive{
 				body = body + JSON.stringify(bdy);
 			}
 			body = body + end;
-			console.log("REQUEST:");
+			console.log("\nREQUEST\n");
 			console.log(body);
-			xhr.open("POST", "https://www.googleapis.com/batch", true);
+			xhr.open("POST", "https://www.googleapis.com/batch", false);
 			xhr.setRequestHeader("Content-Type", "multipart/mixed; boundary=" + "BOUNDARY");
 			xhr.onload = function() {
+				console.log("\nRESPONSE:\n");
 				console.log(xhr.response);
 			};
 			xhr.onerror = function() {
+				console.log("\nERROR:\n");
 				console.log(xhr.error);
 			};
 			xhr.send(body);
