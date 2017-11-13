@@ -336,7 +336,8 @@ class OverDrive{
         role: role,
         that: that
     }
-    this.addUsers(args);
+    //this.addUsers(args);
+	this.addUsersBatch(users, role);
   }
   
   addUsers(args) {
@@ -497,20 +498,27 @@ class OverDrive{
 			// Tradeoff: High upfront overhead and high storage need, but makes permissions requests (both get and add/remove/change) faster
 			// Question: How much faster?  Is it worth it?
   // Decision: Try basic batching.  If this takes too long, may have to resort to choosing which requests to send
-  addUserBatch(users) {
-	  //BFS
+  addUsersBatch(users, role) {
+	var newrole = role;
+	var com = false;
+	if(newrole == "commenter") {
+		com = true;
+		newrole = "reader";
+	}
+	
+	//BFS
 	var fulltreearray = [];
 	var checkedtreearray = [];
 	for(let i = 0; i < this.tree._root.children.length; i++) {
 		fulltreearray.push(this.tree._root.children[i]);
-		if(fulltreearray[i].checked) {
+		if(fulltreearray[i].file.checked) {
 			checkedtreearray.push(fulltreearray[i]);
 		}
 	}
 	for(let i = 0; i < fulltreearray.length; i++) {
-		for(let j = 0; j = fulltreearray[i].children.length; j++) {
+		for(let j = 0; j < fulltreearray[i].children.length; j++) {
 			fulltreearray.push(fulltreearray[i].children[j]);
-			if(fulltreearray[i].children[j].checked) {
+			if(fulltreearray[i].children[j].file.checked) {
 				checkedtreearray.push(fulltreearray[i].children[j]);
 			}
 		}
@@ -519,6 +527,37 @@ class OverDrive{
 	identityAuth(function(token) {
 		for(let i = 0; i < users.length; i++) {
 			//TODO: SEND A BATCH REQUEST FOR EACH USER WITH ALL FILES IN checkedtreearray (MAX 100 AT A TIME)
+			
+			var xhr = new XMLHttpRequest();
+			var sep = "\n--BOUNDARY\n";
+			var end = "\n--BOUNDARY--";
+			
+			var body = "";
+			for(let j = 0; j < checkedtreearray.length; j++) {
+				let bdy = {
+					'role': newrole,
+					'type': "user",
+					'value': users[i]
+				}
+				if(com && !(checkedtreearray[j].file.folder)) {
+					bdy.additionalRoles = ["commenter"];
+				}
+				
+				body = body + sep + "Content-Type: application/http\n\n" + "POST https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(checkedtreearray[j].file.fid) + "/permissions" + "?sendNotificationEmails=false" + "\nAuthorization: Bearer " + token + "\nContent-Type: application/json\n\n";
+				body = body + JSON.stringify(bdy);
+			}
+			body = body + end;
+			console.log("REQUEST:");
+			console.log(body);
+			xhr.open("POST", "https://www.googleapis.com/batch", true);
+			xhr.setRequestHeader("Content-Type", "multipart/mixed; boundary=" + "BOUNDARY");
+			xhr.onload = function() {
+				console.log(xhr.response);
+			};
+			xhr.onerror = function() {
+				console.log(xhr.error);
+			};
+			xhr.send(body);
 		}
 	});
   }
