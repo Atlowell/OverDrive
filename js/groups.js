@@ -15,8 +15,10 @@ class Groups {
     setUpEventListeners() {
         const newGroupBtn = document.querySelector(".new-group");
         const confirmBtn = document.querySelector(".confirm");
+		const addBtn = document.querySelector(".add");
         newGroupBtn.addEventListener("click", (e) => this.showHideNewGroup(e));
         confirmBtn.addEventListener("click", (e) => this.handleNewGroup(e));
+		//addBtn.addEventListener("click", (e) => this.handleAddUser(e));
     }
 
     showHideNewGroup(e) {
@@ -65,6 +67,47 @@ class Groups {
         this.groups.push(new Group(groupName, users));
         this.displayGroups();
     }
+	
+
+
+    handleAddUser (e) {
+        e.preventDefault();
+        this.showHideNewGroup(e);
+        const groupName = this.getGroupName();
+        const user = this.parseUsers();
+		for (var i in this.groups) {
+			if (this.groups[i].name == groupName) {
+				for (var j in this.groups[i].users) {
+					if (this.groups[i].users[j] = user){
+						return;
+					}
+				}
+				this.groups[i].users.push(user);
+				return;
+			}
+		}
+        this.displayGroups();
+    }
+	
+	handleRemoveUser (e) {
+        e.preventDefault();
+        this.showHideNewGroup(e);
+        const groupName = this.getGroupName();
+        const user = this.parseUsers();
+		for (var i in this.groups) {
+			if (this.groups[i].name == groupName) {
+				for (var j in this.groups[i].users) {
+					if (this.groups[i].users[j] = user){
+						this.groups[i].users.splice(j,1);
+						this.displayGroups();
+						return;
+					}
+				}
+				return;
+			}
+		}
+        this.displayGroups();
+    }
 
     displayGroups() {
         var groupsList = document.querySelector("#groups-list");
@@ -91,6 +134,7 @@ class Groups {
         groupsList.outerHTML = groupsUI;
         $('#groups-list').jstree();
     }
+
 }
 
 var groups = new Groups();
