@@ -21,3 +21,28 @@
   color: #767676;
   padding: 8px
 }
+
+.tutorial {
+  display: none;
+
+
+}
+
+.tut0 {
+  position: absolute;
+  width: 60%;
+  height: 20%;
+  /*z-index: 15;*/
+  top: 50%;
+  left: 50%;
+  margin: -10% 0 0 -30%;
+  border: 1px solid black;
+  background: white;
+}
+
+.tutorial p {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
