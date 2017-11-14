@@ -145,12 +145,14 @@ class OverDrive{
     const fileBrowser = document.querySelector('div#file-browser');
     const checkBox_fileIcon_fileName = document.querySelectorAll('.jstree-anchor');
     const groupsBtn = document.querySelector('.groups');
+    const helpBtn = document.querySelector('.help');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
     fileBrowser.addEventListener('contextmenu', (e) => this.displayPermissions(e));
     groupsBtn.addEventListener('click', (e) => this.showGroups(e));
+    helpBtn.addEventListener('click', (e) => this.handleHelp(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -313,6 +315,11 @@ class OverDrive{
     cb(args);
   }
   
+  handleHelp(e) {
+      e.preventDefault;
+      let y = document.getElementById('tut0');
+      y.style.display = 'block';
+  }
   handleAddUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
