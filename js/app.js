@@ -175,12 +175,14 @@ class OverDrive{
     const fileBrowser = document.querySelector('div#file-browser');
     const checkBox_fileIcon_fileName = document.querySelectorAll('.jstree-anchor');
     const groupsBtn = document.querySelector('.groups');
+    const editorSharingBtn = document.querySelector('.change-editor-sharing');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
     changePermBtn.addEventListener('click', (e) => this.handleChangePermissions(e));
     fileBrowser.addEventListener('contextmenu', (e) => this.displayPermissions(e));
     groupsBtn.addEventListener('click', (e) => this.showGroups(e));
+    editorSharingBtn.addEventListener('click', (e) => this.handleEditorSharing(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -342,7 +344,7 @@ class OverDrive{
     args.numcalls--;
     cb(args);
   }
-  
+
   addUsers(args) {
     var users = args.users;
     var role = args.role;
@@ -771,7 +773,7 @@ class OverDrive{
                             numretries--;
                             if(numretries >= 0) {
                                 setTimeout(function() {
-                                    addRequest();
+                                    ownerRequest();
                                 }, 200);
                             }
                             else {
@@ -1172,6 +1174,132 @@ class OverDrive{
                 //console.log("sent request");
             /*}
         } */
+  }
+
+  handleEditorSharing(e) {
+    e.preventDefault();
+    const editorsCanShare = document.querySelector('.editor-sharing').checked;
+    
+	var numchecked = this.handleNumChecked();
+	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+		alert("No files selected");
+		return;
+	}
+    var that = this;
+    var args = {
+        writersCanShare: editorsCanShare,
+        that: that
+    }
+    this.changeEditorSharing(args);
+  }
+
+  changeEditorSharing(args) {
+    const writersCanShare = args.writersCanShare;
+    const that = args.that;
+
+    function userrecurse(node, chk) {
+        if(chk) {
+            identityAuth(function(token) { 
+                var body = {
+                    'writersCanShare': writersCanShare
+                }
+                
+                var numretries = 1;
+                
+                function changeEditorSharingRequest() {
+                
+                    var xhr = new XMLHttpRequest();
+                    //console.log("fid: " + encodeURIComponent(filelist[i]));
+                    xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid));
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                    xhr.responseType = "json";
+                    xhr.onload = function() {
+                        if(xhr.status == 200) {
+                            console.log("editor sharing changed for " + node.file.name);
+                            //console.log(xhr.response);
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                userrecurse(node.children[i], chk2);
+                            }
+                        }
+                        else if(xhr.status == 500) {
+                            console.log("Error with request in changeEditorSharing");
+                            console.log(xhr.response);
+                            console.log("Retrying " + numretries + " more times");
+                            numretries--;
+                            if(numretries >= 0) {
+                                setTimeout(function() {
+                                    changeEditorSharingRequest();
+                                }, 200);
+                            }
+                            else {
+                                console.log("Giving up retrying changeEditorSharing: " + node.file.name);
+                                //Continue on anyways
+                                for(let i = 0; i < node.children.length; i++) {
+                                    let chk2 = false;
+                                    if(node.children[i].file.checked) {
+                                        chk2 = true;
+                                    }
+                                    userrecurse(node.children[i], chk2);
+                                }
+                            }
+                        }
+                        else {
+                            console.log("Error with request in changeEditorSharing");
+                            console.log(xhr.response);
+                            if(xhr.status == 400) {
+                                for(let i = 0; i < xhr.response.error.errors.length; i++) {
+                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
+                                        console.log("Insufficient permissions to share " + node.file.name);
+                                    }
+                                }
+                            }
+                            // Continue on with other files anyways
+                            for(let i = 0; i < node.children.length; i++) {
+                                let chk2 = false;
+                                if(node.children[i].file.checked) {
+                                    chk2 = true;
+                                }
+                                userrecurse(node.children[i], chk2);
+                            }
+                        }
+                    };
+                    xhr.onerror = function() {
+                        console.log(xhr.error);
+                    };
+                    xhr.send(JSON.stringify(body));
+                    //console.log(body);
+                    //console.log(JSON.stringify(body));
+                    //console.log("sent request");
+                }
+                changeEditorSharingRequest();
+            });
+        }
+        else {
+            console.log("No action needed for " + node.file.name);
+            for(let i = 0; i < node.children.length; i++) {
+                let chk2 = false;
+                if(node.children[i].file.checked) {
+                    chk2 = true;
+                }
+                let permarr = [];
+                userrecurse(node.children[i], 0, chk2);
+            }
+        }
+    }
+    
+	//console.log(body);
+    for(let i = 0; i < that.tree._root.children.length; i++) {
+        let chk = false;
+        if(that.tree._root.children[i].file.checked == true) {
+            chk = true;
+        }
+        userrecurse(that.tree._root.children[i], chk);
+    }
   }
 
   parseUsers() {
