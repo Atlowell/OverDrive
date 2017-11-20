@@ -1198,6 +1198,18 @@ class OverDrive{
         console.log("email array [" + i + "] " + userEmails[i]);
         if(!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(userEmails[i]))) { // Regex for emails taken from http://emailregex.com/
             console.log("\"" + userEmails[i] + "\" is not a valid email address");
+            // TODO: Retrieve groups from extension data folder (once they are saved there in the first place)
+            /*for(let j = 0; j < groups.groups.length; j++) {
+                if(userEmails[i] == groups.groups[j].name) {
+                    for(let k = 0; k < groups.groups[j].users.length; k++) {
+                        // Will not check if name is already in list, so could end up with a list of repeats, but you could already do that.  Should not break the functionality
+                        // Assumes groups do not contain the name of groups
+                        userEmails.push(groups.groups[j].users[k]);
+                    }
+                    console.log("Found a group: " + userEmails[i]);
+                    break;
+                }
+            }*/
             userEmails.splice(i, 1);
             i--;
         }
