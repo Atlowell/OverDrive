@@ -147,6 +147,7 @@ class OverDrive{
     const groupsBtn = document.querySelector('.groups');
     const editorSharingBtn = document.querySelector('.change-editor-sharing');
     const helpBtn = document.querySelector('.help');
+    const requestOwnerBtn = document.querySelector('.request-ownership');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
@@ -155,6 +156,7 @@ class OverDrive{
     groupsBtn.addEventListener('click', (e) => this.showGroups(e));
     editorSharingBtn.addEventListener('click', (e) => this.handleEditorSharing(e));
     helpBtn.addEventListener('click', (e) => this.handleHelp(e));
+    requestOwnerBtn.addEventListener('click', (e) => this.handleRequestOwner(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -1186,6 +1188,82 @@ class OverDrive{
         }
         userrecurse(that.tree._root.children[i], chk);
     }
+  }
+  
+  handleRequestOwner(e) {
+    e.preventDefault();
+    
+	var numchecked = this.handleNumChecked();
+	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+		alert("No files selected");
+		return;
+	}
+    this.requestOwner();
+  }
+  
+  requestOwner() {
+    var checkedFiles = [];
+    this.tree.DFtraversal(function(node) {
+        if(node.file.checked) {
+            checkedFiles.push(node);
+        }
+    });
+    identityAuth(function(token) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(checkedFiles[0].file.fid));
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        xhr.responseType = "json";
+        xhr.onload = function() {
+            if(xhr.status == 200) {
+                var ownername = xhr.response.owners[0].displayName;
+                var owneremail = xhr.response.owners[0].emailAddress;
+                var filename = xhr.response.title;
+                var filelink = xhr.response.alternateLink;
+                
+                var urlstring = "mailto:" + owneremail + "?subject=Google Drive Ownership Request&body=Hello " + ownername +"!\nI would like to request ownership of the following file!\n\nName: " + filename + "\nLink: " + filelink + "\nParent: ";
+                
+                var parentlink;
+                if((xhr.response.parents.length) && (!xhr.response.parents[0].isRoot)) {
+                    var xhr2 = new XMLHttpRequest();
+                    xhr2.open('GET', xhr.response.parents[0].parentLink);
+                    xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
+                    xhr2.responseType = "json";
+                    xhr2.onload = function() {
+                        if(xhr2.status == 200) {
+                            parentlink = xhr2.response.alternateLink;
+                            urlstring += parentlink + "\n\nThanks,\nINSERT_YOUR_NAME_HERE";
+                            var url = encodeURI(urlstring);
+                            var win = window.open(url, '_blank');
+                            //win.focus();
+                        }
+                        else {
+                            console.log("error with get request on parent in requestOwner()");
+                            console.log(xhr2.response);
+                        }
+                    };
+                    xhr2.onerror = function() {
+                        console.log(xhr2.error);
+                    }
+                    xhr2.send();
+                }
+                else {
+                    parentlink = "Parent is root or the requesting user does not have access to it";
+                    urlstring += parentlink + "\n\nThanks,\nINSERT_YOUR_NAME_HERE";
+                    var url = encodeURI(urlstring);
+                    var win = window.open(url, '_blank');
+                    //win.focus();
+                }
+            }
+            else {
+                console.log("error with get request in requestOwner()");
+                console.log(xhr.response);
+            }
+        };
+        xhr.onerror = function() {
+            console.log(xhr.error);
+        };
+        xhr.send();
+    });
   }
 
   parseUsers() {
