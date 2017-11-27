@@ -1198,72 +1198,125 @@ class OverDrive{
 		alert("No files selected");
 		return;
 	}
+	if(this.parseName() == "") {
+		alert("Please enter you name into the users bar");
+		return;
+	}
     this.requestOwner();
   }
   
   requestOwner() {
+	var that = this;
     var checkedFiles = [];
     this.tree.DFtraversal(function(node) {
         if(node.file.checked) {
             checkedFiles.push(node);
         }
     });
+	var fileinfo = [];
+	var userarray = [];
+	var hasfinished = false;
+	var numrequests = 0;
     identityAuth(function(token) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(checkedFiles[0].file.fid));
-        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-        xhr.responseType = "json";
-        xhr.onload = function() {
-            if(xhr.status == 200) {
-                var ownername = xhr.response.owners[0].displayName;
-                var owneremail = xhr.response.owners[0].emailAddress;
-                var filename = xhr.response.title;
-                var filelink = xhr.response.alternateLink;
-                
-                var urlstring = "mailto:" + owneremail + "?subject=Google Drive Ownership Request&body=Hello " + ownername +"!\nI would like to request ownership of the following file!\n\nName: " + filename + "\nLink: " + filelink + "\nParent: ";
-                
-                var parentlink;
-                if((xhr.response.parents.length) && (!xhr.response.parents[0].isRoot)) {
-                    var xhr2 = new XMLHttpRequest();
-                    xhr2.open('GET', xhr.response.parents[0].parentLink);
-                    xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
-                    xhr2.responseType = "json";
-                    xhr2.onload = function() {
-                        if(xhr2.status == 200) {
-                            parentlink = xhr2.response.alternateLink;
-                            urlstring += parentlink + "\n\nThanks,\nINSERT_YOUR_NAME_HERE";
-                            var url = encodeURI(urlstring);
-                            var win = window.open(url, '_blank');
-                            //win.focus();
-                        }
-                        else {
-                            console.log("error with get request on parent in requestOwner()");
-                            console.log(xhr2.response);
-                        }
-                    };
-                    xhr2.onerror = function() {
-                        console.log(xhr2.error);
-                    }
-                    xhr2.send();
-                }
-                else {
-                    parentlink = "Parent is root or the requesting user does not have access to it";
-                    urlstring += parentlink + "\n\nThanks,\nINSERT_YOUR_NAME_HERE";
-                    var url = encodeURI(urlstring);
-                    var win = window.open(url, '_blank');
-                    //win.focus();
-                }
-            }
-            else {
-                console.log("error with get request in requestOwner()");
-                console.log(xhr.response);
-            }
-        };
-        xhr.onerror = function() {
-            console.log(xhr.error);
-        };
-        xhr.send();
+		for(let i = 0; i < checkedFiles.length; i++) {
+			let xhr = new XMLHttpRequest();
+			xhr.open('GET', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(checkedFiles[i].file.fid));
+			xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+			xhr.responseType = "json";
+			xhr.onload = function() {
+				if(xhr.status == 200) {
+					var ownername = xhr.response.owners[0].displayName;
+					var owneremail = xhr.response.owners[0].emailAddress;
+					var filename = xhr.response.title;
+					var filelink = xhr.response.alternateLink;
+					var isin = false;
+					for(let j = 0; j < userarray.length; j++) {
+						if(userarray[j].email == owneremail) {
+							isin = true;
+							break;
+						}
+					}
+					if(!isin) {
+						userarray.push({
+							email: owneremail,
+							name: ownername
+						});
+					}
+					
+					var bodystring = "Name: " + filename + "\nLink: " + filelink + "\nParent: ";
+					var parentlink;
+					if((xhr.response.parents.length) && (!xhr.response.parents[0].isRoot)) {
+						var xhr2 = new XMLHttpRequest();
+						xhr2.open('GET', xhr.response.parents[0].parentLink);
+						xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
+						xhr2.responseType = "json";
+						xhr2.onload = function() {
+							if(xhr2.status == 200) {
+								parentlink = xhr2.response.alternateLink;
+								bodystring += parentlink + "\n\n";
+								fileinfo.push({
+									txt: bodystring,
+									email: owneremail
+								});
+								numrequests--;
+								that.triggerSendEmails(numrequests, hasfinished, userarray, fileinfo, that);
+							}
+							else {
+								console.log("error with get request on parent in requestOwner()");
+								console.log(xhr2.response);
+							}
+						};
+						xhr2.onerror = function() {
+							console.log(xhr2.error);
+						}
+						xhr2.send();
+					}
+					else {
+						parentlink = "Parent is root or the requesting user does not have access to it";
+						bodystring += parentlink + "\n\n";
+						fileinfo.push({
+							txt: bodystring,
+							email: owneremail
+						});
+						numrequests--;
+						that.triggerSendEmails(numrequests, hasfinished, userarray, fileinfo, that);
+					}
+				}
+				else {
+					console.log("error with get request in requestOwner()");
+					console.log(xhr.response);
+				}
+			};
+			xhr.onerror = function() {
+				console.log(xhr.error);
+			};
+			xhr.send();
+			numrequests++;
+		}
+		hasfinished = true;
+		that.triggerSendEmails(numrequests, hasfinished, userarray, fileinfo, that);
     });
+  }
+  
+  triggerSendEmails(numrequests, hasfinished, userarray, fileinfo, that) {
+	if((!numrequests) && (hasfinished)) {
+		that.sendEmails(userarray, fileinfo, that);
+	}
+  }
+  
+  sendEmails(userarray, fileinfo, that) {
+	for(let i = 0; i < userarray.length; i++) {
+		var urlstring = "mailto:" + userarray[i].email + "?subject=Google Drive Ownership Request&body=Hello " + userarray[i].name +"!\nI would like to request ownership of the following files!\n\n";
+		for(let j = 0; j < fileinfo.length; j++) {
+			if(fileinfo[j].email == userarray[i].email) {
+				urlstring += fileinfo[j].txt;
+			}
+		}
+		urlstring += "Thank you,\n" + that.parseName();
+		var url = encodeURI(urlstring);
+		var win = window.open(url, '_blank');
+		//win.focus();
+	}
   }
 
   parseUsers() {
@@ -1293,6 +1346,12 @@ class OverDrive{
         }
     }
     return userEmails;
+  }
+  
+  parseName() {
+	const usersInput = document.querySelector('.users');
+	const usersString = usersInput.value;
+	return usersString;
   }
 
   getRoleFromUI() {
