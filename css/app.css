@@ -30,12 +30,11 @@
 #tut0 {
   display: none;
   position: absolute;
-  width: 60%;
-  height: 20%;
-  /*z-index: 15;*/
-  top: 50%;
+  width: 40%;
+  height: 100px;
+  top: 45%;
   left: 50%;
-  margin: -10% 0 0 -30%;
+  margin: -10% -10% 0 -30%;
 }
 
 .tutorial p {
