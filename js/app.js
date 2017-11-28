@@ -1086,8 +1086,6 @@ class OverDrive{
     const that = args.that;
 
     function userrecurse(node, chk) {
-        console.log(node);
-        console.log(chk);
         if(chk) {
             identityAuth(function(token) { 
                 var body = {
