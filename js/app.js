@@ -1086,6 +1086,8 @@ class OverDrive{
     const that = args.that;
 
     function userrecurse(node, chk) {
+        console.log(node);
+        console.log(chk);
         if(chk) {
             identityAuth(function(token) { 
                 var body = {
@@ -1097,7 +1099,6 @@ class OverDrive{
                 function changeEditorSharingRequest() {
                 
                     var xhr = new XMLHttpRequest();
-                    //console.log("fid: " + encodeURIComponent(filelist[i]));
                     xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid));
                     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                     xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
@@ -1139,10 +1140,12 @@ class OverDrive{
                         else {
                             console.log("Error with request in changeEditorSharing");
                             console.log(xhr.response);
-                            if(xhr.status == 400) {
+                            console.log(xhr.response.error.message);
+                            if(xhr.status == 403) {
                                 for(let i = 0; i < xhr.response.error.errors.length; i++) {
-                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
-                                        console.log("Insufficient permissions to share " + node.file.name);
+                                    if(xhr.response.error.errors[i].reason == "forbidden") {
+                                        console.log("Insufficient permissions for " + node.file.name);
+                                        alert("Insufficient permissions for " + node.file.name);
                                     }
                                 }
                             }
@@ -1175,7 +1178,7 @@ class OverDrive{
                     chk2 = true;
                 }
                 let permarr = [];
-                userrecurse(node.children[i], 0, chk2);
+                userrecurse(node.children[i], chk2);
             }
         }
     }
