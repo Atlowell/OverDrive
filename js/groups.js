@@ -110,8 +110,49 @@ class Groups {
     }
 
     displayGroups() {
+		testStorage();
         var groupsList = document.querySelector("#groups-list");
         var groupsUI = "<div id='groups-list'><ul>";
+		var that = this;
+		
+		chrome.storage.sync.get({
+			list:[]//put defaultvalues if any
+		},
+		function(data) {
+			console.log(data.list);
+			//update(data.list)//storing the storage value in a variable and passing to update function
+			console.log(data.list.length);
+			var i = 0;
+			while(i < data.list.length) {
+				var numargs = data.list[i];
+				i++;
+				var j = 0;
+				var groupName = data.list[i];
+
+				console.log(groupName);
+				i++;
+				j++;
+
+				var storedUsers = [];
+				while (j < numargs) {
+					storedUsers.push(data.list[i])
+					
+					
+					i++;
+					j++;
+					
+				}
+				console.log(storedUsers);
+				if (numargs != 0) {
+					that.groups.push(new Group(groupName, storedUsers));
+				}
+			}
+		}
+		
+		);  
+		
+		console.log(this);
+		
         for (var i in this.groups) {
             groupsUI += "<li data-jstree='{\"icon\":\"fa fa-users\"}'>";
             groupsUI += this.groups[i].name;
@@ -133,8 +174,48 @@ class Groups {
         groupsUI += "</ul></div>";
         groupsList.outerHTML = groupsUI;
         $('#groups-list').jstree();
+		//testStorage();
+		//testGet();
     }
+	
+
 
 }
+
+function testStorage() {
+	var groupStorage = ["3","Group1", "Brian", "Austin","3","Group2", "Clayton", "Sam", "0"];	
+	var testArray=["test","teste","testes"];
+	chrome.storage.sync.set({
+		list:groupStorage
+		}, function() {
+		console.log("added to list");
+	});
+	
+		
+}
+
+function testGet() {
+	chrome.storage.sync.get({
+    list:[]//put defaultvalues if any
+	},
+	function(data) {
+		console.log(data.list);
+		//update(data.list)//storing the storage value in a variable and passing to update function
+	}
+	);  
+}
+
+ 
+
+function update(array)
+   {
+    array.push("testAdd");
+    //then call the set to update with modified value
+    chrome.storage.sync.set({
+        list:array
+    }, function() {
+        console.log("added to list with new values");
+    });
+    }
 
 var groups = new Groups();
