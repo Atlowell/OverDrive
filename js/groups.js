@@ -136,8 +136,6 @@ class Groups {
 				var storedUsers = [];
 				while (j < numargs) {
 					storedUsers.push(data.list[i])
-					
-					
 					i++;
 					j++;
 					
@@ -147,39 +145,44 @@ class Groups {
 					that.groups.push(new Group(groupName, storedUsers));
 				}
 			}
-		}
-		
-		);  
-		
+			console.log(that);
+			
+			for (var i in that.groups) {
+				groupsUI += "<li data-jstree='{\"icon\":\"fa fa-users\"}'>";
+				groupsUI += that.groups[i].name;
+				groupsUI += "<ul>";
+				for (var j in that.groups[i].users) {
+					groupsUI += "<li data-jstree='{\"icon\":\"fa fa-user\"}'>";
+					groupsUI += that.groups[i].users[j];
+					groupsUI += "&emsp;<button class='remove' group='"
+					groupsUI += that.groups[i].name;
+					groupsUI += "' user='";
+					groupsUI += that.groups[i].users[j];
+					groupsUI += "'><i class='fa fa-minus-circle'></i></button>";
+					groupsUI += "</li>";
+				}
+				groupsUI += "<li data-jstree='{\"icon\":\"fa fa-user-plus\"}'>Add User&emsp;<button class='add' group='";
+				groupsUI += that.groups[i].name;
+				groupsUI += "'><i class='fa fa-plus-circle'></i></button></li></ul></li>"
+			}
+			console.log(that);
+			groupsUI += "</ul></div>";
+			groupsList.outerHTML = groupsUI;
+			$('#groups-list').jstree();
+			//testStorage();
+			//testGet();
+			testVals();
+		}	
+		);  		
 		console.log(this);
-		
-        for (var i in this.groups) {
-            groupsUI += "<li data-jstree='{\"icon\":\"fa fa-users\"}'>";
-            groupsUI += this.groups[i].name;
-            groupsUI += "<ul>";
-            for (var j in this.groups[i].users) {
-                groupsUI += "<li data-jstree='{\"icon\":\"fa fa-user\"}'>";
-                groupsUI += this.groups[i].users[j];
-                groupsUI += "&emsp;<button class='remove' group='"
-                groupsUI += this.groups[i].name;
-                groupsUI += "' user='";
-                groupsUI += this.groups[i].users[j];
-                groupsUI += "'><i class='fa fa-minus-circle'></i></button>";
-                groupsUI += "</li>";
-            }
-            groupsUI += "<li data-jstree='{\"icon\":\"fa fa-user-plus\"}'>Add User&emsp;<button class='add' group='";
-            groupsUI += this.groups[i].name;
-            groupsUI += "'><i class='fa fa-plus-circle'></i></button></li></ul></li>"
-        }
-        groupsUI += "</ul></div>";
-        groupsList.outerHTML = groupsUI;
-        $('#groups-list').jstree();
-		//testStorage();
-		//testGet();
+
     }
 	
+}
 
-
+function testVals() {
+	console.log("Vals");
+	console.log(this.groups);
 }
 
 function testStorage() {
