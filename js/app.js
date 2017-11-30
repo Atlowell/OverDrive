@@ -1097,7 +1097,6 @@ class OverDrive{
                 function changeEditorSharingRequest() {
                 
                     var xhr = new XMLHttpRequest();
-                    //console.log("fid: " + encodeURIComponent(filelist[i]));
                     xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid));
                     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
                     xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
@@ -1139,10 +1138,12 @@ class OverDrive{
                         else {
                             console.log("Error with request in changeEditorSharing");
                             console.log(xhr.response);
-                            if(xhr.status == 400) {
+                            console.log(xhr.response.error.message);
+                            if(xhr.status == 403) {
                                 for(let i = 0; i < xhr.response.error.errors.length; i++) {
-                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
-                                        console.log("Insufficient permissions to share " + node.file.name);
+                                    if(xhr.response.error.errors[i].reason == "forbidden") {
+                                        console.log("Insufficient permissions for " + node.file.name);
+                                        alert("Insufficient permissions for " + node.file.name);
                                     }
                                 }
                             }
@@ -1175,7 +1176,7 @@ class OverDrive{
                     chk2 = true;
                 }
                 let permarr = [];
-                userrecurse(node.children[i], 0, chk2);
+                userrecurse(node.children[i], chk2);
             }
         }
     }
@@ -1536,60 +1537,67 @@ class OverDrive{
             
             // On Success
             xhr.onload = function() {
-				console.log(xhr.response);
-                var childlist = xhr.response.items;
-				var npt = xhr.response.nextPageToken;
-         
-                function getnpt() {                   
-                    var xhr2 = new XMLHttpRequest();
-                    xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&?q=" + encodeURIComponent(q));
-                    xhr2.setRequestHeader('Authorization', 'Bearer ' + tok);
-                    xhr2.setRequestHeader('pageToken', npt);
-                    xhr2.responseType = "json";
-                    xhr2.onload = function() {
-                        // Update npt and filelist, mark ready for next request
-                        console.log("got child from npt token - chain child succeeded");
-                        npt = xhr2.response.nextPageToken;
-                        var childlist2 = xhr2.response.items;
-                        console.log("new child list: " + childlist2.length);
-                        
+                if(xhr.status != 200) {
+                    console.log(xhr.status);
+                    console.log("List error in recurse");
+                    if(xhr.status == 403) {
+                        if((xhr.response.error.errors[0].reason == "userRateLimitExceeded") || (xhr2.response.error.errors[0].reason == "rateLimitExceeded")) {
+                            console.log("retry");
+                            //setTimeout(test, Math.floor(Math.random() * 500) + 501);
+                        }
+                    }
+                }
+                else {
+                    console.log(xhr.response);
+                    var childlist = xhr.response.items;
+                    var npt = xhr.response.nextPageToken;
+             
+                    function getnpt() {     
                         if(npt) {
-                            console.log("next child npt");
-                            getnpt();
+                            var xhr2 = new XMLHttpRequest();
+                            xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&?q=" + encodeURIComponent(q));
+                            xhr2.setRequestHeader('Authorization', 'Bearer ' + t);
+                            //xhr2.setRequestHeader('pageToken', npt);
+                            xhr2.responseType = "json";
+                            xhr2.onload = function() {
+                                if(xhr2.status != 200) {
+                                    console.log(xhr2.status);
+                                    console.log("npt list error in recurse");
+                                }
+                                else {
+                                    // Update npt and filelist, mark ready for next request
+                                    console.log("got child from npt token in recurse - chain child succeeded");
+                                    npt = xhr2.response.nextPageToken;
+                                    var childlist2 = xhr2.response.items;
+                                    console.log("new child list: " + childlist2.length);
+                                    childlist.concat(childlist2);
+                                    
+                                    getnpt();
+                                }
+                                that.numrequests--;
+                                that.triggerDisplayTree();
+                            //readyflag = 1;
+                            };
+                            xhr2.onerror = function() {
+                                console.log("Chain child failed");
+                                console.log(xhr2.error);
+                            };
+                            xhr2.send();
+                            that.numrequests++;
                         }
                         else {
-                            //endflag = true;
-                            console.log("no more child npts");
+                            for(let i = 0; i < childlist.length; i++) {
+                                //console.log("Calling populatetreerecurse from populatetreerecurse");
+                                //console.log(this);
+                                //console.log(childlist[i]);
+                                that.numcalls++;
+                                that.populateTreeRecurse(childlist[i], childnode);
+                            }
                         }
-                        for(var j = 0; j < childlist2.length; j++) {
-                            //console.log("Calling populatetreerecurse from populatetreerecurse");
-                            that.numcalls++;
-                            that.populateTreeRecurse(childlist2[j], childnode);
-                        }
-                        that.numrequests--;
-                        that.triggerDisplayTree();
-                    //readyflag = 1;
                     };
-                    xhr2.onerror = function() {
-                        console.log("Chain child failed");
-                        console.log(xhr2.error);
-                    };
-                    xhr2.send();
-                    that.numrequests++;
-                };
-                
-                if(npt) {
-                    //endflag = false;
-                    //readyflag = true;
-                    console.log("Initial child npt");
+                    
                     getnpt();
-                }
-                for(var i = 0; i < childlist.length; i++) {
-                    //console.log("Calling populatetreerecurse from populatetreerecurse");
-                    //console.log(this);
-                    //console.log(childlist[i]);
-                    that.numcalls++;
-                    that.populateTreeRecurse(childlist[i], childnode);
+                    
                 }
                 that.numrequests--;
                 that.triggerDisplayTree();
@@ -1607,8 +1615,6 @@ class OverDrive{
 			//Don't need to trigger display tree because it won't be valid
 			//this.triggerDisplayTree();
         });
-        
-		
 	}
 	else {
 		//console.log("numcalls should be decreased here");
@@ -1638,102 +1644,142 @@ class OverDrive{
         
         // On success
         xhr.onload = function() {
-            //console.log("Successful get of files");
-            //console.log(xhr.response);
-            var filelist = xhr.response.items;
-            //console.log(xhr.response.items);
-            console.log("original file list: " + filelist.length);
-            var npt = xhr.response.nextPageToken;
-            //console.log("npt: " + npt);
-            //var readyflag = false;
-            //var endflag = true;
-            
-			
-			// TODO: FIX NPT
-            function getnpt() {
-                var xhr2 = new XMLHttpRequest();
-                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q));
-                xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
-                //xhr2.setRequestHeader('pageToken', npt);
-                //xhr2.setRequestHeader('maxResults', 460);
-                xhr2.responseType = "json";
-                xhr2.onload = function() {
-					console.log(xhr.response);
-                    console.log("Got list from npt token- chain list succeeded");
-                    //console.log(xhr2.response);
-                    // Update npt and filelist, mark ready for next request
-                    npt = xhr2.response.nextPageToken;
-                    //console.log("list npt: " + npt);
-                    var filelist2 = xhr2.response.items;
-                    console.log("new file list: " + filelist2.length);
-                    //readyflag = true;
+            if(xhr.status != 200) {
+                console.log(xhr.status);
+                console.log("List error");
+            }
+            else {
+                //console.log("Successful get of files");
+                //console.log(xhr.response);
+                var filelist = xhr.response.items;
+                //console.log(xhr.response.items);
+                console.log("original file list: " + filelist.length);
+                var npt = xhr.response.nextPageToken;
+                //console.log("npt: " + npt);
+                //var readyflag = false;
+                //var endflag = true;
+                
+                
+                function getnpt() {
                     if(npt) {
-                        console.log("next list npt");
-                        getnpt();
+                        console.log("npt found.  Getting next list");
+                        var xhr2 = new XMLHttpRequest();
+                        xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q));
+                        xhr2.setRequestHeader('Authorization', 'Bearer ' + token);
+                        //xhr2.setRequestHeader('pageToken', npt);
+                        //xhr2.setRequestHeader('maxResults', 460);
+                        xhr2.responseType = "json";
+                        xhr2.onload = function() {
+                            if(xhr2.status != 200) {
+                                console.log(xhr2.response);
+                                console.log("Error in npt list response");
+                            }
+                            else {
+                                console.log("Got list from npt token- chain list succeeded");
+                                //console.log(xhr2.response);
+                                // Update npt and filelist, mark ready for next request
+                                npt = xhr2.response.nextPageToken;
+                                //console.log("list npt: " + npt);
+                                var filelist2 = xhr2.response.items;
+                                console.log("new file list: " + filelist2.length);
+                                filelist.concat(filelist2);
+                                //readyflag = true;
+                                
+                                getnpt();
+                            }
+                            that.numrequests--;
+                            that.triggerDisplayTree();
+                        };
+                        xhr2.onerror = function() {
+                            console.log("chain list returned with error");
+                            console.log(xhr2.error);
+                        };
+                        xhr2.send();
+                        that.numrequests++;
+                        //console.log("xhr2 was sent: " + xhr2.readyState);
                     }
+                    // Last of files
                     else {
-                        //endflag = true;
-                        console.log("no more list npts");
+                        var q2 = "(sharedWithMe = true) and trashed=false";
+                        var xhr3 = new XMLHttpRequest();
+                        xhr3.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q2));
+                        xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
+                        xhr3.responseType = "json";
+                        
+                        xhr3.onload = function() {
+                            if(xhr3.status != 200) {
+                                console.log(xhr2.status);
+                                console.log("List2 error");
+                            }
+                            else {
+                                var sharelist = xhr3.response.items;
+                                console.log("original share list: " + sharelist.length);
+                                npt = xhr3.response.nextPageToken;
+                                
+                                function getnpt2() {
+                                    if(npt) {
+                                        console.log("npt found.  Getting next list2");
+                                        var xhr4 = new XMLHttpRequest();
+                                        xhr4.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q2));
+                                        xhr4.setRequestHeader('Authorization', 'Bearer ' + token);
+                                        xhr4.responseType = "json";
+                                        xhr4.onload = function() {
+                                            if(xhr4.status != 200) {
+                                                console.log(xhr4.response);
+                                                console.log("Error in npt list2 response");
+                                            }
+                                            else {
+                                                console.log("Got list2 from npt token- chain list2 succeeded");
+                                                npt = xhr4.response.nextPageToken;
+                                                var sharelist2 = xhr4.response.items;
+                                                console.log("new share list: " + sharelist2.length);
+                                                sharelist.concat(sharelist2);
+                                                
+                                                getnpt2();
+                                            }
+                                            that.numrequests--;
+                                            that.triggerDisplayTree();
+                                        };
+                                        xhr4.onerror = function() {
+                                            console.log("chain list 2 returned with an error");
+                                            console.log(xhr4.error);
+                                        };
+                                        xhr4.send();
+                                        that.numrequests++;
+                                    }
+                                    else {
+                                        for(let i = 0; i < sharelist.length; i++) {
+                                            if(sharelist[i].parents.length == 0) {
+                                                filelist.push(sharelist[i]);
+                                            }
+                                        }
+                                        for(let i = 0; i < filelist.length; i++) {
+                                            that.numcalls++;
+                                            that.populateTreeRecurse(filelist[i], that.tree._root);
+                                        }
+                                    }
+                                }
+                                
+                                getnpt2();
+                                
+                            }
+                            that.numrequests--;
+                            that.triggerDisplayTree();
+                        };
+                        var onerror = function() {
+                            console.log(xhr3.error);
+                        }
+                        xhr3.send();
+                        that.numrequests++;
                     }
-                    for(let j = 0; j < filelist2.length; j++) {
-                        //console.log("Calling populatetreerecurse");
-                        that.numcalls++;
-                        that.populateTreeRecurse(filelist2[j], that.tree._root);
-                    }
-                    that.numrequests--;
-                    that.triggerDisplayTree();
-                };
-                xhr2.onerror = function() {
-                    console.log("chain list returned with error");
-                    console.log(xhr2.error);
-                };
-                xhr2.send();
-                that.numrequests++;
-                //console.log("xhr2 was sent: " + xhr2.readyState);
+                }
+                
+                getnpt();
+                
             }
-            
-            if(npt) {
-                //endflag = false;
-                //readyflag = true;
-                console.log("Initial list npt");
-                //getnpt();
-            }
+            that.numrequests--;
+            that.triggerDisplayTree();
 			
-			var q2 = "(sharedWithMe = true) and trashed=false";
-			var xhr3 = new XMLHttpRequest();
-			xhr3.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q2));
-			xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
-			xhr3.responseType = "json";
-			
-			xhr3.onload = function() {
-				var sharelist = xhr3.response.items;
-				
-				// NPT
-				
-				for(let i = 0; i < sharelist.length; i++) {
-					if(sharelist[i].parents.length == 0) {
-						filelist.push(sharelist[i]);
-					}
-				}
-				for(let i = 0; i < filelist.length; i++) {
-					//console.log("Calling populatetreerecurse");
-					//console.log(that);
-					//console.log("numcalls increase");
-					//console.log("numcalls before: " + that.numcalls);
-					that.numcalls++;
-					//console.log("numcalls after: " + that.numcalls);
-					that.populateTreeRecurse(filelist[i], that.tree._root);
-				}
-				//var i = 0;
-				that.numrequests--;
-				that.triggerDisplayTree();
-            
-			};
-			var onerror = function() {
-				console.log(xhr3.error);
-			}
-			xhr3.send();
-			that.numrequests++;
         };
         
         //On failure
@@ -1742,6 +1788,7 @@ class OverDrive{
         };
         
         xhr.send();
+        that.numrequests++;
         //that.startedtopopulate = true;
     });
   }

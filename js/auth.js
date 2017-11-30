@@ -42,7 +42,7 @@ function identityAuth(callback) {
             console.log(chrome.runtime.lastError);
         }
         else {
-            console.log("Token: " + token);
+            //console.log("Token: " + token);
             
             callback(token);
             
