@@ -56,3 +56,8 @@
   margin-left: 10px;
   margin-right: 10px;
 }
+
+#close-tut {
+  display: none;
+  z-index: 1003;
+}

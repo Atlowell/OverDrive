@@ -158,6 +158,12 @@ class OverDrive{
     helpBtn.addEventListener('click', (e) => this.handleHelp(e));
     requestOwnerBtn.addEventListener('click', (e) => this.handleRequestOwner(e));
 
+
+    // These are all the tutorial buttons
+
+    const closeTutBtn = document.querySelector('#close-tut');
+    closeTutBtn.addEventListener('click', (e) => this.handleCloseTut(e));
+
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
             e.preventDefault;
@@ -321,10 +327,17 @@ class OverDrive{
   
   handleHelp(e) {
       e.preventDefault;
-      let y = document.getElementById('tut0');
-      let overlay = document.getElementById('overlay')
-      overlay.style.display = 'block';
-      y.style.display = 'block';
+      $('#tut0').show();
+      $('#overlay').show();
+      $('#close-tut').show();
+      
+  }
+
+  handleCloseTut(e) {
+      e.preventDefault;
+      $('.tutorial').hide();
+      $('#overlay').hide();
+      $('#close-tut').hide();
   }
   handleAddUsers(e) {
     e.preventDefault();
