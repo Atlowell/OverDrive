@@ -327,6 +327,7 @@ class OverDrive{
   
   handleHelp(e) {
       e.preventDefault;
+      //$('#tut0').css('display', 'inline-block');
       $('#tut0').show();
       $('#overlay').show();
       $('#close-tut').show();
