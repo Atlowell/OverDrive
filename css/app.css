@@ -22,16 +22,29 @@
   padding: 8px
 }
 
+#overlay {
+    display: none;
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background-color:black;
+    opacity:0.4;
+    z-index:1001;
+}
+
 .tutorial {
   border: 1px solid black;
   background: white;
+  display: none;
+  z-index: 1003;
 }
 
 #tut0 {
-  display: none;
   position: absolute;
   width: 40%;
-  height: 100px;
+  height: 10%;
   top: 45%;
   left: 50%;
   margin: -10% -10% 0 -30%;

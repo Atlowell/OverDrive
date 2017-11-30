@@ -322,6 +322,8 @@ class OverDrive{
   handleHelp(e) {
       e.preventDefault;
       let y = document.getElementById('tut0');
+      let overlay = document.getElementById('overlay')
+      overlay.style.display = 'block';
       y.style.display = 'block';
   }
   handleAddUsers(e) {

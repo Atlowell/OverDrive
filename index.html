@@ -189,14 +189,17 @@
 
         <!-- Tutorial boxes  -->
 
-        <div class="callout clearfix tutorial large-centered" id="tut0">   
+        <div class="callout clearfix tutorial" id="tut0">
             <p class="text-center"> Hi there! Welcome to OverDrive. This short tutorial will ensure you know how to use our extension to its full potential. 
-            Let's get started! Click on the "Next" button when you're ready to go!<br></p>
+            Let's get started! Click on the "Next" button when you're ready to go<br></p>
             <button class="float-left button tiny disabled">Previous</button>
             <button class="float-right button tiny" id="tut0-1">Next</button>
+            <button class="close-button" aria-label="Dismiss alert" type="button">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
 
-
+        <div id="overlay"></div>
 
         
         <script src="js/vendor/jquery.js"></script>
