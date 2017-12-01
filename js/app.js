@@ -208,6 +208,10 @@ class OverDrive{
     const tut9_8 = document.querySelector('#tut9-8');
     tut8_9.addEventListener('click', (e) => this.handle8_9(e));
     tut9_8.addEventListener('click', (e) => this.handle9_8(e));
+
+    const tutEnd = document.querySelector('#tut-end');
+    tutEnd.addEventListener('click', (e) => this.handleTutEnd(e));
+
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
             e.preventDefault;
@@ -383,6 +387,22 @@ class OverDrive{
       $('.tutorial').hide();
       $('#overlay').hide();
       $('#close-tut').hide();
+
+      //resetting z-indexes
+      $('#filebrowser-callout').css('z-index', 'auto');
+      $('#actions').css('z-index', 'auto');
+
+      //resetting the beautiful yellow borders
+      $('#file-browser').css('box-shadow', 'none');
+      $('.counts').css('box-shadow', 'none');
+      $('#input-potato').css('box-shadow', 'none');
+      $('#input-users-potato').css('border', 'none');
+      $("#tut6-area-bot").css('border', 'none');
+      $("#tut6-area-top").css('border', 'none');
+      $('#change-permissions-potato').css('border', 'none');
+      $('#change-permissions-ticks-potato').css('border', 'none');
+      $('#change-editor-potato').css('border', 'none');
+      $('#change-editor-tick-potato').css('border', 'none');
   }
 
   handle0_1(e) {
@@ -572,6 +592,12 @@ class OverDrive{
       $('#change-editor-tick-potato').css({'border':'5px solid #faff0e',
                                            'border-top':'0px solid #faff0e'});
       $('#actions').css('z-index', 1002);
+  }
+
+  handleTutEnd(e) {
+      $('#tut9').hide();
+      $('#overlay').hide();
+      $('#close-tut').hide();
   }
 
   handleAddUsers(e) {
