@@ -46,6 +46,7 @@
     "debugger",
     "declarativeContent",
     "identity",
+	"identity.email",
     "storage",
     "tabs",
     "https://*.google.com/*",

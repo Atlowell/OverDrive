@@ -106,18 +106,28 @@ class OverDrive{
     this.currentName = null;
     this.currentFid = null;
     this.currentPermissions = null;
+	this.useremail = "Not retrieved";
     //this.startedtopopulate = false;
     //this.lockrequests = false;
     //this.lockitems = false;
     //console.log(this.tree);
     this.populateTree(); // ASYNC!
     this.setUpEventListeners();
+	this.getUserEmail();
 
     //permissions box
     //$('.permissions-box .file').jstree();
     const permissionsBox = document.querySelector('.permissions-box');
     permissionsBox.style.left = (-500) + 'px';
     permissionsBox.style.top = (-500) + 'px';
+  }
+  
+  getUserEmail() {
+	  var that = this;
+	  chrome.identity.getProfileUserInfo(function(email) {
+		  that.useremail = email.email;
+		  console.log("Email retrieved: " + that.useremail);
+	  });
   }
   
   triggerDisplayTree() {
@@ -1622,16 +1632,27 @@ class OverDrive{
   
   sendEmails(userarray, fileinfo, that) {
 	for(let i = 0; i < userarray.length; i++) {
-		var urlstring = "mailto:" + userarray[i].email + "?subject=Google Drive Ownership Request&body=Hello " + userarray[i].name +"!\nI would like to request ownership of the following files!\n\n";
-		for(let j = 0; j < fileinfo.length; j++) {
-			if(fileinfo[j].email == userarray[i].email) {
-				urlstring += fileinfo[j].txt;
+		if(userarray[i].email == that.useremail) {
+			if(userarray.length == 1) {
+				alert("You cannot request ownership from yourself.");
+				return;
+			}
+			else {
+				alert("Found request to file(s) you are the owner of.  Skipping and sending the rest");
 			}
 		}
-		urlstring += "Thank you,\n" + that.parseName();
-		var url = encodeURI(urlstring);
-		var win = window.open(url, '_blank');
-		//win.focus();
+		else {
+			var urlstring = "mailto:" + userarray[i].email + "?subject=Google Drive Ownership Request&body=Hello " + userarray[i].name +"!\nI would like to request ownership of the following files!\n\n";
+			for(let j = 0; j < fileinfo.length; j++) {
+				if(fileinfo[j].email == userarray[i].email) {
+					urlstring += fileinfo[j].txt;
+				}
+			}
+			urlstring += "Thank you,\n" + that.parseName();
+			var url = encodeURI(urlstring);
+			var win = window.open(url, '_blank');
+			//win.focus();
+		}
 	}
   }
 
