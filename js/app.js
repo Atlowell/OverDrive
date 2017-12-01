@@ -602,29 +602,32 @@ class OverDrive{
 
   handleAddUsers(e) {
     e.preventDefault();
-    const users = this.parseUsers();
-    if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-    const role = this.getRoleFromUI();
-    if(!role) {
-        alert("No role selected");
-        return;
-    }
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
     var that = this;
-    var args = {
-        users: users,
-        role: role,
-        that: that
-    }
-    //this.addUsers(args);
-	this.addUsersBatch(users, role);
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        const role = that.getRoleFromUI();
+        if(!role) {
+            alert("No role selected");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+        var args = {
+            users: users,
+            role: role,
+            that: that
+        }
+        //that.addUsers(args);
+        that.addUsersBatch(users, role);
+    });
+    
   }
   
   addUsers(args) {
@@ -855,25 +858,26 @@ class OverDrive{
   handleRemoveUsers(e) {
 	 console.log("Removing");
     e.preventDefault();
-    const users = this.parseUsers();
-    if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
- 
     var that = this;
-    var args = {
-        users: users,
-        role: role,
-        that: that
-    }
-    this.removeUsers(args);
-
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+     
+        var args = {
+            users: users,
+            role: role,
+            that: that
+        }
+        that.removeUsers(args);
+    });
   }
   
 
@@ -1044,24 +1048,24 @@ class OverDrive{
 
   handleChangeOwner(e) {
     e.preventDefault();
-    const users = this.parseUsers();
-	if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-	if(users.length > 1) {
-		alert("Too many emails entered.  There can only be one owner");
-		return;
-	}
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
-	this.changeOwners(users[0]);
-		
-    //get checked file(s) from tree
-    //call createOwner for given files and users
+    var that = this;
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        if(users.length > 1) {
+            alert("Too many emails entered.  There can only be one owner");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+        that.changeOwners(users[0]);
+    });
   }
   
   changeOwners(user) {
@@ -1180,31 +1184,33 @@ class OverDrive{
 
   handleChangePermissions(e) {
     e.preventDefault();
-    const users = this.parseUsers();
-	if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-    const role = this.getRoleFromUI();
-    if(!role) {
-        alert("No role selected");
-        return;
-    }
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
     var that = this;
-	this.getIdsforUsers(users, function(userids) {
-		var args = {
-			users: users,
-			userids: userids,
-			role: role,
-			that: that
-		}
-		that.changePermissions(args);
-	});
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        const role = that.getRoleFromUI();
+        if(!role) {
+            alert("No role selected");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+        that.getIdsforUsers(users, function(userids) {
+            var args = {
+                users: users,
+                userids: userids,
+                role: role,
+                that: that
+            }
+            that.changePermissions(args);
+        });
+    });
   }
 
   triggerDone(args, numrequests, donesending, cb) {
@@ -1596,33 +1602,77 @@ class OverDrive{
 	}
   }
 
-  parseUsers() {
+  parseUsers(callback) {
     const usersInput = document.querySelector('.users');
     const usersString = usersInput.value;
     console.log("email string: " + usersString);
     const userEmails = usersString.split(/[\s,;]+/);
     console.log("email array length " + userEmails.length);
-    for(let i = 0; i < userEmails.length; i++) {
-        console.log("email array [" + i + "] " + userEmails[i]);
-        if(!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(userEmails[i]))) { // Regex for emails taken from http://emailregex.com/
-            console.log("\"" + userEmails[i] + "\" is not a valid email address");
+    chrome.storage.sync.get({
+        list: [] //put defaultvalues if any
+    },
+    function(data) {
+        console.log("Groups list:");
+        console.log(data.list);
+        console.log(data.list.length);
+        
+        var len = userEmails.length;
+        for(let cnt = 0; cnt < userEmails.length; cnt++) {
+            console.log("email array [" + cnt + "] " + userEmails[cnt]);
+            if(!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(userEmails[cnt]))) { // Regex for emails taken from http://emailregex.com/
+                console.log("\"" + userEmails[cnt] + "\" is not a valid email address");
+                if(cnt < len) { // In the original list.  Prevents chaining this on users added from groups        
+                    var i = 0;
+                    while (i < data.list.length) {
+                        var numargs = data.list[i];
+                        if(numargs == 0) {
+                            break;
+                        }
+                        i++;
+                        var j = 0;
+                        var groupName = data.list[i];
+
+                        console.log(groupName);
+                        i++;
+                        j++;
+                        
+                        // Group matches
+                        if(userEmails[cnt] == groupName) {
+                            console.log("Matching group found");
+                            while(j < numargs) {
+                                userEmails.push(data.list[i]);
+                                i++;
+                                j++;
+                            }
+                            break;
+                            // Will not check if name is already in list, so could end up with a list of repeats, but you could already do that.  Should not break the functionality
+                            // Assumes groups do not contain the name of groups
+                        }
+                        
+                        // Group doesn't match.  Continue
+                        i += numargs - 1;
+                    }
+                }
+                
+                userEmails.splice(cnt, 1);
+                cnt--;
+                len--;
+            }
+        }
+        callback(userEmails);
+    });
             // TODO: Retrieve groups from extension data folder (once they are saved there in the first place)
             /*for(let j = 0; j < groups.groups.length; j++) {
                 if(userEmails[i] == groups.groups[j].name) {
                     for(let k = 0; k < groups.groups[j].users.length; k++) {
-                        // Will not check if name is already in list, so could end up with a list of repeats, but you could already do that.  Should not break the functionality
-                        // Assumes groups do not contain the name of groups
+                        
                         userEmails.push(groups.groups[j].users[k]);
                     }
                     console.log("Found a group: " + userEmails[i]);
                     break;
                 }
             }*/
-            userEmails.splice(i, 1);
-            i--;
-        }
-    }
-    return userEmails;
+            
   }
   
   parseName() {
