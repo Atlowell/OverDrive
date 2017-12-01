@@ -167,8 +167,50 @@ class OverDrive{
     const tut0_1 = document.querySelector('#tut0-1');
     const tut1_0 = document.querySelector('#tut1-0');
     tut0_1.addEventListener('click', (e) => this.handle0_1(e));
-    tut1_0.addEventListener('click', (e) => this.handle1_0(e))
+    tut1_0.addEventListener('click', (e) => this.handle1_0(e));
 
+    const tut1_2 = document.querySelector('#tut1-2');
+    const tut2_1 = document.querySelector('#tut2-1');
+    tut1_2.addEventListener('click', (e) => this.handle1_2(e));
+    tut2_1.addEventListener('click', (e) => this.handle2_1(e));
+
+    const tut2_3 = document.querySelector('#tut2-3');
+    const tut3_2 = document.querySelector('#tut3-2');
+    tut2_3.addEventListener('click', (e) => this.handle2_3(e));
+    tut3_2.addEventListener('click', (e) => this.handle3_2(e));
+
+    const tut3_4 = document.querySelector('#tut3-4');
+    const tut4_3 = document.querySelector('#tut4-3');
+    tut3_4.addEventListener('click', (e) => this.handle3_4(e));
+    tut4_3.addEventListener('click', (e) => this.handle4_3(e));
+
+    const tut4_5 = document.querySelector('#tut4-5');
+    const tut5_4 = document.querySelector('#tut5-4');
+    tut4_5.addEventListener('click', (e) => this.handle4_5(e));
+    tut5_4.addEventListener('click', (e) => this.handle5_4(e));
+
+    const tut5_6 = document.querySelector('#tut5-6');
+    const tut6_5 = document.querySelector('#tut6-5');
+    tut5_6.addEventListener('click', (e) => this.handle5_6(e));
+    tut6_5.addEventListener('click', (e) => this.handle6_5(e));
+
+    const tut6_7 = document.querySelector('#tut6-7');
+    const tut7_6 = document.querySelector('#tut7-6');
+    tut6_7.addEventListener('click', (e) => this.handle6_7(e));
+    tut7_6.addEventListener('click', (e) => this.handle7_6(e));
+
+    const tut7_8 = document.querySelector('#tut7-8');
+    const tut8_7 = document.querySelector('#tut8-7');
+    tut7_8.addEventListener('click', (e) => this.handle7_8(e));
+    tut8_7.addEventListener('click', (e) => this.handle8_7(e));
+
+    const tut8_9 = document.querySelector('#tut8-9');
+    const tut9_8 = document.querySelector('#tut9-8');
+    tut8_9.addEventListener('click', (e) => this.handle8_9(e));
+    tut9_8.addEventListener('click', (e) => this.handle9_8(e));
+
+    const tutEnd = document.querySelector('#tut-end');
+    tutEnd.addEventListener('click', (e) => this.handleTutEnd(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -345,6 +387,22 @@ class OverDrive{
       $('.tutorial').hide();
       $('#overlay').hide();
       $('#close-tut').hide();
+
+      //resetting z-indexes
+      $('#filebrowser-callout').css('z-index', 'auto');
+      $('#actions').css('z-index', 'auto');
+
+      //resetting the beautiful yellow borders
+      $('#file-browser').css('box-shadow', 'none');
+      $('.counts').css('box-shadow', 'none');
+      $('#input-potato').css('box-shadow', 'none');
+      $('#input-users-potato').css('border', 'none');
+      $("#tut6-area-bot").css('border', 'none');
+      $("#tut6-area-top").css('border', 'none');
+      $('#change-permissions-potato').css('border', 'none');
+      $('#change-permissions-ticks-potato').css('border', 'none');
+      $('#change-editor-potato').css('border', 'none');
+      $('#change-editor-tick-potato').css('border', 'none');
   }
 
   handle0_1(e) {
@@ -359,33 +417,217 @@ class OverDrive{
       e.preventDefault;
       $('#tut1').hide();
       $('#tut0').show();
+      $('#filebrowser-callout').css('z-index', 'auto');
+      $('#file-browser').css('box-shadow', 'none');
+  }
+
+  handle1_2(e) {
+      e.preventDefault;
+      $('#tut1').hide();
+      $('#tut2').show();
+      $('#file-browser').css('box-shadow', 'none');
+      $('.counts').css('box-shadow', '0px 0px 5px 5px #fff700');
+  }
+
+  handle2_1(e) {
+      e.preventDefault;
+      $('#tut2').hide();
+      $('#tut1').show();
+
+      $('#file-browser').css('box-shadow', '0px 0px 5px 5px #fff700');
+      $('.counts').css('box-shadow', 'none');
+  }
+
+  handle2_3(e) {
+      e.preventDefault;
+      $('#tut2').hide();
+      $('#tut3').show();
+
+      $('#input-potato').css('box-shadow', '0px 0px 5px 5px #fff700')
+      $('.counts').css('box-shadow', 'none');
+  }
+
+  handle3_2(e) {
+      e.preventDefault;
+      $('#tut3').hide();
+      $('#tut2').show();
+
+      $('#input-potato').css('box-shadow', 'none');
+      $('.counts').css('box-shadow', '0px 0px 5px 5px #fff700');
+  }
+
+  handle3_4(e) {
+      e.preventDefault;
+      $('#tut3').hide();
+      $('#tut4').show();
+
+      $('#input-potato').css('box-shadow', 'none');
+      $('#filebrowser-callout').css('z-index', 'auto');
+      $('#actions').css('z-index', 1002);
+  }
+
+  handle4_3(e) {
+      e.preventDefault;
+      $('#tut4').hide();
+      $('#tut3').show();
+
+      $('#input-potato').css('box-shadow', '0px 0px 5px 5px #fff700');
+      $('#filebrowser-callout').css('z-index', 1002);
+      $('#actions').css('z-index', 'auto');
+  }
+
+  handle4_5(e) {
+      e.preventDefault;
+      $('#tut4').hide();
+      $('#tut5').show();
+
+      $('#input-users-potato').css('border', '5px solid #faff0e');
+  }
+
+  handle5_4(e) {
+      e.preventDefault;
+      $('#tut5').hide();
+      $('#tut4').show();
+
+      $('#input-users-potato').css('border', 'none');
+  }
+
+  handle5_6(e) {
+      e.preventDefault;
+      $('#tut5').hide();
+      $('#tut6').show();
+
+      $('#input-users-potato').css('border', 'none');
+      $("#tut6-area-bot").css({'border':'5px solid #faff0e',
+                               'border-top':'0px solid #faff0e'})
+      $("#tut6-area-top").css({'border':'5px solid #faff0e',
+                               'border-bottom':'0px solid #faff0e'});
+  }
+
+  handle6_5(e) {
+      e.preventDefault;
+      $('#tut6').hide();
+      $('#tut5').show();
+
+      $('#input-users-potato').css('border', '5px solid #faff0e');
+      $("#tut6-area-bot").css('border', 'none');
+      $("#tut6-area-top").css('border', 'none');
+  }
+
+  handle6_7(e) {
+      e.preventDefault;
+      $('#tut6').hide();
+      $('#tut7').show();
+
+      $("#tut6-area-bot").css('border', 'none');
+      $("#tut6-area-top").css('border', 'none');
+      $('#change-permissions-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-permissions-ticks-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+  }
+
+  handle7_6(e) {
+      e.preventDefault;
+      $('#tut7').hide();
+      $('#tut6').show();
+
+      $('#change-permissions-potato').css('border', 'none');
+      $('#change-permissions-ticks-potato').css('border', 'none');
+      $("#tut6-area-bot").css({'border':'5px solid #faff0e',
+                               'border-top':'0px solid #faff0e'})
+      $("#tut6-area-top").css({'border':'5px solid #faff0e',
+                               'border-bottom':'0px solid #faff0e'});
+  }
+  
+  handle7_8(e) {
+      e.preventDefault;
+      $('#tut7').hide();
+      $('#tut8').show();
+
+      $('#change-permissions-potato').css('border', 'none');
+      $('#change-permissions-ticks-potato').css('border', 'none');
+      $('#change-editor-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-editor-tick-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+
+  }
+
+  handle8_7(e) {
+      e.preventDefault;
+      $('#tut8').hide();
+      $('#tut7').show();
+
+      $('#change-permissions-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-permissions-ticks-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+
+      $('#change-editor-potato').css('border', 'none');
+      $('#change-editor-tick-potato').css('border', 'none');
+  }
+
+  handle8_9(e) {
+      e.preventDefault;
+      $('#tut8').hide();
+      $('#tut9').show();
+
+      $('#change-editor-potato').css('border', 'none');
+      $('#change-editor-tick-potato').css('border', 'none');
+      $('#actions').css('z-index', 'auto');
+  }
+
+  handle9_8(e) {
+      e.preventDefault;
+      $('#tut9').hide();
+      $('#tut8').show();
+
+      $('#change-editor-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-editor-tick-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+      $('#actions').css('z-index', 1002);
+  }
+
+  handleTutEnd(e) {
+      $('#tut9').hide();
+      $('#overlay').hide();
+      $('#close-tut').hide();
   }
 
   handleAddUsers(e) {
     e.preventDefault();
-    const users = this.parseUsers();
-    if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-    const role = this.getRoleFromUI();
-    if(!role) {
-        alert("No role selected");
-        return;
-    }
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
     var that = this;
-    var args = {
-        users: users,
-        role: role,
-        that: that
-    }
-    //this.addUsers(args);
-	this.addUsersBatch(users, role);
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        const role = that.getRoleFromUI();
+        if(!role) {
+            alert("No role selected");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+        var args = {
+            users: users,
+            role: role,
+            that: that
+        }
+        //that.addUsers(args);
+        that.addUsersBatch(users, role);
+    });
+    
   }
   
   addUsers(args) {
@@ -616,25 +858,26 @@ class OverDrive{
   handleRemoveUsers(e) {
 	 console.log("Removing");
     e.preventDefault();
-    const users = this.parseUsers();
-    if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
- 
     var that = this;
-    var args = {
-        users: users,
-        role: role,
-        that: that
-    }
-    this.removeUsers(args);
-
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+     
+        var args = {
+            users: users,
+            role: role,
+            that: that
+        }
+        that.removeUsers(args);
+    });
   }
   
 
@@ -805,24 +1048,24 @@ class OverDrive{
 
   handleChangeOwner(e) {
     e.preventDefault();
-    const users = this.parseUsers();
-	if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-	if(users.length > 1) {
-		alert("Too many emails entered.  There can only be one owner");
-		return;
-	}
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
-	this.changeOwners(users[0]);
-		
-    //get checked file(s) from tree
-    //call createOwner for given files and users
+    var that = this;
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        if(users.length > 1) {
+            alert("Too many emails entered.  There can only be one owner");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+        that.changeOwners(users[0]);
+    });
   }
   
   changeOwners(user) {
@@ -941,31 +1184,33 @@ class OverDrive{
 
   handleChangePermissions(e) {
     e.preventDefault();
-    const users = this.parseUsers();
-	if(users.length == 0) {
-        alert("No valid emails entered");
-        return;
-    }
-    const role = this.getRoleFromUI();
-    if(!role) {
-        alert("No role selected");
-        return;
-    }
-	var numchecked = this.handleNumChecked();
-	if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
-		alert("No files selected");
-		return;
-	}
     var that = this;
-	this.getIdsforUsers(users, function(userids) {
-		var args = {
-			users: users,
-			userids: userids,
-			role: role,
-			that: that
-		}
-		that.changePermissions(args);
-	});
+    this.parseUsers(function(array) {
+        const users = array;
+        if(users.length == 0) {
+            alert("No valid emails entered");
+            return;
+        }
+        const role = that.getRoleFromUI();
+        if(!role) {
+            alert("No role selected");
+            return;
+        }
+        var numchecked = that.handleNumChecked();
+        if((!numchecked.numFilesChecked) && (!numchecked.numFoldersChecked)) {
+            alert("No files selected");
+            return;
+        }
+        that.getIdsforUsers(users, function(userids) {
+            var args = {
+                users: users,
+                userids: userids,
+                role: role,
+                that: that
+            }
+            that.changePermissions(args);
+        });
+    });
   }
 
   triggerDone(args, numrequests, donesending, cb) {
@@ -1357,33 +1602,77 @@ class OverDrive{
 	}
   }
 
-  parseUsers() {
+  parseUsers(callback) {
     const usersInput = document.querySelector('.users');
     const usersString = usersInput.value;
     console.log("email string: " + usersString);
     const userEmails = usersString.split(/[\s,;]+/);
     console.log("email array length " + userEmails.length);
-    for(let i = 0; i < userEmails.length; i++) {
-        console.log("email array [" + i + "] " + userEmails[i]);
-        if(!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(userEmails[i]))) { // Regex for emails taken from http://emailregex.com/
-            console.log("\"" + userEmails[i] + "\" is not a valid email address");
+    chrome.storage.sync.get({
+        list: [] //put defaultvalues if any
+    },
+    function(data) {
+        console.log("Groups list:");
+        console.log(data.list);
+        console.log(data.list.length);
+        
+        var len = userEmails.length;
+        for(let cnt = 0; cnt < userEmails.length; cnt++) {
+            console.log("email array [" + cnt + "] " + userEmails[cnt]);
+            if(!(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(userEmails[cnt]))) { // Regex for emails taken from http://emailregex.com/
+                console.log("\"" + userEmails[cnt] + "\" is not a valid email address");
+                if(cnt < len) { // In the original list.  Prevents chaining this on users added from groups        
+                    var i = 0;
+                    while (i < data.list.length) {
+                        var numargs = data.list[i];
+                        if(numargs == 0) {
+                            break;
+                        }
+                        i++;
+                        var j = 0;
+                        var groupName = data.list[i];
+
+                        console.log(groupName);
+                        i++;
+                        j++;
+                        
+                        // Group matches
+                        if(userEmails[cnt] == groupName) {
+                            console.log("Matching group found");
+                            while(j < numargs) {
+                                userEmails.push(data.list[i]);
+                                i++;
+                                j++;
+                            }
+                            break;
+                            // Will not check if name is already in list, so could end up with a list of repeats, but you could already do that.  Should not break the functionality
+                            // Assumes groups do not contain the name of groups
+                        }
+                        
+                        // Group doesn't match.  Continue
+                        i += numargs - 1;
+                    }
+                }
+                
+                userEmails.splice(cnt, 1);
+                cnt--;
+                len--;
+            }
+        }
+        callback(userEmails);
+    });
             // TODO: Retrieve groups from extension data folder (once they are saved there in the first place)
             /*for(let j = 0; j < groups.groups.length; j++) {
                 if(userEmails[i] == groups.groups[j].name) {
                     for(let k = 0; k < groups.groups[j].users.length; k++) {
-                        // Will not check if name is already in list, so could end up with a list of repeats, but you could already do that.  Should not break the functionality
-                        // Assumes groups do not contain the name of groups
+                        
                         userEmails.push(groups.groups[j].users[k]);
                     }
                     console.log("Found a group: " + userEmails[i]);
                     break;
                 }
             }*/
-            userEmails.splice(i, 1);
-            i--;
-        }
-    }
-    return userEmails;
+            
   }
   
   parseName() {

@@ -53,9 +53,73 @@
 #tut1 {
   position: absolute;
   width: 40%;
-  height: 13%;
-  top: 35%;
+  height: 10%;
+  top: 42%;
   left: 83%;
+}
+
+#tut2 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 26%;
+  left: 83%;
+}
+
+#tut3 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 20%;
+  left: 83%;
+}
+
+#tut4 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 42%;
+  left: 35%;
+}
+
+#tut5 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 26%;
+  left: 35%;
+}
+
+#tut6 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 37%;
+  left: 35%;
+}
+
+#tut7 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 51%;
+  left: 35%;
+}
+
+#tut8 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 51%;
+  left: 35%;
+}
+
+#tut9 {
+  position: absolute;
+  width: 40%;
+  height: 13%;
+  top: 45%;
+  left: 50%;
 }
 
 .tutorial p {
@@ -68,4 +132,9 @@
 #close-tut {
   display: none;
   z-index: 1003;
+  color: red;
+}
+
+#close-tut:hover {
+  color: #990c1c;
 }

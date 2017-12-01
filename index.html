@@ -37,7 +37,7 @@
                     <!-- File browser -->
                     <div class="large-6 medium-6 small-12 cell">
                         <div class="callout" id="filebrowser-callout">
-                            <div class="input-group">
+                            <div class="input-group" id="input-potato">
                                 <input class="input-group-field" type="text" name="search" placeholder="Search for file(s)">
                                 <div class="input-group-button">
                                     <button class="button" type="button">
@@ -90,13 +90,13 @@
 
                         <!-- Input for users -->
                         <div class="input-group grid-x grid-padding-1">
-                            <div class="large-12 medium-12">
+                            <div class="large-12 medium-12" id="input-users-potato">
                                 <input class="input-group-field users" type="text" name="personName" placeholder="Enter email addresses..." autofocus required/>
                             </div>
                         </div>
 
                         <!-- Action buttons -->
-                        <div class="grid-x grid-padding-1">
+                        <div class="grid-x grid-padding-1" id="tut6-area-top">
                             <!-- Add users button -->
                             <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action add-users" type="button">
@@ -111,7 +111,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="grid-x grid-padding-1">
+                        <div class="grid-x grid-padding-1" id="tut6-area-bot">
                             <!-- Change owner button -->
                             <div class="large-6 medium-6 small-12">
                                 <button class="button secondary action change-owner" type="button">
@@ -127,13 +127,13 @@
                         </div>
                         <div class="grid-x grid-padding-1">
                             <!-- Change permissions button -->
-                            <div class="large-6 medium-6 small-12">
+                            <div class="large-6 medium-6 small-12" id="change-permissions-potato">
                                 <button class="button secondary action change-permissions" type="button">
                                     <i class="fa fa-pencil"></i> Change Permissions
                                 </button>
                             </div>
                             <!-- Change editor sharing button -->
-                            <div class="large-6 medium-6 small-12">
+                            <div class="large-6 medium-6 small-12" id="change-editor-potato">
                                 <button class="button secondary action change-editor-sharing" type="button">
                                     <i class="fa fa-share-alt"></i> Change Editor Sharing
                                 </button>
@@ -144,7 +144,7 @@
                         <!-- Permissions options -->
                         <div class="input-group grid-x grid-padding-1">
                             <div class="large-6 medium-6 small-12"> 
-                                <div class="input-group grid-x grid-padding-1">
+                                <div class="input-group grid-x grid-padding-1" id="change-permissions-ticks-potato">
                                     <div class="large-12 medium-12"> 
                                         <input type="radio" name="role" id="role" value="writer"> <strong>Writer</strong>: can write, read and comment
                                     </div>
@@ -156,7 +156,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="large-6 medium-6 small-12">
+                            <div class="large-6 medium-6 small-12" id="change-editor-tick-potato">
                                 <input type="checkbox" name="editor-sharing" id="editor-sharing" class="editor-sharing"> Editors can share
                             </div>
                         </div>
@@ -191,17 +191,69 @@
 
         <div class="callout clearfix tutorial" id="tut0">
             <p class="text-center"> Hi there! Welcome to OverDrive. This short tutorial will ensure you know how to use our extension to its full potential. 
-            Let's get started! Click on the "Next" button when you're ready to go. (You can exit this tutorial at any time by clicking on the X button on the
-            top right of the page)<br></p>
+                Let's get started! Click on the "Next" button when you're ready to go. (You can exit this tutorial at any time by clicking on the X button on the
+                top right of the page)<br></p>
             <button class="float-left button tiny disabled">Previous</button>
             <button class="float-right button tiny" id="tut0-1">Next</button>
         </div>
 
         <div class="callout clearfix tutorial" id="tut1">
             <p class="text-center"> Here you have your file browser. These are all the files you currently have access to on your Drive account. You can expand and
-            collapse them, as well as select multiple using the checkboxes.<br></p>
+                collapse them, as well as select multiple using the checkboxes.<br></p>
             <button class="float-left button tiny" id="tut1-0">Previous</button>
             <button class="float-right button tiny" id="tut1-2">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut2">
+            <p class="text-center"> These icons tell you how many files and folders you have access to. The two light ones represent the total amount of each, while
+                the darkened ones represent the total selected amount of each.<br></p>
+            <button class="float-left button tiny" id="tut2-1">Previous</button>
+            <button class="float-right button tiny" id="tut2-3">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut3">
+            <p class="text-center"> You can use this search bar to search for specific files or folders within your Drive. Just type a name and hit search!<br></p>
+            <button class="float-left button tiny" id="tut3-2">Previous</button>
+            <button class="float-right button tiny" id="tut3-4">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut4">
+            <p class="text-center"> On this side you have your controls for permission and access administration.<br></p>
+            <button class="float-left button tiny" id="tut4-3">Previous</button>
+            <button class="float-right button tiny" id="tut4-5">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut5">
+            <p class="text-center"> Write the e-mail address of the user (or users) that you wish to add to your file(s) or whose permission(s) you wish to modify.
+                If you have multiple files checked, this will apply to all of them.<br></p>
+            <button class="float-left button tiny" id="tut5-4">Previous</button>
+            <button class="float-right button tiny" id="tut5-6">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut6">
+            <p class="text-center"> Use these buttons to add the users whose e-mail addresses you typed in. Or to remove them. Or give them ownership. Or even
+                request it!<br></p>
+            <button class="float-left button tiny" id="tut6-5">Previous</button>
+            <button class="float-right button tiny" id="tut6-7">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut7">
+            <p class="text-center"> Select the permissions you wish to give to the user(s) on the selected files and hit the Change Permissions button
+                to change them. NOTE: This will overwrite previous permissions, so be careful!<br></p>
+            <button class="float-left button tiny" id="tut7-6">Previous</button>
+            <button class="float-right button tiny" id="tut7-8">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut8">
+            <p class="text-center"> Tick the checkbox and hit the Change Editor Sharing button to enable this functionality in all currently checked files.<br></p>
+            <button class="float-left button tiny" id="tut8-7">Previous</button>
+            <button class="float-right button tiny" id="tut8-9">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut9">
+            <p class="text-center"> That's all for this tutorial. We hope you enjoy OverDrive and find it useful. If you have any questions or feedback please let us know!<br></p>
+            <button class="float-left button tiny" id="tut9-8">Previous</button>
+            <button class="float-right button tiny" id="tut-end">End Tutorial</button>
         </div>
 
         <button class="close-button" aria-label="Dismiss alert" type="button" id="close-tut">
