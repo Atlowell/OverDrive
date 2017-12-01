@@ -7,7 +7,7 @@ class Group {
 
 class Groups {
     constructor() {
-        this.groups = [new Group("test", ["claytonhenrylewis@gmail.com", "bwong14@gmail.com"])];
+        this.groups = [];
         this.setUpEventListeners();
         this.displayGroups();
 
@@ -421,14 +421,16 @@ class Groups {
 		i++;
 		
     }
+	console.log("Storage");
 	console.log(arr);
-	/*
+	
     chrome.storage.sync.set({
-        list: groupStorage
+        list: arr
     }, function() {
         console.log("added to list storage");
     });
-	*/
+	
+	
 }
 	
 }
@@ -440,7 +442,7 @@ function testVals() {
 }
 
 function testStorage() {
-    var groupStorage = ["3", "Group1", "Brian", "Austin", "3", "Group2", "Clayton", "Sam", "0"];
+    var groupStorage = ["3", "Group1", "Brian@gmail.com", "Austin@gmail.com", "3", "Group2", "Clayton@gmail.com", "Sam@gmail.com", "0"];
     chrome.storage.sync.set({
         list: groupStorage
     }, function() {
