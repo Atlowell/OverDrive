@@ -122,11 +122,41 @@ class OverDrive{
   
   triggerDisplayTree() {
     if((this.numrequests == 0) && (this.numcalls == 0)) {
+        console.log("Tree before cleanup:");
+        console.log(this.tree._root.children);
+        this.cleanupTree();
+        console.log("Tree after cleanup:");
+        console.log(this.tree._root.children);
         this.displayTree();
         //this.setUpEventListeners();
     }
   }
   
+  cleanupTree() {
+    console.log("Tree cleanup");
+    for(let i = 0; i < this.tree._root.children.length; i++) {
+        for(let j = 0; j < this.tree._root.children.length; j++) {
+            var done = false;
+            if(i != j) {
+                var that = this;
+                this.tree.DFtraversalNode(function(node) {
+                    if(!done) {
+                        if(that.tree._root.children[i].file.fid == node.file.fid) {
+                            console.log("removing " + node.file.name);
+                            console.log("removing " + node.file.name);
+                            that.tree._root.children.splice(i, 1);
+                            i--;
+                            done = true;
+                        }
+                    }
+                }, this.tree._root.children[j]);
+                if(done) {
+                    break;
+                }
+            }
+        }
+    }
+  }
   // NOT USED
   triggerAddUsers(args) {
     //console.log(args);
@@ -236,6 +266,7 @@ class OverDrive{
   }
 
   showGroups(e) {
+    console.log(this.tree._root.children);
     var win = window.open(chrome.extension.getURL("groups.html"), '_blank');
     win.focus();
   }
@@ -1894,7 +1925,7 @@ class OverDrive{
                     console.log("List error in recurse");
                     if(xhr.status == 403) {
                         if((xhr.response.error.errors[0].reason == "userRateLimitExceeded") || (xhr2.response.error.errors[0].reason == "rateLimitExceeded")) {
-                            console.log("retry");
+                            console.log("retrying children of " + name);
                             //setTimeout(test, Math.floor(Math.random() * 500) + 501);
                         }
                     }
@@ -1939,6 +1970,7 @@ class OverDrive{
                         }
                         else {
                             for(let i = 0; i < childlist.length; i++) {
+                                
                                 //console.log("Calling populatetreerecurse from populatetreerecurse");
                                 //console.log(this);
                                 //console.log(childlist[i]);
@@ -1986,7 +2018,7 @@ class OverDrive{
         //Search term to get all top-level files
         var q;
         if(search) {
-            q = "title = '" + searchtext + "' and trashed=false";
+            q = "title contains '" + searchtext + "' and trashed=false";
         }
         else {
             var q = "('root' in parents) and trashed=false";
