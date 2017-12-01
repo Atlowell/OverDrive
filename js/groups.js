@@ -7,7 +7,6 @@ class Group {
 
 class Groups {
     constructor() {
-        console.log("hi");
         this.groups = [new Group("test", ["claytonhenrylewis@gmail.com", "bwong14@gmail.com"])];
         this.setUpEventListeners();
         this.displayGroups();
@@ -24,7 +23,7 @@ class Groups {
     }
 
     showHideNewGroup(e) {
-        e.preventDefault();
+       // e.preventDefault();
         var newGroupUI = document.querySelector(".new-group-ui");
         if (newGroupUI.style.display == "block") {
             newGroupUI.style.display = "none";
@@ -68,52 +67,105 @@ class Groups {
         const users = this.parseUsers();
         this.groups.push(new Group(groupName, users));
         this.updateGroups();
+        updateStorage();
     }
 
-
-
-    handleAddUser(e) {
+    handleRemoveGroup(e) {
         e.preventDefault();
-        this.showHideNewGroup(e);
+        //this.showHideNewGroup(e);
         const groupName = this.getGroupName();
-        const user = this.parseUsers();
+        const users = this.parseUsers();
+
         for (var i in this.groups) {
             if (this.groups[i].name == groupName) {
-                for (var j in this.groups[i].users) {
-                    if (this.groups[i].users[j] = user) {
-                        return;
-                    }
-                }
-                this.groups[i].users.push(user);
+                groups.splice(i, 1);
                 return;
             }
         }
-        this.displayGroups();
+
+        this.updateGroups();
+        updateStorage();
     }
 
-    handleRemoveUser(e) {
-        e.preventDefault();
-        this.showHideNewGroup(e);
-        const groupName = this.getGroupName();
-        const user = this.parseUsers();
+
+
+    handleAddUser(group) {
+        
+	
+       this.showHideNewGroup(); 
+	   const user = this.parseUsers();
+        //const user = this.parseUsers();
+		console.log("Adding " + user + " to " + group);
+		
         for (var i in this.groups) {
-            if (this.groups[i].name == groupName) {
-                for (var j in this.groups[i].users) {
-                    if (this.groups[i].users[j] = user) {
+			console.log(i);
+            if (this.groups[i].name == group) {
+				var j = 0;
+				while (j < this.groups[i].users.length) {
+                    if (this.groups[i].users[j] == user) {
+                        return;
+                    }
+					j++;
+                }
+				console.log("Added " + user + " to " + group);
+				console.log( this.groups[i].users);
+				console.log(j);
+				
+                this.groups[i].users[j] = user[0];
+				console.log(this.groups);
+				
+				this.groups[i].users = this.groups[i].users.filter(function( element ) {
+					return element !== undefined;
+				});
+				this.updateGroups();
+				this.updateStorage();
+                return;
+            }
+        }
+		
+		
+
+    }
+
+    handleRemoveUser(group, user) {
+        //console.log(group);
+
+        //this.showHideNewGroup(e);
+        //console.log(this.groups[1].users[1]);
+        console.log("Removing " + user + " from " + group);
+
+        for (var i in this.groups) {
+            //console.log(this.groups[i].name);
+            if (this.groups[i].name == group) {
+
+                var j = 0;
+                while (j < this.groups[i].users.length) {
+
+                    //console.log(user + " " + this.groups[i].users[j]);
+                    if (this.groups[i].users[j] == user) {
+                        console.log("Removed " + this.groups[i].users[j] + " from " + this.groups[i].name);
                         this.groups[i].users.splice(j, 1);
-                        this.displayGroups();
+                        console.log(this);
+                        this.updateGroups();
+                        this.updateStorage();
                         return;
                     }
+                    j++;
                 }
                 return;
             }
         }
-        this.displayGroups();
+        /*
+        this.updateGroups();
+		updateStorage();
+		*/
     }
-
+    // var groupsList = document.querySelector("#groups-list");
+    // var btn = document.querySelector(button[group=groupname].add);'
     displayGroups(e) {
-        testStorage();
+        //testStorage();
         var groupsList = document.querySelector("#groups-list");
+
         var groupsUI = "<div id='groups-list'><ul>";
         var that = this;
 
@@ -155,7 +207,21 @@ class Groups {
                     groupsUI += "'>";
                     groupsUI += that.groups[i].name;
                     groupsUI += "<ul>";
+					
+					
+				
+					
+					console.log(groupsUI);
+					//groupsUI += "&emsp;<button class="remove" group="test" ><i class="fa fa-minus-circle"></i></button>";
                     for (var j in that.groups[i].users) {
+
+                        //var str = "";
+                        //str += "Remove_"
+                        //str += that.groups[i].name;
+                        //str += "_"
+                        //str += that.groups[i].users[j];
+                        //console.log(str);	
+
                         groupsUI += "<li data-jstree='{\"icon\":\"fa fa-user\"}'>";
                         groupsUI += that.groups[i].users[j];
                         groupsUI += "&emsp;<button class='remove' group='"
@@ -173,14 +239,77 @@ class Groups {
                 groupsUI += "</ul></div>";
                 groupsList.outerHTML = groupsUI;
                 $('#groups-list').jstree();
-                //testStorage();
-                //testGet();
-                //testVals();
+                $("#groups-list").jstree("open_all");
+
+                //console.log(document.querySelector("#groups-list "));
+                //console.log(document.querySelector('#test_anchor'));
+                //console.log(document.querySelector('button.add '));
+
+                //var list2 = list.querySelector('#j1_2_anchor');
+                //console.log(list2);
+                //var list3 = list.querySelector('.remove');
+                //console.log(list3);
+
+
+                //sets up all buttons
+                var list = document.querySelector("#groups-list");
+                console.log(list);
+                var first = "#j1_";
+                var num = 1;
+                var second = num.toString();
+                var third = "_anchor";
+
+                for (var i in that.groups) {
+
+                    second = num.toString();
+                    var req = first + second + third;
+                    //console.log(req);
+                    num++;
+                    var list2;
+
+                    console.log("Remove Buttons:");
+                    for (var j in that.groups[i].users) {
+
+                        function createRmvBtn() {
+                            var btn;
+                            second = num.toString();
+                            req = first + second + third;
+                            //console.log(req);
+                            list2 = list.querySelector(req)
+                            //console.log(list2);
+                            btn = list2.querySelector('.remove');
+                            console.log(btn);
+                            console.log(btn.getAttribute('group'));
+                            console.log(btn.getAttribute('user'));
+                            btn.addEventListener("click", (e) => that.handleRemoveUser(btn.getAttribute('group'), btn.getAttribute('user')));
+                        }
+                        createRmvBtn();
+                        num++;
+                    }
+
+                    function createAddBtn() {
+                        var btn;
+                        console.log("Add button");
+                        second = num.toString();
+                        req = first + second + third;
+                        //console.log(req);
+                        //console.log(list.querySelector(req));
+                        list2 = list.querySelector(req)
+                        btn = list2.querySelector('.add')
+                        console.log(btn);
+                        btn.addEventListener("click", (e) => that.handleAddUser(btn.getAttribute('group')));
+                    }
+                    createAddBtn();
+                    num++;
+                }
+
             }
         );
         console.log(this);
 
     }
+
+
 
     updateGroups() {
         var groupsList = document.querySelector("#groups-list");
@@ -208,7 +337,100 @@ class Groups {
         groupsUI += "</ul></div>";
         groupsList.outerHTML = groupsUI;
         $('#groups-list').jstree();
+        $("#groups-list").jstree("open_all");
+
+
+        //sets up all buttons
+		numTrees++;
+        var list = document.querySelector("#groups-list");
+        console.log(list);
+        var first = "#j" + numTrees.toString() + "_";
+        var num = 1;
+        var second = num.toString();
+        var third = "_anchor";
+		
+        for (var i in that.groups) {
+
+            second = num.toString();
+            var req = first + second + third;
+            console.log(req);
+            num++;
+            var list2;
+
+            console.log("Remove Buttons:");
+            for (var j in that.groups[i].users) {
+
+                function createRmvBtn() {
+                    var btn;
+                    second = num.toString();
+                    req = first + second + third;
+                    //console.log(req);
+                    list2 = list.querySelector(req)
+                    //console.log(list2);
+                    btn = list2.querySelector('.remove');
+                    console.log(btn);
+                    console.log(btn.getAttribute('group'));
+                    console.log(btn.getAttribute('user'));
+                    btn.addEventListener("click", (e) => that.handleRemoveUser(btn.getAttribute('group'), btn.getAttribute('user')));
+                }
+                createRmvBtn();
+                num++;
+            }
+
+            function createAddBtn() {
+                var btn;
+                console.log("Add button");
+                second = num.toString();
+                req = first + second + third;
+                //console.log(req);
+                //console.log(list.querySelector(req));
+                list2 = list.querySelector(req)
+                btn = list2.querySelector('.add')
+                console.log(btn);
+                btn.addEventListener("click", (e) => that.handleAddUser(btn.getAttribute('group')));
+            }
+            createAddBtn();
+            num++;
+        }
     }
+	
+ updateStorage() {
+    var arr = [];
+
+    var i = 0;
+    var j = 0;
+	var k = 0;
+	
+	//console.log(this.groups.length);
+	var that = this;
+    for (var i in that.groups) {
+		//console.log(i +  " " + j);
+		j = 0;
+     	
+        var count = that.groups[i].users.length + 1;
+        arr.push(count);
+        arr.push(that.groups[i].name);
+           
+        while (j < that.groups[i].users.length) {
+			console.log(i +  " " + j);
+			console.log(that.groups[i].users[j]);
+            arr.push(that.groups[i].users[j]);
+             j++;
+        }
+        
+		i++;
+		
+    }
+	console.log(arr);
+	/*
+    chrome.storage.sync.set({
+        list: groupStorage
+    }, function() {
+        console.log("added to list storage");
+    });
+	*/
+}
+	
 }
 
 
@@ -228,6 +450,8 @@ function testStorage() {
 
 }
 
+
+
 function testGet() {
     chrome.storage.sync.get({
             list: [] //put defaultvalues if any
@@ -237,6 +461,10 @@ function testGet() {
             //update(data.list)//storing the storage value in a variable and passing to update function
         }
     );
+}
+
+function testMain() {
+
 }
 
 
@@ -253,5 +481,5 @@ function update(array) {
 
 
 
-
+var numTrees = 1;
 var groups = new Groups();
