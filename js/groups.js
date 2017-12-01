@@ -122,11 +122,13 @@ class Groups {
 						this.groups[i].users = this.groups[i].users.filter(function( element ) {
 							return element !== undefined;
 						});
+						this.updateGroups();
+						this.updateStorage();
 					}
 					u++;
 				}
-				this.updateGroups();
-				this.updateStorage();
+				//this.updateGroups();
+				//this.updateStorage();
                 return;
             }
         }
@@ -171,7 +173,7 @@ class Groups {
     // var groupsList = document.querySelector("#groups-list");
     // var btn = document.querySelector(button[group=groupname].add);'
     displayGroups(e) {
-        testStorage();
+        //testStorage();
         var groupsList = document.querySelector("#groups-list");
 
         var groupsUI = "<div id='groups-list'><ul>";
