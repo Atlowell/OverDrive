@@ -148,6 +148,7 @@ class OverDrive{
     const editorSharingBtn = document.querySelector('.change-editor-sharing');
     const helpBtn = document.querySelector('.help');
     const requestOwnerBtn = document.querySelector('.request-ownership');
+    const searchBtn = document.querySelector('.search-files');
     addUsersBtn.addEventListener('click', (e) => this.handleAddUsers(e));
     removeUsersBtn.addEventListener('click', (e) => this.handleRemoveUsers(e));
     changeOwnerBtn.addEventListener('click', (e) => this.handleChangeOwner(e));
@@ -157,6 +158,7 @@ class OverDrive{
     editorSharingBtn.addEventListener('click', (e) => this.handleEditorSharing(e));
     helpBtn.addEventListener('click', (e) => this.handleHelp(e));
     requestOwnerBtn.addEventListener('click', (e) => this.handleRequestOwner(e));
+    searchBtn.addEventListener('click', (e) => this.handleSearchFiles(e));
 
 
     // These are all the tutorial buttons
@@ -1680,6 +1682,12 @@ class OverDrive{
 	const usersString = usersInput.value;
 	return usersString;
   }
+  
+  parseSearch() {
+    const searchInput = document.querySelector('.searchbar');
+    const searchString = searchInput.value;
+    return searchString;
+  }
 
   getRoleFromUI() {
     const roleElement = document.querySelector('input[name = "role"]:checked');
@@ -1832,6 +1840,24 @@ class OverDrive{
 	});
   }
 
+  handleSearchFiles(e) {
+    e.preventDefault();
+    console.log("Searching");
+    // Clear tree
+    this.tree = new TreeRoot([]);
+    // Clear filebrowser
+    $('#file-browser').jstree("destroy");
+    var query = this.parseSearch();
+    if(query != "") {
+        this.populateTree(true, query);
+    }
+    else {
+        this.populateTree(false);
+    }
+  }
+      
+      
+  
   // NOTE: This function is asynchronous.  See populateTree() below for reasoning
   populateTreeRecurse(file, parent) {
     
@@ -1952,12 +1978,19 @@ class OverDrive{
   }
   
   // This function is asynchronous.  There is no guarantee that when it returns the tree will be completely populated.  This is due to the ansynchronous nature of XMLHttpRequests
-  populateTree() {
+  populateTree(search, searchtext) {
     var that = this;
     //console.log(this);
     identityAuth(function(token) {
+        
         //Search term to get all top-level files
-        var q = "('root' in parents) and trashed=false";
+        var q;
+        if(search) {
+            q = "title = '" + searchtext + "' and trashed=false";
+        }
+        else {
+            var q = "('root' in parents) and trashed=false";
+        }
         //var q2 = "name contains 'shgdfh'";
         //var q3 = "invalid search 5435";
         var xhr = new XMLHttpRequest();
@@ -2026,77 +2059,86 @@ class OverDrive{
                     }
                     // Last of files
                     else {
-                        var q2 = "(sharedWithMe = true) and trashed=false";
-                        var xhr3 = new XMLHttpRequest();
-                        xhr3.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q2));
-                        xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
-                        xhr3.responseType = "json";
-                        
-                        xhr3.onload = function() {
-                            if(xhr3.status != 200) {
-                                console.log(xhr2.status);
-                                console.log("List2 error");
-                            }
-                            else {
-                                var sharelist = xhr3.response.items;
-                                console.log("original share list: " + sharelist.length);
-                                npt = xhr3.response.nextPageToken;
-                                
-                                function getnpt2() {
-                                    if(npt) {
-                                        console.log("npt found.  Getting next list2");
-                                        var xhr4 = new XMLHttpRequest();
-                                        xhr4.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q2));
-                                        xhr4.setRequestHeader('Authorization', 'Bearer ' + token);
-                                        xhr4.responseType = "json";
-                                        xhr4.onload = function() {
-                                            if(xhr4.status != 200) {
-                                                console.log(xhr4.response);
-                                                console.log("Error in npt list2 response");
-                                            }
-                                            else {
-                                                console.log("Got list2 from npt token- chain list2 succeeded");
-                                                npt = xhr4.response.nextPageToken;
-                                                var sharelist2 = xhr4.response.items;
-                                                console.log("new share list: " + sharelist2.length);
-                                                sharelist.concat(sharelist2);
-                                                
-                                                getnpt2();
-                                            }
-                                            that.numrequests--;
-                                            that.triggerDisplayTree();
-                                        };
-                                        xhr4.onerror = function() {
-                                            console.log("chain list 2 returned with an error");
-                                            console.log(xhr4.error);
-                                        };
-                                        xhr4.send();
-                                        that.numrequests++;
-                                    }
-                                    else {
-                                        for(let i = 0; i < sharelist.length; i++) {
-                                            if(sharelist[i].parents.length == 0) {
-                                                filelist.push(sharelist[i]);
-                                            }
-                                        }
-                                        for(let i = 0; i < filelist.length; i++) {
-                                            that.numcalls++;
-                                            that.populateTreeRecurse(filelist[i], that.tree._root);
-                                        }
-                                    }
+                        if(!search) {
+                            var q2 = "(sharedWithMe = true) and trashed=false";
+                            var xhr3 = new XMLHttpRequest();
+                            xhr3.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q2));
+                            xhr3.setRequestHeader('Authorization', 'Bearer ' + token);
+                            xhr3.responseType = "json";
+                            
+                            xhr3.onload = function() {
+                                if(xhr3.status != 200) {
+                                    console.log(xhr2.status);
+                                    console.log("List2 error");
                                 }
-                                
-                                getnpt2();
-                                
+                                else {
+                                    var sharelist = xhr3.response.items;
+                                    console.log("original share list: " + sharelist.length);
+                                    npt = xhr3.response.nextPageToken;
+                                    
+                                    function getnpt2() {
+                                        if(npt) {
+                                            console.log("npt found.  Getting next list2");
+                                            var xhr4 = new XMLHttpRequest();
+                                            xhr4.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&q=" + encodeURIComponent(q2));
+                                            xhr4.setRequestHeader('Authorization', 'Bearer ' + token);
+                                            xhr4.responseType = "json";
+                                            xhr4.onload = function() {
+                                                if(xhr4.status != 200) {
+                                                    console.log(xhr4.response);
+                                                    console.log("Error in npt list2 response");
+                                                }
+                                                else {
+                                                    console.log("Got list2 from npt token- chain list2 succeeded");
+                                                    npt = xhr4.response.nextPageToken;
+                                                    var sharelist2 = xhr4.response.items;
+                                                    console.log("new share list: " + sharelist2.length);
+                                                    sharelist.concat(sharelist2);
+                                                    
+                                                    getnpt2();
+                                                }
+                                                that.numrequests--;
+                                                that.triggerDisplayTree();
+                                            };
+                                            xhr4.onerror = function() {
+                                                console.log("chain list 2 returned with an error");
+                                                console.log(xhr4.error);
+                                            };
+                                            xhr4.send();
+                                            that.numrequests++;
+                                        }
+                                        else {
+                                            for(let i = 0; i < sharelist.length; i++) {
+                                                if(sharelist[i].parents.length == 0) {
+                                                    filelist.push(sharelist[i]);
+                                                }
+                                            }
+                                            for(let i = 0; i < filelist.length; i++) {
+                                                that.numcalls++;
+                                                that.populateTreeRecurse(filelist[i], that.tree._root);
+                                            }
+                                        }
+                                    }
+                                    
+                                    getnpt2();
+                                    
+                                }
+                                that.numrequests--;
+                                that.triggerDisplayTree();
+                            };
+                            var onerror = function() {
+                                console.log(xhr3.error);
                             }
-                            that.numrequests--;
-                            that.triggerDisplayTree();
-                        };
-                        var onerror = function() {
-                            console.log(xhr3.error);
+                            xhr3.send();
+                            that.numrequests++;
                         }
-                        xhr3.send();
-                        that.numrequests++;
+                        // Search.  Don't need to get sharedwithme because search already covers it
+                        else {
+                            for(let i = 0; i < filelist.length; i++) {
+                                that.numcalls++;
+                                that.populateTreeRecurse(filelist[i], that.tree._root);
+                            }
+                        }
                     }
                 }
                 
@@ -2152,7 +2194,7 @@ class OverDrive{
   
     //console.log("displaytree");
     //console.log(fileBrowserUI);
-
+    
     document.getElementById('file-browser').innerHTML = fileBrowserUI;
     var fileTree = $('#file-browser');
     fileTree.jstree({
@@ -2164,7 +2206,7 @@ class OverDrive{
 
     fileTree.on("check_node.jstree", function(event, data) {
         console.log("CHECKED:" + data.node.text)
-		
+        
         console.log(this.tree);
         this.tree.DFtraversal(function(node) {
             if (data.node.text == node.file.name) {
@@ -2177,14 +2219,14 @@ class OverDrive{
             }
         }.bind(this))
         console.log(this.tree);
-		var ret = this.handleNumChecked();
-		document.getElementById('fileCount').innerHTML = ret.numFilesChecked;
-		document.getElementById('folderCount').innerHTML = ret.numFoldersChecked;
+        var ret = this.handleNumChecked();
+        document.getElementById('fileCount').innerHTML = ret.numFilesChecked;
+        document.getElementById('folderCount').innerHTML = ret.numFoldersChecked;
     }.bind(this))
 
     fileTree.on("uncheck_node.jstree", function(event, data) {
         console.log("UNCHECKED:" + data.node.text)
-		
+        
         console.log(this.tree)
         this.tree.DFtraversal(function(node) {
             if (data.node.text == node.file.name) {
@@ -2207,11 +2249,11 @@ class OverDrive{
         }.bind(this))
         console.log(this.tree)
     //console.log("jstree happened")
-		this.handleNumChecked();
-		var ret = this.handleNumChecked();
-		document.getElementById('fileCount').innerHTML = ret.numFilesChecked;
-		document.getElementById('folderCount').innerHTML = ret.numFoldersChecked;
-  }.bind(this))
+        this.handleNumChecked();
+        var ret = this.handleNumChecked();
+        document.getElementById('fileCount').innerHTML = ret.numFilesChecked;
+        document.getElementById('folderCount').innerHTML = ret.numFoldersChecked;
+    }.bind(this))
 
 let tot = this.handleFileCount();
 console.log("counting happened" + tot.numFiles + tot.numFolders)
