@@ -164,6 +164,12 @@ class OverDrive{
     const closeTutBtn = document.querySelector('#close-tut');
     closeTutBtn.addEventListener('click', (e) => this.handleCloseTut(e));
 
+    const tut0_1 = document.querySelector('#tut0-1');
+    const tut1_0 = document.querySelector('#tut1-0');
+    tut0_1.addEventListener('click', (e) => this.handle0_1(e));
+    tut1_0.addEventListener('click', (e) => this.handle1_0(e))
+
+
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
             e.preventDefault;
@@ -340,6 +346,21 @@ class OverDrive{
       $('#overlay').hide();
       $('#close-tut').hide();
   }
+
+  handle0_1(e) {
+      e.preventDefault;
+      $('#tut0').hide();
+      $('#tut1').show();
+      $('#filebrowser-callout').css('z-index', 1002);
+      $('#file-browser').css('box-shadow', '0px 0px 5px 5px #fff700');
+  }
+  
+  handle1_0(e) {
+      e.preventDefault;
+      $('#tut1').hide();
+      $('#tut0').show();
+  }
+
   handleAddUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
