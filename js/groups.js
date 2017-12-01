@@ -67,7 +67,7 @@ class Groups {
         const users = this.parseUsers();
         this.groups.push(new Group(groupName, users));
         this.updateGroups();
-        updateStorage();
+        this.updateStorage();
     }
 
     handleRemoveGroup(e) {
