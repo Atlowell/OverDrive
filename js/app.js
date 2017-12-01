@@ -179,6 +179,15 @@ class OverDrive{
     tut2_3.addEventListener('click', (e) => this.handle2_3(e));
     tut3_2.addEventListener('click', (e) => this.handle3_2(e));
 
+    const tut3_4 = document.querySelector('#tut3-4');
+    const tut4_3 = document.querySelector('#tut4-3');
+    tut3_4.addEventListener('click', (e) => this.handle3_4(e));
+    tut4_3.addEventListener('click', (e) => this.handle4_3(e));
+
+    const tut4_5 = document.querySelector('#tut4-5');
+    const tut5_4 = document.querySelector('#tut5-4');
+    tut4_5.addEventListener('click', (e) => this.handle4_5(e));
+    tut5_4.addEventListener('click', (e) => this.handle5_4(e));
 
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
@@ -406,9 +415,66 @@ class OverDrive{
 
       $('#input-potato').css('box-shadow', 'none');
       $('.counts').css('box-shadow', '0px 0px 5px 5px #fff700');
-
   }
 
+  handle3_4(e) {
+      e.preventDefault;
+      $('#tut3').hide();
+      $('#tut4').show();
+
+      $('#input-potato').css('box-shadow', 'none');
+      $('#filebrowser-callout').css('z-index', 'auto');
+      $('#actions').css('z-index', 1002);
+  }
+
+  handle4_3(e) {
+      e.preventDefault;
+      $('#tut4').hide();
+      $('#tut3').show();
+
+      $('#input-potato').css('box-shadow', '0px 0px 5px 5px #fff700');
+      $('#filebrowser-callout').css('z-index', 1002);
+      $('#actions').css('z-index', 'auto');
+  }
+
+  handle4_5(e) {
+      e.preventDefault;
+      $('#tut4').hide();
+      $('#tut5').show();
+
+      $('#input-users-potato').css('border', '5px solid #faff0e');
+  }
+
+  handle5_4(e) {
+      e.preventDefault;
+      $('#tut5').hide();
+      $('#tut4').show();
+
+      $('#input-users-potato').css('border', 'none');
+  }
+
+/*
+  handle4_5(e) {
+      e.preventDefault;
+      $('#tut4').hide();
+      $('#tut5').show();
+
+      $('#change-permissions-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-permissions-ticks-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+  }
+
+  handle5_4(e) {
+      e.preventDefault;
+      $('#tut5').hide();
+      $('#tut4').show();
+
+      $('#change-permissions-potato').css('box-shadow', 'none');
+      $('#change-permissions-ticks-potato').css('box-shadow', 'none');
+  }
+*/
   handleAddUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();

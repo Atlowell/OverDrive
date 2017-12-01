@@ -90,7 +90,7 @@
 
                         <!-- Input for users -->
                         <div class="input-group grid-x grid-padding-1">
-                            <div class="large-12 medium-12">
+                            <div class="large-12 medium-12" id="input-users-potato">
                                 <input class="input-group-field users" type="text" name="personName" placeholder="Enter email addresses..." autofocus required/>
                             </div>
                         </div>
@@ -127,7 +127,7 @@
                         </div>
                         <div class="grid-x grid-padding-1">
                             <!-- Change permissions button -->
-                            <div class="large-6 medium-6 small-12">
+                            <div class="large-6 medium-6 small-12" id="change-permissions-potato">
                                 <button class="button secondary action change-permissions" type="button">
                                     <i class="fa fa-pencil"></i> Change Permissions
                                 </button>
@@ -144,7 +144,7 @@
                         <!-- Permissions options -->
                         <div class="input-group grid-x grid-padding-1">
                             <div class="large-6 medium-6 small-12"> 
-                                <div class="input-group grid-x grid-padding-1">
+                                <div class="input-group grid-x grid-padding-1" id="change-permissions-ticks-potato">
                                     <div class="large-12 medium-12"> 
                                         <input type="radio" name="role" id="role" value="writer"> <strong>Writer</strong>: can write, read and comment
                                     </div>
@@ -215,6 +215,26 @@
             <p class="text-center"> You can use this search bar to search for specific files or folders within your Drive. Just type a name and hit search!<br></p>
             <button class="float-left button tiny" id="tut3-2">Previous</button>
             <button class="float-right button tiny" id="tut3-4">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut4">
+            <p class="text-center"> On this side you have your controls for permission and access administration.<br></p>
+            <button class="float-left button tiny" id="tut4-3">Previous</button>
+            <button class="float-right button tiny" id="tut4-5">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut5">
+            <p class="text-center"> Write the e-mail address of the user (or users) that you wish to add to your file(s) or whose permission(s) you wish to modify.
+                If you have multiple files checked, this will apply to all of them.<br></p>
+            <button class="float-left button tiny" id="tut5-4">Previous</button>
+            <button class="float-right button tiny" id="tut5-6">Next</button>
+        </div>
+
+        <div class="callout clearfix tutorial" id="tut6">
+            <p class="text-center"> Use these buttons to add the users whose e-mail addresses you typed in. Or to remove them. Or change their permissions. Or even
+                request ownership of a file!<br></p>
+            <button class="float-left button tiny" id="tut6-5">Previous</button>
+            <button class="float-right button tiny" id="tut6-7">Next</button>
         </div>
 
         <button class="close-button" aria-label="Dismiss alert" type="button" id="close-tut">

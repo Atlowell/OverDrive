@@ -74,6 +74,22 @@
   left: 83%;
 }
 
+#tut4 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 42%;
+  left: 35%;
+}
+
+#tut5 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 26%;
+  left: 35%;
+}
+
 .tutorial p {
   margin-top: 10px;
   margin-bottom: 10px;
