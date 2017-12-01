@@ -70,21 +70,21 @@ class Groups {
         this.updateStorage();
     }
 
-    handleRemoveGroup(e) {
+    handleRemoveGroup(group) {
         e.preventDefault();
         //this.showHideNewGroup(e);
-        const groupName = this.getGroupName();
-        const users = this.parseUsers();
+        //const group = this.getGroupName();
+       // const users = this.parseUsers();
 
         for (var i in this.groups) {
-            if (this.groups[i].name == groupName) {
+            if (this.groups[i].name == group) {
                 groups.splice(i, 1);
                 return;
             }
         }
 
         this.updateGroups();
-        updateStorage();
+        this.updateStorage();
     }
 
 
@@ -100,25 +100,35 @@ class Groups {
         for (var i in this.groups) {
 			console.log(i);
             if (this.groups[i].name == group) {
-				var j = 0;
-				while (j < this.groups[i].users.length) {
-                    if (this.groups[i].users[j] == user) {
-                        return;
-                    }
-					j++;
-                }
-				console.log("Added " + user + " to " + group);
-				console.log( this.groups[i].users);
-				console.log(j);
+				var u = 0;
+				while (u < user.length) {
+					var j = 0;
+					var reset = 0;
+					while (j < this.groups[i].users.length) {
+						if (this.groups[i].users[j] == user[u]) {
+							reset = 1;
+							
+						}
+						j++;
+					}
+					if (reset == 0 ) {
+						console.log("Added " + user[u] + " to " + group);
+						console.log( this.groups[i].users);
+						console.log(j);
 				
-                this.groups[i].users[j] = user[0];
-				console.log(this.groups);
-				
-				this.groups[i].users = this.groups[i].users.filter(function( element ) {
-					return element !== undefined;
-				});
-				this.updateGroups();
-				this.updateStorage();
+						this.groups[i].users[j] = user[u];
+						console.log(this.groups);
+					
+						this.groups[i].users = this.groups[i].users.filter(function( element ) {
+							return element !== undefined;
+						});
+						this.updateGroups();
+						this.updateStorage();
+					}
+					u++;
+				}
+				//this.updateGroups();
+				//this.updateStorage();
                 return;
             }
         }
@@ -206,9 +216,10 @@ class Groups {
                     groupsUI += that.groups[i].name;
                     groupsUI += "'>";
                     groupsUI += that.groups[i].name;
+                    groupsUI += "&emsp;<button class='remove-group' group='"
+                    groupsUI += that.groups[i].name;
+                    groupsUI += "'><i class='fa fa-minus-circle'></i></button>";
                     groupsUI += "<ul>";
-					
-					
 				
 					
 					console.log(groupsUI);
@@ -442,7 +453,7 @@ function testVals() {
 }
 
 function testStorage() {
-    var groupStorage = ["3", "Group1", "Brian@gmail.com", "Austin@gmail.com", "3", "Group2", "Clayton@gmail.com", "Sam@gmail.com", "0"];
+    var groupStorage = ["3", "Group1", "bwong14@gmail.com", "claytonhenrylewis@gmail.com", "3", "Group2", "atlowell42@gmail.com", "samrobf30@gmail.com", "0"];
     chrome.storage.sync.set({
         list: groupStorage
     }, function() {
