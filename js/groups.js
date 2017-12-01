@@ -100,23 +100,31 @@ class Groups {
         for (var i in this.groups) {
 			console.log(i);
             if (this.groups[i].name == group) {
-				var j = 0;
-				while (j < this.groups[i].users.length) {
-                    if (this.groups[i].users[j] == user) {
-                        return;
-                    }
-					j++;
-                }
-				console.log("Added " + user + " to " + group);
-				console.log( this.groups[i].users);
-				console.log(j);
+				var u = 0;
+				while (u < user.length) {
+					var j = 0;
+					var reset = 0;
+					while (j < this.groups[i].users.length) {
+						if (this.groups[i].users[j] == user[u]) {
+							reset = 1;
+							
+						}
+						j++;
+					}
+					if (reset == 0 ) {
+						console.log("Added " + user[u] + " to " + group);
+						console.log( this.groups[i].users);
+						console.log(j);
 				
-                this.groups[i].users[j] = user[0];
-				console.log(this.groups);
-				
-				this.groups[i].users = this.groups[i].users.filter(function( element ) {
-					return element !== undefined;
-				});
+						this.groups[i].users[j] = user[u];
+						console.log(this.groups);
+					
+						this.groups[i].users = this.groups[i].users.filter(function( element ) {
+							return element !== undefined;
+						});
+					}
+					u++;
+				}
 				this.updateGroups();
 				this.updateStorage();
                 return;
@@ -163,7 +171,7 @@ class Groups {
     // var groupsList = document.querySelector("#groups-list");
     // var btn = document.querySelector(button[group=groupname].add);'
     displayGroups(e) {
-        //testStorage();
+        testStorage();
         var groupsList = document.querySelector("#groups-list");
 
         var groupsUI = "<div id='groups-list'><ul>";
@@ -442,7 +450,7 @@ function testVals() {
 }
 
 function testStorage() {
-    var groupStorage = ["3", "Group1", "Brian@gmail.com", "Austin@gmail.com", "3", "Group2", "Clayton@gmail.com", "Sam@gmail.com", "0"];
+    var groupStorage = ["3", "Group1", "bwong14@gmail.com", "claytonhenrylewis@gmail.com", "3", "Group2", "atlowell42@gmail.com", "samrobf30@gmail.com", "0"];
     chrome.storage.sync.set({
         list: groupStorage
     }, function() {
