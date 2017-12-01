@@ -98,6 +98,30 @@
   left: 35%;
 }
 
+#tut7 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 51%;
+  left: 35%;
+}
+
+#tut8 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 51%;
+  left: 35%;
+}
+
+#tut9 {
+  position: absolute;
+  width: 40%;
+  height: 13%;
+  top: 45%;
+  left: 50%;
+}
+
 .tutorial p {
   margin-top: 10px;
   margin-bottom: 10px;

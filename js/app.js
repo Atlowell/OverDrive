@@ -194,7 +194,20 @@ class OverDrive{
     tut5_6.addEventListener('click', (e) => this.handle5_6(e));
     tut6_5.addEventListener('click', (e) => this.handle6_5(e));
 
-    
+    const tut6_7 = document.querySelector('#tut6-7');
+    const tut7_6 = document.querySelector('#tut7-6');
+    tut6_7.addEventListener('click', (e) => this.handle6_7(e));
+    tut7_6.addEventListener('click', (e) => this.handle7_6(e));
+
+    const tut7_8 = document.querySelector('#tut7-8');
+    const tut8_7 = document.querySelector('#tut8-7');
+    tut7_8.addEventListener('click', (e) => this.handle7_8(e));
+    tut8_7.addEventListener('click', (e) => this.handle8_7(e));
+
+    const tut8_9 = document.querySelector('#tut8-9');
+    const tut9_8 = document.querySelector('#tut9-8');
+    tut8_9.addEventListener('click', (e) => this.handle8_9(e));
+    tut9_8.addEventListener('click', (e) => this.handle9_8(e));
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
             e.preventDefault;
@@ -477,16 +490,17 @@ class OverDrive{
       $('#tut5').show();
 
       $('#input-users-potato').css('border', '5px solid #faff0e');
-      $("#tut6-area-bot").css('border', 'none')
+      $("#tut6-area-bot").css('border', 'none');
       $("#tut6-area-top").css('border', 'none');
   }
 
-/*
-  handle4_5(e) {
+  handle6_7(e) {
       e.preventDefault;
-      $('#tut4').hide();
-      $('#tut5').show();
+      $('#tut6').hide();
+      $('#tut7').show();
 
+      $("#tut6-area-bot").css('border', 'none');
+      $("#tut6-area-top").css('border', 'none');
       $('#change-permissions-potato').css({'border':'5px solid #faff0e',
                                            'border-bottom':'0px solid #faff0e'});
 
@@ -494,15 +508,72 @@ class OverDrive{
                                            'border-top':'0px solid #faff0e'});
   }
 
-  handle5_4(e) {
+  handle7_6(e) {
       e.preventDefault;
-      $('#tut5').hide();
-      $('#tut4').show();
+      $('#tut7').hide();
+      $('#tut6').show();
 
-      $('#change-permissions-potato').css('box-shadow', 'none');
-      $('#change-permissions-ticks-potato').css('box-shadow', 'none');
+      $('#change-permissions-potato').css('border', 'none');
+      $('#change-permissions-ticks-potato').css('border', 'none');
+      $("#tut6-area-bot").css({'border':'5px solid #faff0e',
+                               'border-top':'0px solid #faff0e'})
+      $("#tut6-area-top").css({'border':'5px solid #faff0e',
+                               'border-bottom':'0px solid #faff0e'});
   }
-*/
+  
+  handle7_8(e) {
+      e.preventDefault;
+      $('#tut7').hide();
+      $('#tut8').show();
+
+      $('#change-permissions-potato').css('border', 'none');
+      $('#change-permissions-ticks-potato').css('border', 'none');
+      $('#change-editor-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-editor-tick-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+
+  }
+
+  handle8_7(e) {
+      e.preventDefault;
+      $('#tut8').hide();
+      $('#tut7').show();
+
+      $('#change-permissions-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-permissions-ticks-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+
+      $('#change-editor-potato').css('border', 'none');
+      $('#change-editor-tick-potato').css('border', 'none');
+  }
+
+  handle8_9(e) {
+      e.preventDefault;
+      $('#tut8').hide();
+      $('#tut9').show();
+
+      $('#change-editor-potato').css('border', 'none');
+      $('#change-editor-tick-potato').css('border', 'none');
+      $('#actions').css('z-index', 'auto');
+  }
+
+  handle9_8(e) {
+      e.preventDefault;
+      $('#tut9').hide();
+      $('#tut8').show();
+
+      $('#change-editor-potato').css({'border':'5px solid #faff0e',
+                                           'border-bottom':'0px solid #faff0e'});
+
+      $('#change-editor-tick-potato').css({'border':'5px solid #faff0e',
+                                           'border-top':'0px solid #faff0e'});
+      $('#actions').css('z-index', 1002);
+  }
+
   handleAddUsers(e) {
     e.preventDefault();
     const users = this.parseUsers();
