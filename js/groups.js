@@ -150,7 +150,9 @@ class Groups {
                 console.log(that);
 
                 for (var i in that.groups) {
-                    groupsUI += "<li data-jstree='{\"icon\":\"fa fa-users\"}'>";
+                    groupsUI += "<li data-jstree='{\"icon\":\"fa fa-users\"}' id='"
+                    groupsUI += that.groups[i].name;
+                    groupsUI += "'>";
                     groupsUI += that.groups[i].name;
                     groupsUI += "<ul>";
                     for (var j in that.groups[i].users) {
