@@ -91,26 +91,39 @@ class Groups {
 
     handleAddUser(group) {
         
-   
+	
        this.showHideNewGroup(); 
 	   const user = this.parseUsers();
         //const user = this.parseUsers();
 		console.log("Adding " + user + " to " + group);
-		/*
+		
         for (var i in this.groups) {
-            if (this.groups[i].name == groupName) {
-                for (var j in this.groups[i].users) {
-                    if (this.groups[i].users[j] = user) {
+			console.log(i);
+            if (this.groups[i].name == group) {
+				var j = 0;
+				while (j < this.groups[i].users.length) {
+                    if (this.groups[i].users[j] == user) {
                         return;
                     }
+					j++;
                 }
-                this.groups[i].users.push(user);
+				console.log("Added " + user + " to " + group);
+				console.log( this.groups[i].users);
+				console.log(j);
+				
+                this.groups[i].users[j] = user[0];
+				console.log(this.groups);
+				
+				this.groups[i].users = this.groups[i].users.filter(function( element ) {
+					return element !== undefined;
+				});
 				this.updateGroups();
-				updateStorage();
+				this.updateStorage();
                 return;
             }
         }
-		*/
+		
+		
 
     }
 
