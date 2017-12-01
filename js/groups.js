@@ -51,7 +51,13 @@ class Groups {
 
     getGroupName() {
         const groupNameInput = document.querySelector('.groupName');
-        const groupName = groupNameInput.value;
+        var groupName = groupNameInput.value;
+		for(let i = 0; i < this.groups.length; i++) {
+			if(groupName == this.groups[i].name) {
+				groupName = "";
+				break;
+			}
+		}
         return groupName;
     }
 
@@ -64,6 +70,10 @@ class Groups {
         e.preventDefault();
         this.showHideNewGroup(e);
         const groupName = this.getGroupName();
+		if(groupName == "") {
+			alert("Invalid group name (group name is blank or group already exists)");
+			return;
+		}
         const users = this.parseUsers();
         this.groups.push(new Group(groupName, users));
         this.updateGroups();
@@ -103,6 +113,10 @@ class Groups {
 
         this.showHideNewGroup();
         const user = this.parseUsers();
+		if(user.length == 0) {
+			alert("No valid users entered");
+			return;
+		}
         //const user = this.parseUsers();
         console.log("Adding " + user + " to " + group);
 
