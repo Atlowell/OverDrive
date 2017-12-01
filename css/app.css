@@ -53,16 +53,24 @@
 #tut1 {
   position: absolute;
   width: 40%;
-  height: 13%;
-  top: 35%;
+  height: 10%;
+  top: 42%;
   left: 83%;
 }
 
 #tut2 {
   position: absolute;
   width: 40%;
-  height: 13%;
-  top: 28%;
+  height: 10%;
+  top: 26%;
+  left: 83%;
+}
+
+#tut3 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 20%;
   left: 83%;
 }
 

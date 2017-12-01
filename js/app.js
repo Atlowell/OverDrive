@@ -174,6 +174,10 @@ class OverDrive{
     tut1_2.addEventListener('click', (e) => this.handle1_2(e));
     tut2_1.addEventListener('click', (e) => this.handle2_1(e));
 
+    const tut2_3 = document.querySelector('#tut2-3');
+    const tut3_2 = document.querySelector('#tut3-2');
+    tut2_3.addEventListener('click', (e) => this.handle2_3(e));
+    tut3_2.addEventListener('click', (e) => this.handle3_2(e));
 
 
     /*for (var ele of checkBox_fileIcon_fileName) {
@@ -384,6 +388,25 @@ class OverDrive{
 
       $('#file-browser').css('box-shadow', '0px 0px 5px 5px #fff700');
       $('.counts').css('box-shadow', 'none');
+  }
+
+  handle2_3(e) {
+      e.preventDefault;
+      $('#tut2').hide();
+      $('#tut3').show();
+
+      $('#input-potato').css('box-shadow', '0px 0px 5px 5px #fff700')
+      $('.counts').css('box-shadow', 'none');
+  }
+
+  handle3_2(e) {
+      e.preventDefault;
+      $('#tut3').hide();
+      $('#tut2').show();
+
+      $('#input-potato').css('box-shadow', 'none');
+      $('.counts').css('box-shadow', '0px 0px 5px 5px #fff700');
+
   }
 
   handleAddUsers(e) {
