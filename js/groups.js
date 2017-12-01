@@ -70,21 +70,21 @@ class Groups {
         this.updateStorage();
     }
 
-    handleRemoveGroup(e) {
+    handleRemoveGroup(group) {
         e.preventDefault();
         //this.showHideNewGroup(e);
-        const groupName = this.getGroupName();
-        const users = this.parseUsers();
+        //const group = this.getGroupName();
+       // const users = this.parseUsers();
 
         for (var i in this.groups) {
-            if (this.groups[i].name == groupName) {
+            if (this.groups[i].name == group) {
                 groups.splice(i, 1);
                 return;
             }
         }
 
         this.updateGroups();
-        updateStorage();
+        this.updateStorage();
     }
 
 
