@@ -189,6 +189,12 @@ class OverDrive{
     tut4_5.addEventListener('click', (e) => this.handle4_5(e));
     tut5_4.addEventListener('click', (e) => this.handle5_4(e));
 
+    const tut5_6 = document.querySelector('#tut5-6');
+    const tut6_5 = document.querySelector('#tut6-5');
+    tut5_6.addEventListener('click', (e) => this.handle5_6(e));
+    tut6_5.addEventListener('click', (e) => this.handle6_5(e));
+
+    
     /*for (var ele of checkBox_fileIcon_fileName) {
         ele.addEventListener('click', (e) => {
             e.preventDefault;
@@ -451,6 +457,28 @@ class OverDrive{
       $('#tut4').show();
 
       $('#input-users-potato').css('border', 'none');
+  }
+
+  handle5_6(e) {
+      e.preventDefault;
+      $('#tut5').hide();
+      $('#tut6').show();
+
+      $('#input-users-potato').css('border', 'none');
+      $("#tut6-area-bot").css({'border':'5px solid #faff0e',
+                               'border-top':'0px solid #faff0e'})
+      $("#tut6-area-top").css({'border':'5px solid #faff0e',
+                               'border-bottom':'0px solid #faff0e'});
+  }
+
+  handle6_5(e) {
+      e.preventDefault;
+      $('#tut6').hide();
+      $('#tut5').show();
+
+      $('#input-users-potato').css('border', '5px solid #faff0e');
+      $("#tut6-area-bot").css('border', 'none')
+      $("#tut6-area-top").css('border', 'none');
   }
 
 /*

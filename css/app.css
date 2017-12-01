@@ -90,6 +90,14 @@
   left: 35%;
 }
 
+#tut6 {
+  position: absolute;
+  width: 40%;
+  height: 10%;
+  top: 37%;
+  left: 35%;
+}
+
 .tutorial p {
   margin-top: 10px;
   margin-bottom: 10px;
