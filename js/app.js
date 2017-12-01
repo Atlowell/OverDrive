@@ -657,8 +657,8 @@ class OverDrive{
             role: role,
             that: that
         }
-        //that.addUsers(args);
-        that.addUsersBatch(users, role);
+        that.addUsers(args);
+        //that.addUsersBatch(users, role);
     });
     
   }
@@ -1912,92 +1912,107 @@ class OverDrive{
 	if (folder) {
         //console.log("is a folder");
         identityAuth(function(t) {
-            var q = "'" + fid + "' in parents and trashed=false";
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q));
-            xhr.setRequestHeader('Authorization', 'Bearer ' + t);
-            xhr.responseType = "json";
-            
-            // On Success
-            xhr.onload = function() {
-                if(xhr.status != 200) {
-                    console.log(xhr.status);
-                    console.log("List error in recurse");
-                    if(xhr.status == 403) {
-                        if((xhr.response.error.errors[0].reason == "userRateLimitExceeded") || (xhr2.response.error.errors[0].reason == "rateLimitExceeded")) {
-                            console.log("retrying children of " + name);
-                            //setTimeout(test, Math.floor(Math.random() * 500) + 501);
-                        }
-                    }
-                }
-                else {
-                    console.log(xhr.response);
-                    var childlist = xhr.response.items;
-                    var npt = xhr.response.nextPageToken;
-             
-                    function getnpt() {     
-                        if(npt) {
-                            var xhr2 = new XMLHttpRequest();
-                            xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&?q=" + encodeURIComponent(q));
-                            xhr2.setRequestHeader('Authorization', 'Bearer ' + t);
-                            //xhr2.setRequestHeader('pageToken', npt);
-                            xhr2.responseType = "json";
-                            xhr2.onload = function() {
-                                if(xhr2.status != 200) {
-                                    console.log(xhr2.status);
-                                    console.log("npt list error in recurse");
-                                }
-                                else {
-                                    // Update npt and filelist, mark ready for next request
-                                    console.log("got child from npt token in recurse - chain child succeeded");
-                                    npt = xhr2.response.nextPageToken;
-                                    var childlist2 = xhr2.response.items;
-                                    console.log("new child list: " + childlist2.length);
-                                    childlist.concat(childlist2);
-                                    
-                                    getnpt();
-                                }
+            function listrequest(retries) {
+                var q = "'" + fid + "' in parents and trashed=false";
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', "https://www.googleapis.com/drive/v2/files" + "?q=" + encodeURIComponent(q));
+                xhr.setRequestHeader('Authorization', 'Bearer ' + t);
+                xhr.responseType = "json";
+                
+                // On Success
+                xhr.onload = function() {
+                    if(xhr.status != 200) {
+                        console.log(xhr.status);
+                        console.log("List error in recurse");
+                        if(xhr.status == 403) {
+                            if((xhr.response.error.errors[0].reason == "userRateLimitExceeded") || (xhr2.response.error.errors[0].reason == "rateLimitExceeded")) {
+                                setTimeout(function() {
+                                    if(retries > 0) {
+                                        console.log("retrying children of " + name);
+                                        listrequest(retries -  1);
+                                    }
+                                    else {
+                                        console.log("Giving up retrying children of " + name);
+                                    }
+                                    that.numrequests--;
+                                    that.triggerDisplayTree();
+                                }, Math.floor(Math.random() * 500) + 501);
+                            }
+                            else {
                                 that.numrequests--;
                                 that.triggerDisplayTree();
-                            //readyflag = 1;
-                            };
-                            xhr2.onerror = function() {
-                                console.log("Chain child failed");
-                                console.log(xhr2.error);
-                            };
-                            xhr2.send();
-                            that.numrequests++;
-                        }
-                        else {
-                            for(let i = 0; i < childlist.length; i++) {
-                                
-                                //console.log("Calling populatetreerecurse from populatetreerecurse");
-                                //console.log(this);
-                                //console.log(childlist[i]);
-                                that.numcalls++;
-                                that.populateTreeRecurse(childlist[i], childnode);
                             }
                         }
-                    };
-                    
-                    getnpt();
-                    
-                }
-                that.numrequests--;
-                that.triggerDisplayTree();
-            };
+                    }
+                    else {
+                        console.log(xhr.response);
+                        var childlist = xhr.response.items;
+                        var npt = xhr.response.nextPageToken;
+                 
+                        function getnpt() {     
+                            if(npt) {
+                                var xhr2 = new XMLHttpRequest();
+                                xhr2.open('GET', "https://www.googleapis.com/drive/v2/files" + "?pageToken=" + encodeURIComponent(npt) + "&?q=" + encodeURIComponent(q));
+                                xhr2.setRequestHeader('Authorization', 'Bearer ' + t);
+                                //xhr2.setRequestHeader('pageToken', npt);
+                                xhr2.responseType = "json";
+                                xhr2.onload = function() {
+                                    if(xhr2.status != 200) {
+                                        console.log(xhr2.status);
+                                        console.log("npt list error in recurse");
+                                    }
+                                    else {
+                                        // Update npt and filelist, mark ready for next request
+                                        console.log("got child from npt token in recurse - chain child succeeded");
+                                        npt = xhr2.response.nextPageToken;
+                                        var childlist2 = xhr2.response.items;
+                                        console.log("new child list: " + childlist2.length);
+                                        childlist.concat(childlist2);
+                                        
+                                        getnpt();
+                                    }
+                                    that.numrequests--;
+                                    that.triggerDisplayTree();
+                                //readyflag = 1;
+                                };
+                                xhr2.onerror = function() {
+                                    console.log("Chain child failed");
+                                    console.log(xhr2.error);
+                                };
+                                xhr2.send();
+                                that.numrequests++;
+                            }
+                            else {
+                                for(let i = 0; i < childlist.length; i++) {
+                                    
+                                    //console.log("Calling populatetreerecurse from populatetreerecurse");
+                                    //console.log(this);
+                                    //console.log(childlist[i]);
+                                    that.numcalls++;
+                                    that.populateTreeRecurse(childlist[i], childnode);
+                                }
+                            }
+                        };
+                        
+                        getnpt();
+                        
+                        that.numrequests--;
+                        that.triggerDisplayTree();
+                    }
+                };
+                
+                // On Error
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                
+                xhr.send();
+                that.numrequests++;
+            }
             
-            // On Error
-            xhr.onerror = function() {
-                console.log(xhr.error);
-            };
-            
-            xhr.send();
-            that.numrequests++;
-			//console.log("numcalls should be decreased here");
-			that.numcalls--;
-			//Don't need to trigger display tree because it won't be valid
-			//this.triggerDisplayTree();
+            listrequest(2);
+            that.numcalls--;
+            that.triggerDisplayTree();
         });
 	}
 	else {
