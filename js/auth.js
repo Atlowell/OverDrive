@@ -3,7 +3,7 @@ var apikey = 'AIzaSyDHRk9uzGCpQVBAK8iwP2JYouXfzN_EKcw';
 var scopes = 'https://www.googleapis.com/auth/drive';
 var gauth;
 var authorization = false;
-			
+
 function clientLoadAuth() {
 	gapi.load('client:auth2', clientInitAuth);
     

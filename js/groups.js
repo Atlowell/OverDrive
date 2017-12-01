@@ -216,9 +216,10 @@ class Groups {
                     groupsUI += that.groups[i].name;
                     groupsUI += "'>";
                     groupsUI += that.groups[i].name;
+                    groupsUI += "&emsp;<button class='remove-group' group='"
+                    groupsUI += that.groups[i].name;
+                    groupsUI += "'><i class='fa fa-minus-circle'></i></button>";
                     groupsUI += "<ul>";
-					
-					
 				
 					
 					console.log(groupsUI);
