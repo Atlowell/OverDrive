@@ -167,7 +167,13 @@ class OverDrive{
     const tut0_1 = document.querySelector('#tut0-1');
     const tut1_0 = document.querySelector('#tut1-0');
     tut0_1.addEventListener('click', (e) => this.handle0_1(e));
-    tut1_0.addEventListener('click', (e) => this.handle1_0(e))
+    tut1_0.addEventListener('click', (e) => this.handle1_0(e));
+
+    const tut1_2 = document.querySelector('#tut1-2');
+    const tut2_1 = document.querySelector('#tut2-1');
+    tut1_2.addEventListener('click', (e) => this.handle1_2(e));
+    tut2_1.addEventListener('click', (e) => this.handle2_1(e));
+
 
 
     /*for (var ele of checkBox_fileIcon_fileName) {
@@ -359,6 +365,25 @@ class OverDrive{
       e.preventDefault;
       $('#tut1').hide();
       $('#tut0').show();
+      $('#filebrowser-callout').css('z-index', 'auto');
+      $('#file-browser').css('box-shadow', 'none');
+  }
+
+  handle1_2(e) {
+      e.preventDefault;
+      $('#tut1').hide();
+      $('#tut2').show();
+      $('#file-browser').css('box-shadow', 'none');
+      $('.counts').css('box-shadow', '0px 0px 5px 5px #fff700');
+  }
+
+  handle2_1(e) {
+      e.preventDefault;
+      $('#tut2').hide();
+      $('#tut1').show();
+
+      $('#file-browser').css('box-shadow', '0px 0px 5px 5px #fff700');
+      $('.counts').css('box-shadow', 'none');
   }
 
   handleAddUsers(e) {

@@ -58,6 +58,14 @@
   left: 83%;
 }
 
+#tut2 {
+  position: absolute;
+  width: 40%;
+  height: 13%;
+  top: 28%;
+  left: 83%;
+}
+
 .tutorial p {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -68,4 +76,9 @@
 #close-tut {
   display: none;
   z-index: 1003;
+  color: red;
+}
+
+#close-tut:hover {
+  color: #990c1c;
 }
