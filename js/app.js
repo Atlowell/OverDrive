@@ -246,10 +246,15 @@ class OverDrive{
     tut7_8.addEventListener('click', (e) => this.handle7_8(e));
     tut8_7.addEventListener('click', (e) => this.handle8_7(e));
 
-    const tut8_9 = document.querySelector('#tut8-9');
-    const tut9_8 = document.querySelector('#tut9-8');
-    tut8_9.addEventListener('click', (e) => this.handle8_9(e));
-    tut9_8.addEventListener('click', (e) => this.handle9_8(e));
+    const tut8_85 = document.querySelector('#tut8-85');
+    const tut85_8 = document.querySelector('#tut85-8');
+    tut8_85.addEventListener('click', (e) => this.handle8_85(e));
+    tut85_8.addEventListener('click', (e) => this.handle85_8(e));
+
+    const tut85_9 = document.querySelector('#tut85-9');
+    const tut9_85 = document.querySelector('#tut9-85');
+    tut85_9.addEventListener('click', (e) => this.handle85_9(e));
+    tut9_85.addEventListener('click', (e) => this.handle9_85(e));
 
     const tutEnd = document.querySelector('#tut-end');
     tutEnd.addEventListener('click', (e) => this.handleTutEnd(e));
@@ -446,6 +451,7 @@ class OverDrive{
       $('#change-permissions-ticks-potato').css('border', 'none');
       $('#change-editor-potato').css('border', 'none');
       $('#change-editor-tick-potato').css('border', 'none');
+      $('#tut-groups').css('border', 'none')
   }
 
   handle0_1(e) {
@@ -614,19 +620,19 @@ class OverDrive{
       $('#change-editor-tick-potato').css('border', 'none');
   }
 
-  handle8_9(e) {
+  handle8_85(e) {
       e.preventDefault;
       $('#tut8').hide();
-      $('#tut9').show();
+      $('#tut85').show();
 
       $('#change-editor-potato').css('border', 'none');
       $('#change-editor-tick-potato').css('border', 'none');
-      $('#actions').css('z-index', 'auto');
+      $('#tut-groups').css('border', '5px solid #faff0e')
   }
 
-  handle9_8(e) {
+  handle85_8(e) {
       e.preventDefault;
-      $('#tut9').hide();
+      $('#tut85').hide();
       $('#tut8').show();
 
       $('#change-editor-potato').css({'border':'5px solid #faff0e',
@@ -634,6 +640,25 @@ class OverDrive{
 
       $('#change-editor-tick-potato').css({'border':'5px solid #faff0e',
                                            'border-top':'0px solid #faff0e'});
+
+      $('#tut-groups').css('border', 'none')
+  }
+
+  handle85_9(e) {
+      e.preventDefault;
+      $('#tut85').hide();
+      $('#tut9').show();
+      
+      $('#tut-groups').css('border', 'none')
+      $('#actions').css('z-index', 'auto');
+  }
+
+  handle9_85(e) {
+      e.preventDefault;
+      $('#tut9').hide();
+      $('#tut85').show();
+
+      $('#tut-groups').css('border', '5px solid #faff0e')
       $('#actions').css('z-index', 1002);
   }
 
