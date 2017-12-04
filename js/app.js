@@ -704,9 +704,8 @@ class OverDrive{
                     body.additionalRoles = ["commenter"];
                 }
                 
-                var maxnumtries = 5;
                 
-                function addRequest(trynum) {
+                function addRequest(retries) {
                 
 					function continueRequest() {
 						if(!initchk) {
@@ -761,14 +760,14 @@ class OverDrive{
                                 }
                             }
 							if(retry) {
-								console.log("Retrying " + (maxnumtries - trynum) + " more times");
-								if(trynum < maxnumtries) {
+								console.log("Retrying " + (retries) + " more times");
+								if(retries > 0) {
 									setTimeout(function() {
-										addRequest(trynum + 1);
-									}, 200*trynum);
+										addRequest(retries - 1);
+									}, Math.floor(Math.random() * 500) + 501);
 								}
 								else {
-									alert("Giving up retrying adduser: " + node.file.name);
+									alert("Giving up retrying addusers: " + node.file.name);
 									//Continue on anyways
 									continueRequest();
 								}
@@ -939,8 +938,22 @@ class OverDrive{
 		console.log(usernum);
 		var permid;
         identityAuth(function(token) { 
-                var numretries = 1;
-                function removeRequest(fileid, permid) {
+                function removeRequest(fileid, permid, retries) {
+					function continueRequest() {
+						if(!initchk) {
+							if((usernum + 1) < users.length) {
+								userrecurse(node, usernum + 1, true, false);
+							}
+						}
+						for(let i = 0; i < node.children.length; i++) {
+							let chk2 = false;
+							if(node.children[i].file.checked) {
+								chk2 = true;
+							}
+							userrecurse(node.children[i], usernum, chk2, true);
+						}
+					}
+					
 					//console.log("Removing file: " + fileid + " with permid: " + permid);
                     var xhr = new XMLHttpRequest();
                     //console.log("fid: " + encodeURIComponent(filelist[i]));
@@ -953,70 +966,58 @@ class OverDrive{
                         if(xhr.status == 204) {
                             console.log("User removed from " + node.file.name);
                             //console.log(xhr.response);
-                            if(!initchk) {
-                                if((usernum + 1) < users.length) {
-                                    userrecurse(node, usernum + 1, true, false);
-                                }
-                            }
-                            for(let i = 0; i < node.children.length; i++) {
-                                let chk2 = false;
-                                if(node.children[i].file.checked) {
-                                    chk2 = true;
-                                }
-                                userrecurse(node.children[i], usernum, chk2, true);
-                            }
+                            continueRequest();
                         }
-                        else if(xhr.status == 404) {
-                            console.log("Error with remove request in remove users");
+						else {
+							console.log("Error with remove request in removeusers");
                             console.log(xhr.response);
-                            console.log("Retrying " + numretries + " more times");
-                            numretries--;
-                            if(numretries >= 0) {
-                                setTimeout(function() {
-                                    removeRequest(fileid,permid);
-                                }, 200);
-                            }
-                            else {
-                                console.log("Giving up retrying");
-                                //Continue on anyways
-                                if(!initchk) {
-                                    if((usernum + 1) < users.length) {
-                                        userrecurse(node, usernum + 1, true, false);
-                                    }
-                                }
-                                for(let i = 0; i < node.children.length; i++) {
-                                    let chk2 = false;
-                                    if(node.children[i].file.checked) {
-                                        chk2 = true;
-                                    }
-                                    userrecurse(node.children[i], usernum, chk2, true);
-                                }
-                            }
-                        }
-                       else {
-                            console.log("Error with remove request in remove users");
-                            console.log(xhr.response);
-                            if(xhr.status == 400 || xhr.status == 403) {
+							let retry = false;
+							if(xhr.status == 500) {
+								retry = true;
+							}
+							else if(xhr.status == 403) {
+								let ret = true;
+								for(let i = 0; i < xhr.response.error.errors.length; i++) {
+									let err = xhr.response.error.errors[i].reason;
+									if((err != "rateLimitExceeded") && (err != "userRateLimitExceeded")) {
+										ret = false;
+										if(err == "forbidden") {
+											alert("Insufficient permissions to share " + node.file.name);
+										}
+										break;
+									}
+								}
+								if(ret) {
+									retry = true;
+								}
+							}
+							else if(xhr.status == 400) {
                                 for(let i = 0; i < xhr.response.error.errors.length; i++) {
-                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest" || xhr.status == 403) {
-                                        console.log("Insufficient permissions to share " + node.file.name);
+                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
+                                        alert("Insufficient permissions to share " + node.file.name);
                                     }
                                 }
                             }
-                            // Continue on with other files anyways
-                            if(!initchk) {
-                                if((usernum + 1) < users.length) {
-                                    userrecurse(node, usernum + 1, true, false);
-                                }
-                            }
-                            for(let i = 0; i < node.children.length; i++) {
-                                let chk2 = false;
-                                if(node.children[i].file.checked) {
-                                    chk2 = true;
-                                }
-                                userrecurse(node.children[i], usernum, chk2, true);
-                            }
-                        }
+							else if(xhr.status == 404) {
+								console.log("Permission not found");
+							}
+							if(retry) {
+								console.log("Retrying " + (retries) + " more times");
+								if(retries > 0) {
+									setTimeout(function() {
+										removeRequest(retries - 1);
+									}, Math.floor(Math.random() * 500) + 501);
+								}
+								else {
+									alert("Giving up retrying removeusers: " + node.file.name);
+									//Continue on anyways
+									continueRequest();
+								}
+							}
+							else {
+								continueRequest();
+							}
+						}
 
                     };
                     xhr.onerror = function() {
@@ -1041,7 +1042,7 @@ class OverDrive{
 						console.log(xhr.response.id);
 						permid = xhr.response.id; 
 						//console.log("Permid :" +permid);
-						removeRequest(node.file.fid, permid);
+						removeRequest(node.file.fid, permid, 2);
 						//console.log("Permid");
 						//console.log(permid);
 					};
@@ -1123,10 +1124,19 @@ class OverDrive{
                     'value': user
                 }
                 
-                var numretries = 1;
                 
-                function ownerRequest() {
-                
+                function ownerRequest(retries) {
+					
+					function continueRequest() {
+						for(let i = 0; i < node.children.length; i++) {
+							let chk2 = false;
+							if(node.children[i].file.checked) {
+								chk2 = true;
+							}
+							userrecurse(node.children[i], chk2, true);
+						}
+					}
+				
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions" + "?sendNotificationEmails=false");
                     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
@@ -1136,55 +1146,51 @@ class OverDrive{
                         if(xhr.status == 200) {
                             console.log("Owner changed for " + node.file.name);
                             //console.log(xhr.response);
-                            for(let i = 0; i < node.children.length; i++) {
-                                let chk2 = false;
-                                if(node.children[i].file.checked) {
-                                    chk2 = true;
-                                }
-                                userrecurse(node.children[i], chk2, true);
-                            }
+                            continueRequest();
                         }
-                        else if(xhr.status == 500) {
-                            console.log("Error with owner request in addusers");
+						else {
+							console.log("Error with change request in changeowners");
                             console.log(xhr.response);
-                            console.log("Retrying " + numretries + " more times");
-                            numretries--;
-                            if(numretries >= 0) {
-                                setTimeout(function() {
-                                    ownerRequest();
-                                }, 200);
-                            }
-                            else {
-                                console.log("Giving up retrying changeowners: " + node.file.name);
-                                //Continue on anyways
-                                for(let i = 0; i < node.children.length; i++) {
-                                    let chk2 = false;
-                                    if(node.children[i].file.checked) {
-                                        chk2 = true;
-                                    }
-                                    userrecurse(node.children[i], chk2, true);
-                                }
-                            }
-                        }
-                        else {
-                            console.log("Error with add request in addusers");
-                            console.log(xhr.response);
-                            if(xhr.status == 400) {
+							let retry = false;
+							if(xhr.status == 500) {
+								retry = true;
+							}
+							else if(xhr.status == 403) {
+								let ret = true;
+								for(let i = 0; i < xhr.response.error.errors.length; i++) {
+									let err = xhr.response.error.errors[i].reason;
+									if((err != "rateLimitExceeded") && (err != "userRateLimitExceeded")) {
+										ret = false;
+									}
+								}
+								if(ret) {
+									retry = true;
+								}
+							}
+							else if(xhr.status == 400) {
                                 for(let i = 0; i < xhr.response.error.errors.length; i++) {
                                     if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
-                                        console.log("You are not the owner of " + node.file.name);
+                                        alert("You are not the owner of " + node.file.name);
                                     }
                                 }
                             }
-                            // Continue on with other files anyways
-                            for(let i = 0; i < node.children.length; i++) {
-                                let chk2 = false;
-                                if(node.children[i].file.checked) {
-                                    chk2 = true;
-                                }
-                                userrecurse(node.children[i], chk2, true);
-                            }
-                        }
+							if(retry) {
+								console.log("Retrying " + (retries) + " more times");
+								if(retries > 0) {
+									setTimeout(function() {
+										ownerRequest(retries - 1);
+									}, Math.floor(Math.random() * 500) + 501);
+								}
+								else {
+									alert("Giving up retrying changeowners: " + node.file.name);
+									//Continue on anyways
+									continueRequest();
+								}
+							}
+							else {
+								continueRequest();
+							}
+						}
                     };
                     xhr.onerror = function() {
                         console.log(xhr.error);
@@ -1194,7 +1200,7 @@ class OverDrive{
                     //console.log(JSON.stringify(body));
                     //console.log("sent request");
                 }
-                ownerRequest();
+                ownerRequest(2);
             });
         }
         else {
@@ -1328,37 +1334,92 @@ class OverDrive{
                 if((com) && (!node.file.folder)) {
                     body.additionalRoles = ["commenter"];
                 }
-                
-                xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
-                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                xhr.responseType = "json";
-                xhr.onload = function() {
-                    if(xhr.status != 200) {
-                        console.log(xhr.response);
-                    }
-                    console.log("permission added to " + node.file.name);
-                    //console.log(xhr.response);
-                    if(!initchk) {
-                        if((usernum + 1) < users.length) {
-                            userrecurse(node, usernum + 1, chk, initchk);
-                        }
-                    }
-                    for(let i = 0; i < node.children.length; i++) {
-                        let chk2 = false;
-                        if(node.children[i].file.checked) {
-                            chk2 = true;
-                        }
-                        userrecurse(node.children[i], usernum, chk2, true);
-                    }
-                };
-                xhr.onerror = function() {
-                    console.log(xhr.error);
-                };
-                xhr.send(JSON.stringify(body));
-                //console.log(body);
-                //console.log(JSON.stringify(body));
-                //console.log("sent request");
+				
+				function changeRequest(retries) {
+					
+					function continueRequest() {
+						if(!initchk) {
+							if((usernum + 1) < users.length) {
+								userrecurse(node, usernum + 1, chk, initchk);
+							}
+						}
+						for(let i = 0; i < node.children.length; i++) {
+							let chk2 = false;
+							if(node.children[i].file.checked) {
+								chk2 = true;
+							}
+							userrecurse(node.children[i], usernum, chk2, true);
+						}
+					}
+					
+					xhr.open('PUT', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+					xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+					xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+					xhr.responseType = "json";
+					xhr.onload = function() {
+
+						if(xhr.status == 200) {
+							console.log("permission changed for " + node.file.name);
+							//console.log(xhr.response);
+							continueRequest();
+						}
+						else {
+							console.log("Error with change request in changepermissions");
+							console.log(xhr.response);
+							let retry = false;
+							if(xhr.status == 500) {
+								retry = true;
+							}
+							else if(xhr.status == 403) {
+								let ret = true;
+								for(let i = 0; i < xhr.response.error.errors.length; i++) {
+									let err = xhr.response.error.errors[i].reason;
+									if((err != "rateLimitExceeded") && (err != "userRateLimitExceeded")) {
+										ret = false;
+									}
+								}
+								if(ret) {
+									retry = true;
+								}
+							}
+							else if(xhr.status == 400) {
+								for(let i = 0; i < xhr.response.error.errors.length; i++) {
+									if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
+										alert("Insufficient permissions to share " + node.file.name);
+									}
+								}
+							}
+							else if(xhr.status == 404) {
+								console.log("Permission not found");
+							}
+							if(retry) {
+								console.log("Retrying " + (retries) + " more times");
+								if(retries > 0) {
+									setTimeout(function() {
+										changeRequest(retries - 1);
+									}, Math.floor(Math.random() * 500) + 501);
+								}
+								else {
+									alert("Giving up retrying changepermissions: " + node.file.name);
+									//Continue on anyways
+									continueRequest();
+								}
+							}
+							else {
+								continueRequest();
+							}
+						}
+					
+					};
+					xhr.onerror = function() {
+						console.log(xhr.error);
+					};
+					xhr.send(JSON.stringify(body));
+					//console.log(body);
+					//console.log(JSON.stringify(body));
+					//console.log("sent request");
+				}
+				changeRequest(2);
             });
         }
         else {
