@@ -52,6 +52,9 @@ class Groups {
     getGroupName() {
         const groupNameInput = document.querySelector('.groupName');
         var groupName = groupNameInput.value;
+        if((/\s/g.test(groupName)) || (/\;/g.test(groupName)) || (/,/g.test(groupName))) {
+            groupName = "";
+        }
 		for(let i = 0; i < this.groups.length; i++) {
 			if(groupName == this.groups[i].name) {
 				groupName = "";
@@ -71,7 +74,7 @@ class Groups {
         this.showHideNewGroup(e);
         const groupName = this.getGroupName();
 		if(groupName == "") {
-			alert("Invalid group name (group name is blank or group already exists)");
+			alert("Invalid group name: Name is blank, contains invalid characters (whitespace, semicolon, or comma), or the group already exists");
 			return;
 		}
         const users = this.parseUsers();
