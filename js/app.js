@@ -755,7 +755,7 @@ class OverDrive{
 							else if(xhr.status == 400) {
                                 for(let i = 0; i < xhr.response.error.errors.length; i++) {
                                     if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
-                                        alert("Insufficient permissions to share " + node.file.name);
+                                        alert("Insufficient permissions to share " + node.file.name + " with " + users[usernum]);
                                     }
                                 }
                             }
@@ -913,12 +913,15 @@ class OverDrive{
             return;
         }
      
-        var args = {
-            users: users,
-            role: role,
-            that: that
-        }
-        that.removeUsers(args);
+        that.getIdsforUsers(users, function(userids) {
+            var args = {
+                users: users,
+                userids: userids,
+                role: role,
+                that: that
+            }
+            that.removeUsers(args);
+        });
     });
   }
   
@@ -928,6 +931,7 @@ class OverDrive{
  
   removeUsers(args) {
 	var users = args.users;
+    var userids = args.userids;
     var role = args.role;
     var that = args.that;
 
@@ -936,127 +940,127 @@ class OverDrive{
 		if(chk) {
 		//console.log("userrecurse");
 		console.log(usernum);
-		var permid;
+		//var permid;
         identityAuth(function(token) { 
-                function removeRequest(fileid, permid, retries) {
-					function continueRequest() {
-						if(!initchk) {
-							if((usernum + 1) < users.length) {
-								userrecurse(node, usernum + 1, true, false);
-							}
-						}
-						for(let i = 0; i < node.children.length; i++) {
-							let chk2 = false;
-							if(node.children[i].file.checked) {
-								chk2 = true;
-							}
-							userrecurse(node.children[i], usernum, chk2, true);
-						}
-					}
-					
-					//console.log("Removing file: " + fileid + " with permid: " + permid);
-                    var xhr = new XMLHttpRequest();
-                    //console.log("fid: " + encodeURIComponent(filelist[i]));
-					//console.log("https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fileid) + "/permissions/" + encodeURIComponent(permid));
-                    xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fileid) + "/permissions/" + encodeURIComponent(permid));
-                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-                    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-                    xhr.responseType = "json";
-                    xhr.onload = function() {
-                        if(xhr.status == 204) {
-                            console.log("User removed from " + node.file.name);
-                            //console.log(xhr.response);
-                            continueRequest();
+            function removeRequest(retries) {
+                function continueRequest() {
+                    if(!initchk) {
+                        if((usernum + 1) < users.length) {
+                            userrecurse(node, usernum + 1, true, false);
                         }
-						else {
-							console.log("Error with remove request in removeusers");
-                            console.log(xhr.response);
-							let retry = false;
-							if(xhr.status == 500) {
-								retry = true;
-							}
-							else if(xhr.status == 403) {
-								let ret = true;
-								for(let i = 0; i < xhr.response.error.errors.length; i++) {
-									let err = xhr.response.error.errors[i].reason;
-									if((err != "rateLimitExceeded") && (err != "userRateLimitExceeded")) {
-										ret = false;
-										if(err == "forbidden") {
-											alert("Insufficient permissions to share " + node.file.name);
-										}
-										break;
-									}
-								}
-								if(ret) {
-									retry = true;
-								}
-							}
-							else if(xhr.status == 400) {
-                                for(let i = 0; i < xhr.response.error.errors.length; i++) {
-                                    if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
-                                        alert("Insufficient permissions to share " + node.file.name);
+                    }
+                    for(let i = 0; i < node.children.length; i++) {
+                        let chk2 = false;
+                        if(node.children[i].file.checked) {
+                            chk2 = true;
+                        }
+                        userrecurse(node.children[i], usernum, chk2, true);
+                    }
+                }
+                
+                //console.log("Removing file: " + fileid + " with permid: " + permid);
+                var xhr = new XMLHttpRequest();
+                //console.log("fid: " + encodeURIComponent(filelist[i]));
+                //console.log("https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(fileid) + "/permissions/" + encodeURIComponent(permid));
+                xhr.open('DELETE', "https://www.googleapis.com/drive/v2/files/" + encodeURIComponent(node.file.fid) + "/permissions/" + encodeURIComponent(userids[usernum]));
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+                xhr.responseType = "json";
+                xhr.onload = function() {
+                    if(xhr.status == 204) {
+                        console.log("User removed from " + node.file.name);
+                        //console.log(xhr.response);
+                        continueRequest();
+                    }
+                    else {
+                        console.log("Error with remove request in removeusers");
+                        console.log(xhr.response);
+                        let retry = false;
+                        if(xhr.status == 500) {
+                            retry = true;
+                        }
+                        else if(xhr.status == 403) {
+                            let ret = true;
+                            for(let i = 0; i < xhr.response.error.errors.length; i++) {
+                                let err = xhr.response.error.errors[i].reason;
+                                if((err != "rateLimitExceeded") && (err != "userRateLimitExceeded")) {
+                                    ret = false;
+                                    if(err == "forbidden") {
+                                        alert("Insufficient permissions to share " + node.file.name + " with " + users[usernum]);
                                     }
                                 }
                             }
-							else if(xhr.status == 404) {
-								console.log("Permission not found");
-							}
-							if(retry) {
-								console.log("Retrying " + (retries) + " more times");
-								if(retries > 0) {
-									setTimeout(function() {
-										removeRequest(retries - 1);
-									}, Math.floor(Math.random() * 500) + 501);
-								}
-								else {
-									alert("Giving up retrying removeusers: " + node.file.name);
-									//Continue on anyways
-									continueRequest();
-								}
-							}
-							else {
-								continueRequest();
-							}
-						}
+                            if(ret) {
+                                retry = true;
+                            }
+                        }
+                        else if(xhr.status == 400) {
+                            for(let i = 0; i < xhr.response.error.errors.length; i++) {
+                                if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
+                                    alert("Insufficient permissions to share " + node.file.name + " with " + users[usernum]);
+                                }
+                            }
+                        }
+                        else if(xhr.status == 404) {
+                            console.log("Permission not found: " + node.file.name + ", " + users[usernum]);
+                        }
+                        if(retry) {
+                            console.log("Retrying " + (retries) + " more times");
+                            if(retries > 0) {
+                                setTimeout(function() {
+                                    removeRequest(retries - 1);
+                                }, Math.floor(Math.random() * 500) + 501);
+                            }
+                            else {
+                                alert("Giving up retrying removeusers: " + node.file.name);
+                                //Continue on anyways
+                                continueRequest();
+                            }
+                        }
+                        else {
+                            continueRequest();
+                        }
+                    }
 
-                    };
-                    xhr.onerror = function() {
-                        console.log(xhr.error);
-                    };
-                    xhr.send();
-                    //console.log(body);
-                    //console.log(JSON.stringify(body));
-                    //console.log("sent request");
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
+                };
+                xhr.send();
+                //console.log(body);
+                //console.log(JSON.stringify(body));
+                //console.log("sent request");
+            }
+            /*function getpermid(node) {
+            
+                //console.log("Getting permid");
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[usernum]));
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                xhr.responseType = "json";
+                xhr.onload = function() {
+                    if(xhr.status != 200) {
+                        console.log(xhr.response);
+                    }
+                    console.log(xhr.response.id);
+                    permid = xhr.response.id; 
+                    //console.log("Permid :" +permid);
+                    removeRequest(node.file.fid, permid, 2);
+                    //console.log("Permid");
+                    //console.log(permid);
+                };
+                xhr.onerror = function() {
+                    console.log(xhr.error);
                 }
-				function getpermid(node) {
-				
-					//console.log("Getting permid");
-					var xhr = new XMLHttpRequest();
-					xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[usernum]));
-					xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-					xhr.responseType = "json";
-					xhr.onload = function() {
-						if(xhr.status != 200) {
-							console.log(xhr.response);
-						}
-						console.log(xhr.response.id);
-						permid = xhr.response.id; 
-						//console.log("Permid :" +permid);
-						removeRequest(node.file.fid, permid, 2);
-						//console.log("Permid");
-						//console.log(permid);
-					};
-					xhr.onerror = function() {
-						console.log(xhr.error);
-					}
-				
-				xhr.send();
-				//console.log(permid);
-				
-				}
-                //removeRequest(node.file.fid,"04201321183946580125");
-				getpermid(node);
-            });
+            
+                xhr.send();
+                //console.log(permid);
+            
+            }*/
+            //removeRequest(node.file.fid,"04201321183946580125");
+            //getpermid(node);
+            removeRequest(2);
+        });
         
 			
 		}
@@ -1276,9 +1280,13 @@ class OverDrive{
 		var numrequests = 0;
 		var donesending = false;
 		var userids = [];
-		for(let i = 0; i < users.length; i++) {
-			let xhr = new XMLHttpRequest();
-            xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[i]));
+        for(let i = 0; i < users.length; i++) {
+            userids.push(undefined);
+        }
+        
+        function sendRequest(id) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://www.googleapis.com/drive/v2/permissionIds/" + encodeURIComponent(users[id]));
             xhr.setRequestHeader('Authorization', 'Bearer ' + token);
             xhr.responseType = "json";
             xhr.onload = function() {
@@ -1286,7 +1294,7 @@ class OverDrive{
                     console.log(xhr.response);
                 }
                 //console.log(xhr.response);
-                userids.push(xhr.response.id);
+                userids[id] = xhr.response.id;
 				numrequests--;
                 that.triggerDone(userids, numrequests, donesending, callback);
             };
@@ -1295,6 +1303,10 @@ class OverDrive{
             };
 			xhr.send();
 			numrequests++;
+        }
+        
+		for(let i = 0; i < users.length; i++) {
+			sendRequest(i);
 		}
 		donesending = true;
 		that.triggerDone(userids, numrequests, donesending, callback);
@@ -1376,6 +1388,9 @@ class OverDrive{
 									let err = xhr.response.error.errors[i].reason;
 									if((err != "rateLimitExceeded") && (err != "userRateLimitExceeded")) {
 										ret = false;
+                                        if(err == "forbidden") {
+											alert("Insufficient permissions to share " + node.file.name + " with " + users[usernum]);
+										}
 									}
 								}
 								if(ret) {
@@ -1385,12 +1400,12 @@ class OverDrive{
 							else if(xhr.status == 400) {
 								for(let i = 0; i < xhr.response.error.errors.length; i++) {
 									if(xhr.response.error.errors[i].reason == "invalidSharingRequest") {
-										alert("Insufficient permissions to share " + node.file.name);
+										alert("Insufficient permissions to share " + node.file.name + " with " + users[usernum]);
 									}
 								}
 							}
 							else if(xhr.status == 404) {
-								console.log("Permission not found");
+								console.log("Permission not found: " + node.file.name + ", " + users[usernum]);
 							}
 							if(retry) {
 								console.log("Retrying " + (retries) + " more times");
