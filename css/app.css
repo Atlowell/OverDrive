@@ -1,3 +1,7 @@
+.over_drive_frame {
+  overflow-y: scroll;
+}
+
 .action {
   width: 95%;
   font-size: 18px;
